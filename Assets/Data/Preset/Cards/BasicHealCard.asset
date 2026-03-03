@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3aef7f1b0ea5558408ad3b45b6f33c78, type: 3}
+  m_Name: BasicHealCard
+  m_EditorClassIdentifier: Assembly-CSharp::Card5.CardData
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes: []
+  _cardId: 101
+  _cardName: Basic Heal
+  _description: 
+  _energyCost: 0
+  _artwork: {fileID: 0}
+  _effects:
+  - {fileID: 11400000, guid: 3f8beb88d61f0e443ac16555cc6b7bbc, type: 2}
