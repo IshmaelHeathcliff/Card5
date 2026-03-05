@@ -25,6 +25,6 @@ MonoBehaviour:
   _cardName: Basic Heal
   _description: 
   _energyCost: 0
-  _artwork: {fileID: 0}
+  _artwork: {fileID: -2524091797026239206, guid: 04bade7f4b51d0f4bbadc9ac39867d59, type: 3}
   _effects:
   - {fileID: 11400000, guid: 3f8beb88d61f0e443ac16555cc6b7bbc, type: 2}
