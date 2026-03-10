@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Card5.Gameplay.Events;
 using UnityEngine;
 
@@ -187,11 +188,32 @@ namespace Card5
             // 后续在此处调用 _enemyController 的行为接口
         }
 
+        /// <summary>丢弃指定手牌索引并重新抽取，每回合限定次数</summary>
+        public bool TryRedrawCards(List<int> handIndices)
+        {
+            if (_battleModel.IsBattleOver) return false;
+            if (_battleModel.RedrawsRemaining <= 0) return false;
+            if (handIndices == null || handIndices.Count == 0) return false;
+
+            _battleModel.RedrawsRemaining--;
+            _cardSystem.RedrawCards(handIndices);
+
+            this.SendEvent(new RedrawCountChangedEvent
+            {
+                Remaining = _battleModel.RedrawsRemaining,
+                Max = _battleModel.RedrawsPerTurn
+            });
+
+            return true;
+        }
+
         void StartTurn()
         {
             _battleModel.TurnNumber.Value++;
             _battleModel.CurrentEnergy.Value = _battleModel.MaxEnergy.Value;
+            _battleModel.RedrawsRemaining = _battleModel.RedrawsPerTurn;
 
+            _cardSystem.DiscardHand();
             _cardSystem.DrawCards(DrawPerTurn);
 
             this.SendEvent(new TurnStartedEvent
@@ -204,6 +226,12 @@ namespace Card5
             {
                 CurrentEnergy = _battleModel.CurrentEnergy.Value,
                 MaxEnergy = _battleModel.MaxEnergy.Value
+            });
+
+            this.SendEvent(new RedrawCountChangedEvent
+            {
+                Remaining = _battleModel.RedrawsRemaining,
+                Max = _battleModel.RedrawsPerTurn
             });
         }
 

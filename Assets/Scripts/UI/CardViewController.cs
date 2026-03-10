@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace Card5
 {
     /// <summary>
-    /// 单张手牌视图：显示牌面信息，处理点击/拖拽出牌逻辑。
+    /// 单张手牌视图：显示牌面信息，处理拖拽出牌、手牌排序、重抽选中逻辑。
     /// </summary>
     public class CardViewController : MonoBehaviour, IController,
         IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
@@ -19,6 +19,7 @@ namespace Card5
         [SerializeField] Image _cardFrame;
         [SerializeField] Canvas _canvas;
         [SerializeField] RectTransform _rectTransform;
+        [SerializeField] GameObject _selectionHighlight;
 
         [ShowInInspector, ReadOnly] CardData _cardData;
 
@@ -32,6 +33,8 @@ namespace Card5
         public CardData CardData => _cardData;
 
         public event Action<CardViewController, int> OnCardDroppedToSlot;
+        public event Action<CardViewController, int> OnHandReorder;
+        public event Action<CardViewController> OnClicked;
 
         public IArchitecture GetArchitecture() => GameArchitecture.Interface;
 
@@ -41,19 +44,11 @@ namespace Card5
             {
                 _canvas = gameObject.GetComponent<Canvas>();
                 if (_canvas == null)
-                {
                     _canvas = gameObject.AddComponent<Canvas>();
-                }
             }
 
             if (_rectTransform == null)
-            {
                 _rectTransform = gameObject.GetComponent<RectTransform>();
-                if (_rectTransform == null)
-                {
-                    _rectTransform = gameObject.AddComponent<RectTransform>();
-                }
-            }
         }
 
         void Awake()
@@ -79,6 +74,12 @@ namespace Card5
             }
         }
 
+        public void SetRedrawSelected(bool selected)
+        {
+            if (_selectionHighlight != null)
+                _selectionHighlight.SetActive(selected);
+        }
+
         public void OnBeginDrag(PointerEventData eventData)
         {
             _isDragging = true;
@@ -94,7 +95,6 @@ namespace Card5
         public void OnDrag(PointerEventData eventData)
         {
             if (!_isDragging) return;
-
             MoveToPointer(eventData);
         }
 
@@ -128,13 +128,18 @@ namespace Card5
             }
             else
             {
-                ReturnToHand();
+                int newSiblingIndex = ComputeSiblingIndexFromX(eventData);
+                if (OnHandReorder != null)
+                    OnHandReorder.Invoke(this, newSiblingIndex);
+                else
+                    ReturnToHand();
             }
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
             if (_isDragging) return;
+            OnClicked?.Invoke(this);
         }
 
         public void ReturnToHand()
@@ -151,6 +156,7 @@ namespace Card5
             _isDragging = false;
             _hasInvokedDrop = false;
             _canvas.sortingOrder = 0;
+            SetRedrawSelected(false);
         }
 
         int FindSlotUnderPointer(PointerEventData eventData)
@@ -168,6 +174,29 @@ namespace Card5
                     return slot.SlotIndex;
             }
             return -1;
+        }
+
+        /// <summary>根据放下位置的 X 坐标，计算在手牌容器中应插入的 sibling index</summary>
+        int ComputeSiblingIndexFromX(PointerEventData eventData)
+        {
+            var parentRect = _originalParent as RectTransform;
+            if (parentRect == null) return _originalSiblingIndex;
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                parentRect,
+                eventData.position,
+                eventData.pressEventCamera,
+                out var localPos);
+
+            int insertPos = 0;
+            for (int i = 0; i < _originalParent.childCount; i++)
+            {
+                Transform child = _originalParent.GetChild(i);
+                if (child == transform) continue;
+                if (child.localPosition.x < localPos.x)
+                    insertPos++;
+            }
+            return insertPos;
         }
     }
 }

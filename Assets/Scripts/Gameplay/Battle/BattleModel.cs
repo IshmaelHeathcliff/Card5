@@ -21,6 +21,12 @@ namespace Card5
 
         public bool IsBattleOver { get; set; }
 
+        /// <summary>每回合可重抽次数</summary>
+        public int RedrawsPerTurn { get; set; } = 1;
+
+        /// <summary>当前回合剩余重抽次数</summary>
+        public int RedrawsRemaining { get; set; }
+
         protected override void OnInit()
         {
         }
@@ -33,6 +39,7 @@ namespace Card5
             CurrentEnergy.Value = maxEnergy;
             TurnNumber.Value = 0;
             IsBattleOver = false;
+            RedrawsRemaining = RedrawsPerTurn;
             ClearSlots();
         }
 

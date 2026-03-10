@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace Card5
 {
     /// <summary>
-    /// 战斗 UI 控制器：显示玩家 HP、能量、回合数，处理「结束回合」按钮。
+    /// 战斗 UI 控制器：显示玩家 HP、能量、回合数，处理「结束回合」和「重抽」按钮。
     /// </summary>
     public class BattleUIController : MonoBehaviour, IController
     {
@@ -22,6 +22,11 @@ namespace Card5
 
         [Title("按钮")]
         [SerializeField] Button _endTurnButton;
+        [SerializeField] Button _redrawButton;
+        [SerializeField] TMPro.TextMeshProUGUI _redrawCountText;
+
+        [Title("手牌控制器引用")]
+        [SerializeField, Required] HandViewController _handViewController;
 
         [Title("战斗结果面板")]
         [SerializeField] GameObject _winPanel;
@@ -36,12 +41,16 @@ namespace Card5
             this.RegisterEvent<EnergyChangedEvent>(OnEnergyChanged).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<TurnStartedEvent>(OnTurnStarted).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<BattleEndedEvent>(OnBattleEnded).UnRegisterWhenGameObjectDestroyed(gameObject);
+            this.RegisterEvent<RedrawCountChangedEvent>(OnRedrawCountChanged).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         void Start()
         {
             if (_endTurnButton != null)
                 _endTurnButton.onClick.AddListener(OnEndTurnClicked);
+
+            if (_redrawButton != null)
+                _redrawButton.onClick.AddListener(OnRedrawClicked);
 
             if (_winPanel != null) _winPanel.SetActive(false);
             if (_losePanel != null) _losePanel.SetActive(false);
@@ -51,11 +60,14 @@ namespace Card5
         {
             if (_endTurnButton != null)
                 _endTurnButton.onClick.RemoveListener(OnEndTurnClicked);
+            if (_redrawButton != null)
+                _redrawButton.onClick.RemoveListener(OnRedrawClicked);
         }
 
         void OnBattleStarted(BattleStartedEvent e)
         {
             if (_endTurnButton != null) _endTurnButton.interactable = true;
+            if (_redrawButton != null) _redrawButton.interactable = true;
             if (_winPanel != null) _winPanel.SetActive(false);
             if (_losePanel != null) _losePanel.SetActive(false);
 
@@ -98,6 +110,7 @@ namespace Card5
         void OnBattleEnded(BattleEndedEvent e)
         {
             if (_endTurnButton != null) _endTurnButton.interactable = false;
+            if (_redrawButton != null) _redrawButton.interactable = false;
 
             if (e.PlayerWon)
             {
@@ -109,10 +122,25 @@ namespace Card5
             }
         }
 
+        void OnRedrawCountChanged(RedrawCountChangedEvent e)
+        {
+            if (_redrawCountText != null)
+                _redrawCountText.text = $"重抽: {e.Remaining}/{e.Max}";
+
+            if (_redrawButton != null)
+                _redrawButton.interactable = e.Remaining > 0;
+        }
+
         void OnEndTurnClicked()
         {
             if (_endTurnButton != null) _endTurnButton.interactable = false;
             this.SendCommand<EndTurnCommand>();
+        }
+
+        void OnRedrawClicked()
+        {
+            if (_handViewController != null)
+                _handViewController.EnterRedrawMode();
         }
     }
 }

@@ -68,6 +68,29 @@ namespace Card5
             this.SendEvent(new CardRemovedFromHandEvent { HandIndex = handIndex });
         }
 
+        /// <summary>丢弃指定索引的手牌（降序处理避免移除时索引偏移），并重新抽取相同数量的牌</summary>
+        public void RedrawCards(List<int> handIndices)
+        {
+            if (handIndices == null || handIndices.Count == 0) return;
+
+            var deckModel = this.GetModel<DeckModel>();
+            var sortedIndices = new List<int>(handIndices);
+            sortedIndices.Sort((a, b) => b.CompareTo(a));
+
+            int count = 0;
+            foreach (int idx in sortedIndices)
+            {
+                if (idx < 0 || idx >= deckModel.Hand.Count) continue;
+                var card = deckModel.Hand[idx];
+                deckModel.Hand.RemoveAt(idx);
+                deckModel.DiscardPile.Add(card);
+                this.SendEvent(new CardRemovedFromHandEvent { HandIndex = idx });
+                count++;
+            }
+
+            DrawCards(count);
+        }
+
         public void Shuffle<T>(List<T> list)
         {
             for (int i = list.Count - 1; i > 0; i--)

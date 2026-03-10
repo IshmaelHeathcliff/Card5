@@ -106,4 +106,10 @@ namespace Card5.Gameplay.Events
         public int CurrentEnergy;
         public int MaxEnergy;
     }
+
+    public struct RedrawCountChangedEvent
+    {
+        public int Remaining;
+        public int Max;
+    }
 }
