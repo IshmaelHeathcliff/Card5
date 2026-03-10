@@ -1,5 +1,7 @@
+using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Card5
 {
@@ -15,11 +17,25 @@ namespace Card5
         [SerializeField] int _playerMaxHp = 30;
         [SerializeField] int _maxEnergy = 3;
 
+        [SerializeField] int _targetFrameRate = 60;
+
         public IArchitecture GetArchitecture() => GameArchitecture.Interface;
 
-        void Start()
+        void Awake()
         {
+            Application.targetFrameRate = _targetFrameRate;
+        }
+
+        async UniTaskVoid Start()
+        {
+            await WaitForPoolAsync();
             StartBattle();
+        }
+
+        async UniTask WaitForPoolAsync()
+        {
+            while (CardViewPool.Instance == null || !CardViewPool.Instance.IsReady)
+                await UniTask.Yield();
         }
 
         [Button("开始战斗")]

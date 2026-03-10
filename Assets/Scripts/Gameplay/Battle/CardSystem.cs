@@ -31,11 +31,9 @@ namespace Card5
             deckModel.DrawPile.RemoveAt(0);
             deckModel.Hand.Add(card);
 
-            this.SendEvent(new CardDrawnEvent
-            {
-                CardId = card.CardId,
-                HandIndex = deckModel.Hand.Count - 1
-            });
+            int handIndex = deckModel.Hand.Count - 1;
+            this.SendEvent(new CardDrawnEvent { CardId = card.CardId, HandIndex = handIndex });
+            this.SendEvent(new CardAddedToHandEvent { HandIndex = handIndex });
 
             return true;
         }
@@ -47,13 +45,6 @@ namespace Card5
             {
                 if (!DrawCard()) break;
             }
-
-            var deckModel = this.GetModel<DeckModel>();
-            var cardIds = new List<string>();
-            foreach (var card in deckModel.Hand)
-                cardIds.Add(card.CardId);
-
-            this.SendEvent(new HandRefreshedEvent { CardIds = cardIds });
         }
 
         /// <summary>将手牌全部移至弃牌堆</summary>
@@ -69,16 +60,12 @@ namespace Card5
         public void DiscardCard(CardData card)
         {
             var deckModel = this.GetModel<DeckModel>();
-            if (deckModel.Hand.Remove(card))
-            {
-                deckModel.DiscardPile.Add(card);
+            int handIndex = deckModel.Hand.IndexOf(card);
+            if (handIndex < 0) return;
+            deckModel.Hand.RemoveAt(handIndex);
+            deckModel.DiscardPile.Add(card);
 
-                var cardIds = new List<string>();
-                foreach (var c in deckModel.Hand)
-                    cardIds.Add(c.CardId);
-
-                this.SendEvent(new HandRefreshedEvent { CardIds = cardIds });
-            }
+            this.SendEvent(new CardRemovedFromHandEvent { HandIndex = handIndex });
         }
 
         public void Shuffle<T>(List<T> list)

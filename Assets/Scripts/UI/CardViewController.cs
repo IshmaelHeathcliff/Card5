@@ -17,15 +17,17 @@ namespace Card5
         [SerializeField] TMPro.TextMeshProUGUI _costText;
         [SerializeField] Image _artwork;
         [SerializeField] Image _cardFrame;
+        [SerializeField] Canvas _canvas;
+        [SerializeField] RectTransform _rectTransform;
 
         [ShowInInspector, ReadOnly] CardData _cardData;
 
-        Canvas _rootCanvas;
-        RectTransform _rectTransform;
         Transform _originalParent;
         Vector3 _originalPosition;
         int _originalSiblingIndex;
+
         bool _isDragging;
+        bool _hasInvokedDrop;
 
         public CardData CardData => _cardData;
 
@@ -33,10 +35,31 @@ namespace Card5
 
         public IArchitecture GetArchitecture() => GameArchitecture.Interface;
 
+        void OnValidate()
+        {
+            if (_canvas == null)
+            {
+                _canvas = gameObject.GetComponent<Canvas>();
+                if (_canvas == null)
+                {
+                    _canvas = gameObject.AddComponent<Canvas>();
+                }
+            }
+
+            if (_rectTransform == null)
+            {
+                _rectTransform = gameObject.GetComponent<RectTransform>();
+                if (_rectTransform == null)
+                {
+                    _rectTransform = gameObject.AddComponent<RectTransform>();
+                }
+            }
+        }
+
         void Awake()
         {
-            _rectTransform = GetComponent<RectTransform>();
-            _rootCanvas = GetComponentInParent<Canvas>();
+            _canvas.overrideSorting = true;
+            _canvas.sortingOrder = 0;
         }
 
         public void Setup(CardData data)
@@ -59,32 +82,48 @@ namespace Card5
         public void OnBeginDrag(PointerEventData eventData)
         {
             _isDragging = true;
+            _hasInvokedDrop = false;
             _originalParent = transform.parent;
             _originalPosition = transform.localPosition;
             _originalSiblingIndex = transform.GetSiblingIndex();
 
-            transform.SetParent(_rootCanvas.transform, true);
-            transform.SetAsLastSibling();
+            _canvas.sortingOrder = 100;
+            MoveToPointer(eventData);
         }
 
         public void OnDrag(PointerEventData eventData)
         {
             if (!_isDragging) return;
-            RectTransformUtility.ScreenPointToWorldPointInRectangle(
-                _rootCanvas.GetComponent<RectTransform>(),
+
+            MoveToPointer(eventData);
+        }
+
+        void MoveToPointer(PointerEventData eventData)
+        {
+            var parentRect = _rectTransform.parent as RectTransform;
+            if (parentRect == null) return;
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                parentRect,
                 eventData.position,
                 eventData.pressEventCamera,
-                out Vector3 worldPos);
-            transform.position = worldPos;
+                out var localPoint);
+
+            _rectTransform.localPosition = localPoint;
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
             _isDragging = false;
+            _canvas.sortingOrder = 0;
+
+            if (_hasInvokedDrop)
+                return;
 
             int slotIndex = FindSlotUnderPointer(eventData);
             if (slotIndex >= 0)
             {
+                _hasInvokedDrop = true;
                 OnCardDroppedToSlot?.Invoke(this, slotIndex);
             }
             else
@@ -100,9 +139,18 @@ namespace Card5
 
         public void ReturnToHand()
         {
+            ResetDragState();
             transform.SetParent(_originalParent, true);
             transform.SetSiblingIndex(_originalSiblingIndex);
             transform.localPosition = _originalPosition;
+        }
+
+        /// <summary>重置拖拽相关状态，取用/归还对象池时调用</summary>
+        public void ResetDragState()
+        {
+            _isDragging = false;
+            _hasInvokedDrop = false;
+            _canvas.sortingOrder = 0;
         }
 
         int FindSlotUnderPointer(PointerEventData eventData)
@@ -112,6 +160,9 @@ namespace Card5
 
             foreach (var result in results)
             {
+                if (result.gameObject.GetComponent<CardViewController>() != null)
+                    continue;
+
                 var slot = result.gameObject.GetComponent<CardSlotView>();
                 if (slot != null)
                     return slot.SlotIndex;

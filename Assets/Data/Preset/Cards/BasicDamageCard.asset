@@ -24,7 +24,7 @@ MonoBehaviour:
   _cardId: 100
   _cardName: Basic Damage
   _description: 
-  _energyCost: 0
+  _energyCost: 1
   _artwork: {fileID: 2802820480549492295, guid: d6da951c8b6f22e468204db5a39053d9, type: 3}
   _effects:
   - {fileID: 11400000, guid: 6d895be7b994dfc4f929ae066466d748, type: 2}

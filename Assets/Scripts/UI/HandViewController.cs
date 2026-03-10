@@ -1,26 +1,59 @@
+using System;
 using System.Collections.Generic;
 using Card5.Gameplay.Events;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
+using UnityEngine.UI;
 
 namespace Card5
 {
     /// <summary>
-    /// 手牌区域控制器：监听手牌刷新事件，动态实例化 CardViewController。
+    /// 手牌区域控制器：监听手牌事件，通过 CardViewPool 取用/归还 View，不再 Instantiate/Destroy。
     /// </summary>
     public class HandViewController : MonoBehaviour, IController
     {
-        [SerializeField, Required] AssetReferenceGameObject _cardViewPrefab;
         [SerializeField, Required] Transform _handContainer;
+        [SerializeField] HandDropZone _handDropZone;
 
         readonly List<CardViewController> _cardViews = new List<CardViewController>();
 
         public IArchitecture GetArchitecture() => GameArchitecture.Interface;
 
+        DeckModel _deckModel;
+
+        void OnValidate()
+        {
+            if(_handContainer == null)
+            {
+                _handContainer = transform.Find("HandContainer");
+                if (_handContainer == null)
+                {
+                    _handContainer = new GameObject("HandContainer").transform;
+                    _handContainer.SetParent(transform);
+                }
+            }
+
+
+            if (_handDropZone == null)
+            {
+                _handDropZone = _handContainer.GetComponent<HandDropZone>();
+                if (_handDropZone == null)
+                {
+                    _handDropZone = _handContainer.gameObject.AddComponent<HandDropZone>();
+                }
+            }
+        }
+
+        void Awake()
+        {
+            _deckModel = this.GetModel<DeckModel>();
+        }
+
         void OnEnable()
         {
             this.RegisterEvent<HandRefreshedEvent>(OnHandRefreshed).UnRegisterWhenGameObjectDestroyed(gameObject);
+            this.RegisterEvent<CardRemovedFromHandEvent>(OnCardRemovedFromHand).UnRegisterWhenGameObjectDestroyed(gameObject);
+            this.RegisterEvent<CardAddedToHandEvent>(OnCardAddedToHand).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         void OnHandRefreshed(HandRefreshedEvent e)
@@ -28,48 +61,61 @@ namespace Card5
             RefreshHand();
         }
 
+        void OnCardRemovedFromHand(CardRemovedFromHandEvent e)
+        {
+            if (e.HandIndex < 0 || e.HandIndex >= _cardViews.Count) return;
+
+            CardViewController view = _cardViews[e.HandIndex];
+            view.OnCardDroppedToSlot -= OnCardDroppedToSlot;
+            _cardViews.RemoveAt(e.HandIndex);
+            ReturnToPool(view);
+        }
+
+        void OnCardAddedToHand(CardAddedToHandEvent e)
+        {
+            if (e.HandIndex < 0 || e.HandIndex >= _deckModel.Hand.Count) return;
+
+            CardData card = _deckModel.Hand[e.HandIndex];
+            SpawnCardView(card);
+        }
+
         void RefreshHand()
         {
             ClearCardViews();
 
-            var deckModel = this.GetModel<DeckModel>();
-            foreach (var card in deckModel.Hand)
-            {
+            foreach (var card in _deckModel.Hand)
                 SpawnCardView(card);
-            }
         }
 
         void SpawnCardView(CardData card)
         {
-            Addressables.InstantiateAsync(_cardViewPrefab, _handContainer).Completed += handle =>
+            var pool = CardViewPool.Instance;
+            if (pool == null || !pool.IsReady)
             {
-                var go = handle.Result;
-                var view = go.GetComponent<CardViewController>();
-                if (view == null)
-                {
-                    Addressables.ReleaseInstance(go);
-                    return;
-                }
+                Debug.LogWarning("[HandViewController] CardViewPool 未就绪，跳过生成");
+                return;
+            }
 
-                view.Setup(card);
-                view.OnCardDroppedToSlot += OnCardDroppedToSlot;
-                _cardViews.Add(view);
-            };
+            var view = pool.Rent(_handContainer);
+            if (view == null) return;
+
+            view.Setup(card);
+            view.OnCardDroppedToSlot += OnCardDroppedToSlot;
+            _cardViews.Add(view);
+            view.transform.SetSiblingIndex(_cardViews.Count - 1);
         }
 
         void OnCardDroppedToSlot(CardViewController cardView, int slotIndex)
         {
-            bool success = this.SendCommand(new PlayCardCommand(cardView.CardData, slotIndex));
-            if (success)
-            {
-                cardView.OnCardDroppedToSlot -= OnCardDroppedToSlot;
-                _cardViews.Remove(cardView);
-                Addressables.ReleaseInstance(cardView.gameObject);
-            }
-            else
-            {
+            int handIndex = _cardViews.IndexOf(cardView);
+            bool success = this.SendCommand(new PlayCardCommand(cardView.CardData, slotIndex, handIndex));
+            if (!success)
                 cardView.ReturnToHand();
-            }
+        }
+
+        void ReturnToPool(CardViewController view)
+        {
+            CardViewPool.Instance?.Return(view);
         }
 
         void ClearCardViews()
@@ -78,7 +124,7 @@ namespace Card5
             {
                 if (view == null) continue;
                 view.OnCardDroppedToSlot -= OnCardDroppedToSlot;
-                Addressables.ReleaseInstance(view.gameObject);
+                ReturnToPool(view);
             }
             _cardViews.Clear();
         }

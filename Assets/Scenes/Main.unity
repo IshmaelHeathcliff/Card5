@@ -206,7 +206,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.44654083, g: 0.4451366, b: 0.4451366, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -308,7 +308,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 1096611355}
   m_FillRect: {fileID: 1521942103}
   m_HandleRect: {fileID: 1096611354}
@@ -371,7 +371,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -508,7 +508,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -665,6 +665,7 @@ MonoBehaviour:
   _enemyData: {fileID: 11400000, guid: 541e6b4d151d2ca458170789f1dfa784, type: 2}
   _playerMaxHp: 30
   _maxEnergy: 3
+  _targetFrameRate: 120
 --- !u!4 &425678316
 Transform:
   m_ObjectHideFlags: 0
@@ -777,7 +778,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1078,7 +1079,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 2026141778}
   m_FillRect: {fileID: 656419718}
   m_HandleRect: {fileID: 2026141777}
@@ -1230,7 +1231,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1318,6 +1319,62 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 625998015}
   m_CullTransparentMesh: 1
+--- !u!1 &649580087
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 649580088}
+  - component: {fileID: 649580089}
+  m_Layer: 0
+  m_Name: CardViewPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &649580088
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 649580087}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 973714615}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &649580089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 649580087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ba69d43878c4264b9befaf6010ff2ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Card5.CardViewPool
+  _cardViewPrefab:
+    m_AssetGUID: d524ef97b0f34054aabc71e477a88155
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_SubObjectGUID: 
+    m_EditorAssetChanged: 1
+  _poolContainer: {fileID: 649580088}
+  _initialPoolSize: 10
 --- !u!1 &656419717
 GameObject:
   m_ObjectHideFlags: 0
@@ -1369,7 +1426,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1444,7 +1501,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0.49999988, b: 0.49999988, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1479,6 +1536,18 @@ PrefabInstance:
     - target: {fileID: 2703784815541562745, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_fontSize
       value: 20.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3434051980192280401, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 20.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3434051980192280401, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 4570093919801606603, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 5395017936186329334, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_Name
@@ -1629,7 +1698,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0.71383643, b: 0.71383643, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1702,12 +1771,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 415598ab8d422324a8aa6ac2e48deac2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card5.HandViewController
-  _cardViewPrefab:
-    m_AssetGUID: d524ef97b0f34054aabc71e477a88155
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_SubObjectGUID: 
-    m_EditorAssetChanged: 1
   _handContainer: {fileID: 1195089229}
 --- !u!1 &937516348
 GameObject:
@@ -1880,6 +1943,7 @@ RectTransform:
   - {fileID: 937516349}
   - {fileID: 819997978}
   - {fileID: 1651106614}
+  - {fileID: 649580088}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1908,7 +1972,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_TargetDisplay: 0
 --- !u!114 &973714617
 MonoBehaviour:
@@ -2037,7 +2101,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.25612113, g: 0.311353, b: 0.31446534, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -2147,6 +2211,18 @@ PrefabInstance:
     - target: {fileID: 2703784815541562745, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_fontSize
       value: 20.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3434051980192280401, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 20.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3434051980192280401, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 4570093919801606603, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 5395017936186329334, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_Name
@@ -2258,6 +2334,18 @@ PrefabInstance:
       propertyPath: m_fontSize
       value: 20.7
       objectReference: {fileID: 0}
+    - target: {fileID: 3434051980192280401, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 20.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3434051980192280401, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 4570093919801606603, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 5395017936186329334, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_Name
       value: CardSlot (2)
@@ -2366,6 +2454,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1195089229}
   - component: {fileID: 1195089230}
+  - component: {fileID: 1195089231}
+  - component: {fileID: 1195089233}
+  - component: {fileID: 1195089235}
   m_Layer: 0
   m_Name: HandContainer
   m_TagString: Untagged
@@ -2389,8 +2480,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 779.5769, y: 185.9609}
+  m_AnchoredPosition: {x: 95.42149, y: 37.807507}
+  m_SizeDelta: {x: 1355.3899, y: 316.217}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1195089230
 MonoBehaviour:
@@ -2485,6 +2576,42 @@ MonoBehaviour:
   customSettings:
     items: []
   orientation: 0
+--- !u!114 &1195089231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195089228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 187e1a1047c74bdb8fab2cc22cf38774, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Card5.EmptyGraphic
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &1195089233
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195089228}
+  m_CullTransparentMesh: 1
+--- !u!114 &1195089235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195089228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2812b9171de70345bded1b098a3bea3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Card5.HandDropZone
 --- !u!1 &1467138342
 GameObject:
   m_ObjectHideFlags: 0
@@ -2657,7 +2784,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -2732,7 +2859,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -2947,6 +3074,18 @@ PrefabInstance:
       propertyPath: m_fontSize
       value: 20.7
       objectReference: {fileID: 0}
+    - target: {fileID: 3434051980192280401, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 20.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3434051980192280401, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 4570093919801606603, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 5395017936186329334, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_Name
       value: CardSlot (5)
@@ -3096,7 +3235,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -3304,6 +3443,18 @@ PrefabInstance:
     - target: {fileID: 2703784815541562745, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_fontSize
       value: 20.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3434051980192280401, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 20.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3434051980192280401, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 4570093919801606603, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 5395017936186329334, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_Name
