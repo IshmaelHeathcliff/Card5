@@ -112,4 +112,24 @@ namespace Card5.Gameplay.Events
         public int Remaining;
         public int Max;
     }
+
+    /// <summary>印记被施加时发送</summary>
+    public struct MarkAppliedEvent
+    {
+        public string MarkId;
+        public MarkTargetType TargetType;
+        /// <summary>槽位印记时有效</summary>
+        public int SlotIndex;
+        /// <summary>卡牌印记时有效</summary>
+        public string CardId;
+    }
+
+    /// <summary>印记到期或被移除时发送</summary>
+    public struct MarkRemovedEvent
+    {
+        public string MarkId;
+        public MarkTargetType TargetType;
+        public int SlotIndex;
+        public string CardId;
+    }
 }

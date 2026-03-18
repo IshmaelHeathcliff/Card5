@@ -15,12 +15,14 @@ namespace Card5
         BattleModel _battleModel;
         DeckModel _deckModel;
         CardSystem _cardSystem;
+        MarkSystem _markSystem;
 
         protected override void OnInit()
         {
             _battleModel = this.GetModel<BattleModel>();
             _deckModel = this.GetModel<DeckModel>();
             _cardSystem = this.GetSystem<CardSystem>();
+            _markSystem = this.GetSystem<MarkSystem>();
         }
 
         /// <summary>注册敌人控制器引用（由 EnemyController 在初始化时调用）</summary>
@@ -41,6 +43,7 @@ namespace Card5
 
             deckModel.InitDeck(deckCards);
             battleModel.InitBattle(playerMaxHp, maxEnergy);
+            _markSystem.ClearAllMarks();
 
             if (_enemyController != null)
                 _enemyController.InitEnemy(enemyData);
@@ -161,16 +164,26 @@ namespace Card5
                     _deckModel,
                     _enemyController,
                     this,
+                    _markSystem,
                     i,
                     card,
                     _battleModel.GetLeftNeighbor(i),
                     _battleModel.GetRightNeighbor(i)
                 );
 
+                _markSystem.ExecuteSlotMarks(i, MarkTrigger.BeforeCardEffects, context);
+                _markSystem.ExecuteCardMarks(card, MarkTrigger.BeforeCardEffects, context);
+
                 foreach (var effect in card.Effects)
                 {
                     effect.Execute(context);
                     if (_battleModel.IsBattleOver) break;
+                }
+
+                if (!_battleModel.IsBattleOver)
+                {
+                    _markSystem.ExecuteSlotMarks(i, MarkTrigger.AfterCardEffects, context);
+                    _markSystem.ExecuteCardMarks(card, MarkTrigger.AfterCardEffects, context);
                 }
 
                 _deckModel.DiscardPile.Add(card);
@@ -212,6 +225,8 @@ namespace Card5
             _battleModel.TurnNumber.Value++;
             _battleModel.CurrentEnergy.Value = _battleModel.MaxEnergy.Value;
             _battleModel.RedrawsRemaining = _battleModel.RedrawsPerTurn;
+
+            _markSystem.TickMarks();
 
             _cardSystem.DiscardHand();
             _cardSystem.DrawCards(DrawPerTurn);

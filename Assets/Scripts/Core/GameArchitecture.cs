@@ -6,8 +6,10 @@ namespace Card5
         {
             RegisterModel(new BattleModel());
             RegisterModel(new DeckModel());
+            RegisterModel(new MarkModel());
 
             RegisterSystem(new CardSystem());
+            RegisterSystem(new MarkSystem());
             RegisterSystem(new BattleSystem());
         }
     }

@@ -10,6 +10,7 @@ namespace Card5
         public DeckModel DeckModel { get; }
         public EnemyController Enemy { get; }
         public BattleSystem BattleSystem { get; }
+        public MarkSystem MarkSystem { get; }
 
         /// <summary>当前出牌所在的槽位索引（0-4）</summary>
         public int SlotIndex { get; }
@@ -28,6 +29,7 @@ namespace Card5
             DeckModel deckModel,
             EnemyController enemy,
             BattleSystem battleSystem,
+            MarkSystem markSystem,
             int slotIndex,
             CardData currentCard,
             CardData leftNeighbor,
@@ -37,6 +39,7 @@ namespace Card5
             DeckModel = deckModel;
             Enemy = enemy;
             BattleSystem = battleSystem;
+            MarkSystem = markSystem;
             SlotIndex = slotIndex;
             CurrentCard = currentCard;
             LeftNeighbor = leftNeighbor;

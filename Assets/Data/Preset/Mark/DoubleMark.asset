@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37c3798daea0b8d49832d51c453c8676, type: 3}
+  m_Name: DoubleMark
+  m_EditorClassIdentifier: Assembly-CSharp::Card5.MarkData
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes: []
+  _markId: double_damage
+  _markName: "\u53CC\u500D\u4F24\u5BB3"
+  _description: 
+  _icon: {fileID: 0}
+  _duration: 3
+  _trigger: 0
+  _effects:
+  - {fileID: 0}
