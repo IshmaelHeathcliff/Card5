@@ -46,5 +46,21 @@ namespace Card5
             DiscardPile.AddRange(Hand);
             Hand.Clear();
         }
+
+        /// <summary>将卡牌加入持久牌库和弃牌堆（下次洗牌时混入抽牌堆）</summary>
+        public void AddCard(CardData card)
+        {
+            FullDeck.Add(card);
+            DiscardPile.Add(card);
+        }
+
+        /// <summary>从持久牌库和当前流通中移除一张卡牌。优先从弃牌堆移除，其次从抽牌堆。手牌中的牌不强制移除。</summary>
+        public bool RemoveCard(CardData card)
+        {
+            if (!FullDeck.Remove(card)) return false;
+            if (!DiscardPile.Remove(card))
+                DrawPile.Remove(card);
+            return true;
+        }
     }
 }

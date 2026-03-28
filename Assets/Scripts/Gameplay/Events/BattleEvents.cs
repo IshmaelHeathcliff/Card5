@@ -125,6 +125,22 @@ namespace Card5.Gameplay.Events
         public int Count;
     }
 
+    /// <summary>新卡牌加入牌库（写入弃牌堆并同步 FullDeck）时发送</summary>
+    public struct CardAddedToDeckEvent
+    {
+        public string CardId;
+        public int DrawPileCount;
+        public int DiscardPileCount;
+    }
+
+    /// <summary>卡牌从牌库移除（FullDeck、DrawPile 或 DiscardPile）时发送</summary>
+    public struct CardRemovedFromDeckEvent
+    {
+        public string CardId;
+        public int DrawPileCount;
+        public int DiscardPileCount;
+    }
+
     /// <summary>印记被施加时发送</summary>
     public struct MarkAppliedEvent
     {

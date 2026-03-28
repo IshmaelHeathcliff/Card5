@@ -98,6 +98,36 @@ namespace Card5
             this.SendEvent(new DiscardPileChangedEvent { Count = dm.DiscardPile.Count });
         }
 
+        /// <summary>将卡牌加入牌库：写入弃牌堆并同步 FullDeck，下次洗牌时混入抽牌堆</summary>
+        public void AddCardToDeck(CardData card)
+        {
+            var deckModel = this.GetModel<DeckModel>();
+            deckModel.AddCard(card);
+            this.SendEvent(new CardAddedToDeckEvent
+            {
+                CardId = card.CardId,
+                DrawPileCount = deckModel.DrawPile.Count,
+                DiscardPileCount = deckModel.DiscardPile.Count
+            });
+            this.SendEvent(new DiscardPileChangedEvent { Count = deckModel.DiscardPile.Count });
+        }
+
+        /// <summary>从牌库移除指定卡牌（FullDeck + DrawPile/DiscardPile 各一张），手牌中的同名牌不强制移除</summary>
+        public bool RemoveCardFromDeck(CardData card)
+        {
+            var deckModel = this.GetModel<DeckModel>();
+            if (!deckModel.RemoveCard(card)) return false;
+            this.SendEvent(new CardRemovedFromDeckEvent
+            {
+                CardId = card.CardId,
+                DrawPileCount = deckModel.DrawPile.Count,
+                DiscardPileCount = deckModel.DiscardPile.Count
+            });
+            this.SendEvent(new DrawPileChangedEvent { Count = deckModel.DrawPile.Count });
+            this.SendEvent(new DiscardPileChangedEvent { Count = deckModel.DiscardPile.Count });
+            return true;
+        }
+
         public void Shuffle<T>(List<T> list)
         {
             for (int i = list.Count - 1; i > 0; i--)

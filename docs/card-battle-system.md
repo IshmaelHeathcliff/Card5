@@ -171,6 +171,8 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 | `SwapSlotsCommand` | bool | 交换/移动两个槽位的卡牌 |
 | `EndTurnCommand` | void | 结束回合并触发结算 |
 | `RedrawCardsCommand` | bool | 重抽选中的手牌 |
+| `AddCardToDeckCommand` | void | 新增卡牌到牌库（写入弃牌堆，同步 FullDeck） |
+| `RemoveCardFromDeckCommand` | bool | 从牌库移除一张卡牌（FullDeck + DrawPile/DiscardPile） |
 
 ---
 
@@ -202,3 +204,5 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 | `DiscardPileChangedEvent` | 弃牌堆数量变化 |
 | `MarkAppliedEvent` | 印记施加 |
 | `MarkRemovedEvent` | 印记移除 |
+| `CardAddedToDeckEvent` | 新卡牌加入牌库（弃牌堆 + FullDeck） |
+| `CardRemovedFromDeckEvent` | 卡牌从牌库移除 |
