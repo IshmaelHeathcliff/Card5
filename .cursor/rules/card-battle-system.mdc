@@ -1,0 +1,51 @@
+---
+description: 卡牌对战系统架构说明，包含文件位置、扩展方式和关键类
+globs: Assets/Scripts/**/*.cs
+alwaysApply: false
+---
+
+# 卡牌对战系统架构
+
+## 关键文件位置
+
+| 类型 | 路径 |
+|------|------|
+| Architecture 入口 | `Assets/Scripts/Core/GameArchitecture.cs` |
+| 游戏启动入口 | `Assets/Scripts/GameManager.cs` |
+| 战斗 Model | `Assets/Scripts/Gameplay/Battle/BattleModel.cs` |
+| 牌组 Model | `Assets/Scripts/Gameplay/Battle/DeckModel.cs` |
+| 战斗 System | `Assets/Scripts/Gameplay/Battle/BattleSystem.cs` |
+| 卡牌 System | `Assets/Scripts/Gameplay/Battle/CardSystem.cs` |
+| 所有事件 | `Assets/Scripts/Gameplay/Events/BattleEvents.cs` |
+| 效果基类 | `Assets/Scripts/Data/CardEffectSO.cs` |
+| 具体效果 | `Assets/Scripts/Data/Effects/` |
+
+## 新增卡牌效果
+
+继承 `CardEffectSO`，加 `[CreateAssetMenu]`，实现 `Execute(BattleContext ctx)`：
+
+```csharp
+[CreateAssetMenu(fileName = "XxxEffect", menuName = "Card5/Effects/Xxx")]
+public class XxxEffectSO : CardEffectSO
+{
+    public override void Execute(BattleContext context)
+    {
+        // context.BattleModel — 玩家状态
+        // context.Enemy       — 敌人
+        // context.LeftNeighbor / context.RightNeighbor — 邻牌
+        // context.SlotIndex   — 当前槽位（0-4）
+    }
+}
+```
+
+## 出牌流程
+
+1. `HandViewController` 监听 `HandRefreshedEvent` → 实例化 `CardViewController`
+2. 玩家拖拽卡牌到 `CardSlotView` → 触发 `PlayCardCommand`
+3. `BattleSystem.TryPlayCard` 验证能量、槽位 → 更新 `BattleModel.PlaySlots`
+4. 点击「结束回合」→ `EndTurnCommand` → `BattleSystem.EndTurn`
+5. 按槽位顺序构建 `BattleContext`，执行每张牌的 `CardEffectSO.Execute`
+
+## 敌人扩展
+
+实现 `IEnemyBehavior`，调用 `EnemyController.SetBehavior(behavior)` 注入。

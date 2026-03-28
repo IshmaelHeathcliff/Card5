@@ -1,0 +1,27 @@
+---
+alwaysApply: true
+---
+# 项目结构指南
+
+## 目录结构
+### 核心目录 `Assets/Scripts/`
+- `Core/` - 核心系统和基础功能
+- `Data/` - 数据与资源系统相关
+- `Editor/` - Unity 编辑器扩展
+- `Gameplay/` - 游戏游玩机制相关
+- `UI/` - 用户界面相关
+- `Utilities/` - 辅助工具类
+
+### 数据目录 `Assets/Data/`
+- `Preset/` - 存放配置文件，预定义游戏数据
+- `Saves/` - 存放存档文件
+
+### 主要文件
+- [GameManager.cs](mdc:Assets/Scripts/GameManager.cs) - 游戏管理器
+- [QFramework.cs](mdc:Assets/Scripts/Core/QFramework.cs) - QFramework 框架
+
+### Model
+
+### System
+
+### Utility
