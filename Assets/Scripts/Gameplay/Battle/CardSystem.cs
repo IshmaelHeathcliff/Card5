@@ -25,6 +25,7 @@ namespace Card5
 
                 deckModel.ReshuffleDiscardIntoDraw();
                 Shuffle(deckModel.DrawPile);
+                this.SendEvent(new DiscardPileChangedEvent { Count = 0 });
             }
 
             var card = deckModel.DrawPile[0];
@@ -34,6 +35,7 @@ namespace Card5
             int handIndex = deckModel.Hand.Count - 1;
             this.SendEvent(new CardDrawnEvent { CardId = card.CardId, HandIndex = handIndex });
             this.SendEvent(new CardAddedToHandEvent { HandIndex = handIndex });
+            this.SendEvent(new DrawPileChangedEvent { Count = deckModel.DrawPile.Count });
 
             return true;
         }
@@ -54,6 +56,7 @@ namespace Card5
             deckModel.MoveHandToDiscard();
 
             this.SendEvent(new HandRefreshedEvent { CardIds = new List<string>() });
+            this.SendEvent(new DiscardPileChangedEvent { Count = deckModel.DiscardPile.Count });
         }
 
         /// <summary>将指定手牌移至弃牌堆</summary>
@@ -66,6 +69,7 @@ namespace Card5
             deckModel.DiscardPile.Add(card);
 
             this.SendEvent(new CardRemovedFromHandEvent { HandIndex = handIndex });
+            this.SendEvent(new DiscardPileChangedEvent { Count = deckModel.DiscardPile.Count });
         }
 
         /// <summary>丢弃指定索引的手牌（降序处理避免移除时索引偏移），并重新抽取相同数量的牌</summary>
@@ -89,6 +93,9 @@ namespace Card5
             }
 
             DrawCards(count);
+
+            var dm = this.GetModel<DeckModel>();
+            this.SendEvent(new DiscardPileChangedEvent { Count = dm.DiscardPile.Count });
         }
 
         public void Shuffle<T>(List<T> list)

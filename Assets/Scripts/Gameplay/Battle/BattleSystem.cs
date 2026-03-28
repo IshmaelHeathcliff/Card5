@@ -9,7 +9,7 @@ namespace Card5
     /// </summary>
     public class BattleSystem : AbstractSystem
     {
-        static readonly int DrawPerTurn = 5;
+        static readonly int DrawPerTurn = 8;
 
         EnemyController _enemyController;
         BattleModel _battleModel;
@@ -145,6 +145,8 @@ namespace Card5
 
             if (_battleModel.IsBattleOver) return;
 
+            _cardSystem.DiscardHand();
+
             EnemyTurn();
 
             if (_battleModel.IsBattleOver) return;
@@ -193,6 +195,7 @@ namespace Card5
 
             _battleModel.ClearSlots();
             this.SendEvent<SlotEffectsResolvedEvent>();
+            this.SendEvent(new DiscardPileChangedEvent { Count = _deckModel.DiscardPile.Count });
         }
 
         void EnemyTurn()
@@ -228,7 +231,6 @@ namespace Card5
 
             _markSystem.TickMarks();
 
-            _cardSystem.DiscardHand();
             _cardSystem.DrawCards(DrawPerTurn);
 
             this.SendEvent(new TurnStartedEvent

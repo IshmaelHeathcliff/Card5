@@ -113,6 +113,18 @@ namespace Card5.Gameplay.Events
         public int Max;
     }
 
+    /// <summary>抽牌堆数量变化时发送</summary>
+    public struct DrawPileChangedEvent
+    {
+        public int Count;
+    }
+
+    /// <summary>弃牌堆数量变化时发送</summary>
+    public struct DiscardPileChangedEvent
+    {
+        public int Count;
+    }
+
     /// <summary>印记被施加时发送</summary>
     public struct MarkAppliedEvent
     {
