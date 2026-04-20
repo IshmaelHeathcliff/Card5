@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3aef7f1b0ea5558408ad3b45b6f33c78, type: 3}
-  m_Name: BasicDamageCard
+  m_Name: GreatDamageCard
   m_EditorClassIdentifier: Assembly-CSharp::Card5.CardData
   serializationData:
     SerializedFormat: 2
@@ -21,10 +21,10 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes: []
-  _cardId: basic_damage
-  _cardName: "\u57FA\u7840\u4F24\u5BB3\u5361"
-  _description: 
-  _energyCost: 0
-  _artwork: {fileID: 2802820480549492295, guid: d6da951c8b6f22e468204db5a39053d9, type: 3}
+  _cardId: great_damage
+  _cardName: "\u8D85\u7EA7\u4F24\u5BB3\u5361"
+  _description: "\u65BD\u52A0\u57FA\u7840\u5370\u8BB0\u3002"
+  _energyCost: 2
+  _artwork: {fileID: -6072499149093677281, guid: e1bfb8cb322109041836117c64dc4e6c, type: 3}
   _effects:
-  - {fileID: 11400000, guid: 6d895be7b994dfc4f929ae066466d748, type: 2}
+  - {fileID: 11400000, guid: 8c14ea4fff518c24f9e7e4370019de19, type: 2}

@@ -13,6 +13,7 @@ namespace Card5
     {
         [SerializeField, Required] DeckPresetData _startingDeck;
         [SerializeField, Required] EnemyData _enemyData;
+        [SerializeField] BattleRewardConfigData _rewardConfig;
 
         [SerializeField] int _playerMaxHp = 30;
         [SerializeField] int _maxEnergy = 3;
@@ -47,7 +48,7 @@ namespace Card5
                 return;
             }
 
-            this.SendCommand(new StartBattleCommand(_startingDeck, _enemyData, _playerMaxHp, _maxEnergy));
+            this.SendCommand(new StartBattleCommand(_startingDeck, _enemyData, _rewardConfig, _playerMaxHp, _maxEnergy));
         }
     }
 }

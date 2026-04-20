@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00a8ecefbb6748e4d86feff8ab3e903b, type: 3}
-  m_Name: BasicHealEffect
-  m_EditorClassIdentifier: Assembly-CSharp::Card5.HealEffectSO
+  m_Script: {fileID: 11500000, guid: 015b64e6528f278408aab07580cdf574, type: 3}
+  m_Name: AdvancedDamageEffect
+  m_EditorClassIdentifier: Assembly-CSharp::Card5.DamageEffectSO
   _description: 
-  _healAmount: 1
+  _damage: 2
   _target: 0

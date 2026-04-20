@@ -141,6 +141,27 @@ namespace Card5.Gameplay.Events
         public int DiscardPileCount;
     }
 
+    public struct BattleRewardOfferedEvent
+    {
+        public int RewardId;
+        public IReadOnlyList<BattleRewardOffer> Offers;
+    }
+
+    public struct BattleRewardOptionClaimedEvent
+    {
+        public int RewardId;
+        public string OfferId;
+        public string OptionId;
+        public BattleRewardType RewardType;
+        public string CardId;
+        public IReadOnlyList<BattleRewardOffer> RemainingOffers;
+    }
+
+    public struct BattleRewardCompletedEvent
+    {
+        public int RewardId;
+    }
+
     /// <summary>印记被施加时发送</summary>
     public struct MarkAppliedEvent
     {

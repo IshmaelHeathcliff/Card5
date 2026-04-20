@@ -18,6 +18,7 @@ Assets/Scripts/
 │   ├── DeckPresetData.cs        # 牌组预设配置
 │   ├── EnemyData.cs             # 敌人配置
 │   ├── MarkData.cs              # 印记配置
+│   ├── BattleRewardConfigData.cs # 战斗奖励配置
 │   └── Effects/                 # 具体效果实现
 │       ├── DamageEffectSO.cs    # 伤害效果
 │       ├── HealEffectSO.cs      # 治疗效果
@@ -42,6 +43,12 @@ Assets/Scripts/
 │   │   ├── MarkModel.cs         # 印记状态数据
 │   │   ├── MarkSystem.cs        # 印记逻辑
 │   │   └── MarkInstance.cs      # 印记运行时实例
+│   ├── Rewards/                 # 战斗奖励系统
+│   │   ├── BattleRewardModel.cs # 奖励待选状态
+│   │   ├── BattleRewardSystem.cs # 奖励生成与领取
+│   │   ├── BattleRewardOffer.cs # 一组多选一奖励
+│   │   ├── BattleRewardOption.cs # 单个奖励选项
+│   │   └── BattleRewardType.cs  # 奖励类型
 │   ├── Enemy/                   # 敌人系统
 │   │   └── IEnemyBehavior.cs    # 敌人行为接口
 │   └── Events/
@@ -57,6 +64,8 @@ Assets/Scripts/
 │   ├── DeckPileView.cs          # 抽牌堆/弃牌堆按钮
 │   ├── CardListPopupView.cs     # 卡牌列表弹窗
 │   ├── CardListEntryView.cs     # 弹窗单条卡牌记录
+│   ├── BattleRewardPopupView.cs # 战斗奖励选择弹窗
+│   ├── BattleRewardOptionView.cs # 战斗奖励选项视图
 │   └── EmptyGraphic.cs          # 空白可交互图形
 ├── Utilities/                   # 辅助工具类
 └── GameManager.cs               # 游戏入口
@@ -76,6 +85,7 @@ Assets/Scripts/
 | `BattleModel` | `Gameplay/Battle/BattleModel.cs` | 战斗状态：玩家 HP、能量、回合数、5 个出牌槽、重抽次数 |
 | `DeckModel` | `Gameplay/Battle/DeckModel.cs` | 牌组状态：完整牌组、抽牌堆、手牌、弃牌堆 |
 | `MarkModel` | `Gameplay/Marks/MarkModel.cs` | 印记状态：槽位印记字典、卡牌印记字典 |
+| `BattleRewardModel` | `Gameplay/Rewards/BattleRewardModel.cs` | 奖励状态：当前待选奖励组、奖励批次编号 |
 
 ---
 
@@ -86,6 +96,7 @@ Assets/Scripts/
 | `BattleSystem` | `Gameplay/Battle/BattleSystem.cs` | 战斗流程：初始化、出牌/撤牌/换牌、结束回合、槽位效果结算 |
 | `CardSystem` | `Gameplay/Battle/CardSystem.cs` | 牌操作：抽牌、洗牌、弃牌、重抽（Fisher-Yates 洗牌） |
 | `MarkSystem` | `Gameplay/Marks/MarkSystem.cs` | 印记：施加、执行、回合推进（Tick）、清理 |
+| `BattleRewardSystem` | `Gameplay/Rewards/BattleRewardSystem.cs` | 奖励：按配置生成奖励组、处理多选一领取、应用奖励 |
 
 ---
 
@@ -101,6 +112,7 @@ Assets/Scripts/
 | `DeckPresetData` | Card5/Deck Preset | 牌组预设，包含卡牌及数量列表 |
 | `EnemyData` | Card5/Enemy | 敌人配置：名称、最大 HP、描述、头像 |
 | `MarkData` | Card5/Mark | 印记配置：名称、图标、持续时间（-1=永久）、触发时机、效果列表 |
+| `BattleRewardConfigData` | Card5/Battle Reward Config | 战斗奖励配置：每次奖励包含多个奖励组，当前支持卡牌奖励组三选一 |
 
 ---
 

@@ -16,6 +16,8 @@ namespace Card5
         DeckModel _deckModel;
         CardSystem _cardSystem;
         MarkSystem _markSystem;
+        BattleRewardSystem _rewardSystem;
+        BattleRewardModel _rewardModel;
 
         protected override void OnInit()
         {
@@ -23,6 +25,8 @@ namespace Card5
             _deckModel = this.GetModel<DeckModel>();
             _cardSystem = this.GetSystem<CardSystem>();
             _markSystem = this.GetSystem<MarkSystem>();
+            _rewardSystem = this.GetSystem<BattleRewardSystem>();
+            _rewardModel = this.GetModel<BattleRewardModel>();
         }
 
         /// <summary>注册敌人控制器引用（由 EnemyController 在初始化时调用）</summary>
@@ -32,7 +36,12 @@ namespace Card5
         }
 
         /// <summary>启动战斗，初始化数据并发牌</summary>
-        public void StartBattle(DeckPresetData deckPreset, EnemyData enemyData, int playerMaxHp = 30, int maxEnergy = 3)
+        public void StartBattle(
+            DeckPresetData deckPreset,
+            EnemyData enemyData,
+            BattleRewardConfigData rewardConfig,
+            int playerMaxHp = 30,
+            int maxEnergy = 3)
         {
             var battleModel = this.GetModel<BattleModel>();
             var deckModel = this.GetModel<DeckModel>();
@@ -44,6 +53,7 @@ namespace Card5
             deckModel.InitDeck(deckCards);
             battleModel.InitBattle(playerMaxHp, maxEnergy);
             _markSystem.ClearAllMarks();
+            _rewardSystem.SetRewardConfig(rewardConfig);
 
             if (_enemyController != null)
                 _enemyController.InitEnemy(enemyData);
@@ -138,13 +148,28 @@ namespace Card5
         public void EndTurn()
         {
             if (_battleModel.IsBattleOver) return;
+            if (_rewardModel.HasPendingReward) return;
 
             this.SendEvent(new TurnEndedEvent { TurnNumber = _battleModel.TurnNumber.Value });
 
-            ResolveSlots();
+            bool resolvedAnyCard = ResolveSlots();
 
             if (_battleModel.IsBattleOver) return;
+            if (resolvedAnyCard && _rewardSystem.TryOfferTurnReward()) return;
 
+            ContinueAfterTurnReward();
+        }
+
+        public void ContinueAfterRewardIfReady()
+        {
+            if (_battleModel.IsBattleOver) return;
+            if (_rewardModel.HasPendingReward) return;
+
+            ContinueAfterTurnReward();
+        }
+
+        void ContinueAfterTurnReward()
+        {
             _cardSystem.DiscardHand();
 
             EnemyTurn();
@@ -154,12 +179,16 @@ namespace Card5
             StartTurn();
         }
 
-        void ResolveSlots()
+        bool ResolveSlots()
         {
+            bool resolvedAnyCard = false;
+
             for (int i = 0; i < BattleModel.SlotCount; i++)
             {
                 CardData card = _battleModel.PlaySlots[i];
                 if (card == null) continue;
+
+                resolvedAnyCard = true;
 
                 var context = new BattleContext(
                     _battleModel,
@@ -196,6 +225,8 @@ namespace Card5
             _battleModel.ClearSlots();
             this.SendEvent<SlotEffectsResolvedEvent>();
             this.SendEvent(new DiscardPileChangedEvent { Count = _deckModel.DiscardPile.Count });
+
+            return resolvedAnyCard;
         }
 
         void EnemyTurn()

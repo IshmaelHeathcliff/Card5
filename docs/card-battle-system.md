@@ -58,10 +58,12 @@ HandViewController  监听 HandRefreshedEvent
             │    ├─ MarkSystem.ExecuteSlotMarks(BeforeCardEffects)
             │    ├─ CardEffectSO.Execute(BattleContext)  // 卡牌效果
             │    └─ MarkSystem.ExecuteSlotMarks(AfterCardEffects)
-            ├─ MarkSystem.TickMarks()       // 印记持续时间 -1
+            ├─ BattleRewardSystem.TryOfferTurnReward() // 若本回合结算过卡牌，生成奖励并暂停后续流程
+            ├─ SelectBattleRewardCommand // 玩家完成所有奖励组选择后继续
             ├─ CardSystem.DiscardHand()     // 手牌全部弃掉
-            ├─ BattleModel.ClearSlots()
+            ├─ EnemyTurn()
             ├─ 回合数 +1，恢复能量
+            ├─ MarkSystem.TickMarks()       // 新回合开始时推进印记持续时间
             ├─ CardSystem.DrawCards(8)      // 新回合抽 8 张
             └─ 发送 TurnEndedEvent / TurnStartedEvent
 ```
@@ -89,6 +91,34 @@ HandViewController  监听 HandRefreshedEvent
             ├─ RedrawsRemaining -1
             └─ 发送 RedrawCountChangedEvent
 ```
+
+### 战斗奖励流程
+
+```
+BattleSystem.EndTurn()
+  └─ ResolveSlots()
+       └─ 若至少结算过 1 张卡牌，调用 BattleRewardSystem.TryOfferTurnReward()
+            ├─ 根据 BattleRewardConfigData 生成本次奖励组
+            ├─ 当前卡牌奖励组从配置卡池中随机抽 3 张
+            └─ 发送 BattleRewardOfferedEvent，战斗流程暂停
+
+玩家选择奖励选项
+  └─ SelectBattleRewardCommand(offerId, optionId)
+       └─ BattleRewardSystem.ClaimReward()
+            ├─ 卡牌奖励：CardSystem.AddCardToDeck()，加入弃牌堆并同步 FullDeck
+            ├─ 若仍有奖励组，继续发送剩余待选项
+            └─ 全部奖励组完成后发送 BattleRewardCompletedEvent，并继续敌方回合/下一回合
+```
+
+`BattleRewardConfigData` 支持一次奖励配置多个奖励组；每个奖励组都是多选一。当前已实现 `Card` 类型，默认用于卡牌三选一；`Mark` 类型仅保留枚举扩展位，后续再接入印记奖励逻辑。
+
+默认配置与 UI：
+
+- `Assets/Data/Preset/BattleRewardConfig.asset`：默认战斗奖励配置，包含 1 个卡牌三选一奖励组。
+- `Assets/Data/Preset/Cards/BasicMarkCard.asset`：用于默认三选一卡池的第三张基础卡。
+- `Assets/Prefabs/BattleRewardOption.prefab`：单个奖励选项视图。
+- `Assets/Prefabs/BattleRewardPopup.prefab`：奖励选择弹窗，已挂到 `Assets/Scenes/Main.unity` 的 `View/BattleRewardPopup`。
+- `Assets/Scripts/Editor/BattleRewardSetupUtility.cs`：可通过 Unity 菜单 `Card5/Setup Battle Reward UI` 重新生成默认配置与 UI。
 
 ---
 
@@ -173,6 +203,7 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 | `RedrawCardsCommand` | bool | 重抽选中的手牌 |
 | `AddCardToDeckCommand` | void | 新增卡牌到牌库（写入弃牌堆，同步 FullDeck） |
 | `RemoveCardFromDeckCommand` | bool | 从牌库移除一张卡牌（FullDeck + DrawPile/DiscardPile） |
+| `SelectBattleRewardCommand` | bool | 领取指定奖励组选项；全部奖励领取完成后恢复战斗流程 |
 
 ---
 
@@ -206,3 +237,6 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 | `MarkRemovedEvent` | 印记移除 |
 | `CardAddedToDeckEvent` | 新卡牌加入牌库（弃牌堆 + FullDeck） |
 | `CardRemovedFromDeckEvent` | 卡牌从牌库移除 |
+| `BattleRewardOfferedEvent` | 战斗奖励生成，等待玩家选择 |
+| `BattleRewardOptionClaimedEvent` | 某个奖励组选项被领取 |
+| `BattleRewardCompletedEvent` | 本次所有奖励组领取完成 |

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3aef7f1b0ea5558408ad3b45b6f33c78, type: 3}
-  m_Name: BasicHealCard
+  m_Name: AdvancedDamageCard
   m_EditorClassIdentifier: Assembly-CSharp::Card5.CardData
   serializationData:
     SerializedFormat: 2
@@ -21,10 +21,10 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes: []
-  _cardId: 101
-  _cardName: Basic Heal
+  _cardId: advanced_damage
+  _cardName: "\u8FDB\u9636\u4F24\u5BB3\u5361"
   _description: 
-  _energyCost: 0
+  _energyCost: 1
   _artwork: {fileID: -2524091797026239206, guid: 04bade7f4b51d0f4bbadc9ac39867d59, type: 3}
   _effects:
-  - {fileID: 11400000, guid: 3f8beb88d61f0e443ac16555cc6b7bbc, type: 2}
+  - {fileID: 11400000, guid: 6117a237385665448a122dc24264fdf8, type: 2}

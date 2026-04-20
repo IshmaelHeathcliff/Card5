@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d95b7979b4304fdc8cd7305ea9ed0d4a, type: 3}
+  m_Name: BattleRewardConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Card5.BattleRewardConfigData
+  _rewardGroups:
+  - _rewardType: 0
+    _choiceCount: 3
+    _cardPool:
+    - {fileID: 11400000, guid: 8a1a231509d2cce4d964971713848d03, type: 2}
+    - {fileID: 11400000, guid: 2221738a65b12b848a66fa6f0258c5c7, type: 2}
+    - {fileID: 11400000, guid: 2e96da86fccf66d4abc311a103b4de80, type: 2}

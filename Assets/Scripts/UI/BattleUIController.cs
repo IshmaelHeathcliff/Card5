@@ -42,6 +42,7 @@ namespace Card5
             this.RegisterEvent<TurnStartedEvent>(OnTurnStarted).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<BattleEndedEvent>(OnBattleEnded).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<RedrawCountChangedEvent>(OnRedrawCountChanged).UnRegisterWhenGameObjectDestroyed(gameObject);
+            this.RegisterEvent<BattleRewardOfferedEvent>(OnBattleRewardOffered).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         void Start()
@@ -120,6 +121,12 @@ namespace Card5
             {
                 if (_losePanel != null) _losePanel.SetActive(true);
             }
+        }
+
+        void OnBattleRewardOffered(BattleRewardOfferedEvent e)
+        {
+            if (_endTurnButton != null) _endTurnButton.interactable = false;
+            if (_redrawButton != null) _redrawButton.interactable = false;
         }
 
         void OnRedrawCountChanged(RedrawCountChangedEvent e)
