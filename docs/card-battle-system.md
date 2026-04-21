@@ -99,7 +99,9 @@ BattleSystem.EndTurn()
   └─ ResolveSlots()
        └─ 若至少结算过 1 张卡牌，调用 BattleRewardSystem.TryOfferTurnReward()
             ├─ 根据 BattleRewardConfigData 生成本次奖励组
-            ├─ 当前卡牌奖励组从配置卡池中随机抽 3 张
+            ├─ 当前卡牌奖励组优先从 CardLibraryData 牌库中按解锁条件筛选
+            ├─ 从已解锁卡牌中按权重无放回随机抽 3 张
+            ├─ 若奖励组未配置牌库，则兼容旧的配置卡池随机
             └─ 发送 BattleRewardOfferedEvent，战斗流程暂停
 
 玩家选择奖励选项
@@ -112,10 +114,28 @@ BattleSystem.EndTurn()
 
 `BattleRewardConfigData` 支持一次奖励配置多个奖励组；每个奖励组都是多选一。当前已实现 `Card` 类型，默认用于卡牌三选一；`Mark` 类型仅保留枚举扩展位，后续再接入印记奖励逻辑。
 
+`CardLibraryData` 是卡牌奖励牌库。牌库条目包含：
+
+- `Card`：可作为奖励的卡牌配置。
+- `Weight`：随机权重，数值越高越容易出现。
+- `UnlockConditions`：解锁条件列表，全部满足时该卡牌才进入本次奖励候选。
+
+当前支持的解锁条件：
+
+| 条件 | 说明 |
+|------|------|
+| `Always` | 始终解锁 |
+| `MinTurnNumber` | 当前回合数大于等于指定值 |
+| `MaxTurnNumber` | 当前回合数小于等于指定值 |
+| `MinDeckCardCount` | 玩家完整牌组数量大于等于指定值 |
+| `HasCardInDeck` | 玩家完整牌组中拥有指定卡 |
+| `DoesNotHaveCardInDeck` | 玩家完整牌组中没有指定卡 |
+| `PlayerHpPercentAtMost` | 玩家当前 HP 百分比小于等于指定值 |
+
 默认配置与 UI：
 
-- `Assets/Data/Preset/BattleRewardConfig.asset`：默认战斗奖励配置，包含 1 个卡牌三选一奖励组。
-- `Assets/Data/Preset/Cards/BasicMarkCard.asset`：用于默认三选一卡池的第三张基础卡。
+- `Assets/Data/Preset/CardLibrary/DefaultCardLibrary.asset`：默认卡牌奖励牌库，包含基础、进阶、超级伤害卡及回合数解锁条件。
+- `Assets/Data/Preset/Reward/BattleRewardConfig.asset`：默认战斗奖励配置，包含 1 个引用默认牌库的卡牌三选一奖励组。
 - `Assets/Prefabs/BattleRewardOption.prefab`：单个奖励选项视图。
 - `Assets/Prefabs/BattleRewardPopup.prefab`：奖励选择弹窗，已挂到 `Assets/Scenes/Main.unity` 的 `View/BattleRewardPopup`。
 - `Assets/Scripts/Editor/BattleRewardSetupUtility.cs`：可通过 Unity 菜单 `Card5/Setup Battle Reward UI` 重新生成默认配置与 UI。

@@ -10,10 +10,10 @@ namespace Card5.Editor
 {
     public static class BattleRewardSetupUtility
     {
-        const string RewardConfigPath = "Assets/Data/Preset/BattleRewardConfig.asset";
+        const string RewardConfigPath = "Assets/Data/Preset/Reward/BattleRewardConfig.asset";
+        const string CardLibraryPath = "Assets/Data/Preset/CardLibrary/DefaultCardLibrary.asset";
         const string OptionPrefabPath = "Assets/Prefabs/BattleRewardOption.prefab";
         const string PopupPrefabPath = "Assets/Prefabs/BattleRewardPopup.prefab";
-        const string MarkCardPath = "Assets/Data/Preset/Cards/BasicMarkCard.asset";
 
         [MenuItem("Card5/Setup Battle Reward UI")]
         public static void SetupFromMenu()
@@ -54,30 +54,6 @@ namespace Card5.Editor
             EditorUtility.SetDirty(target);
         }
 
-        static void SetStringValue(UnityEngine.Object target, string propertyName, string value)
-        {
-            var serializedObject = new SerializedObject(target);
-            SerializedProperty property = serializedObject.FindProperty(propertyName);
-            if (property == null)
-                throw new Exception($"Property not found: {target.GetType().Name}.{propertyName}");
-
-            property.stringValue = value;
-            serializedObject.ApplyModifiedPropertiesWithoutUndo();
-            EditorUtility.SetDirty(target);
-        }
-
-        static void SetIntValue(UnityEngine.Object target, string propertyName, int value)
-        {
-            var serializedObject = new SerializedObject(target);
-            SerializedProperty property = serializedObject.FindProperty(propertyName);
-            if (property == null)
-                throw new Exception($"Property not found: {target.GetType().Name}.{propertyName}");
-
-            property.intValue = value;
-            serializedObject.ApplyModifiedPropertiesWithoutUndo();
-            EditorUtility.SetDirty(target);
-        }
-
         static TextMeshProUGUI CreateTextElement(string name, Transform parent, string text, int size, FontStyles style, TextAlignmentOptions alignment)
         {
             var gameObject = new GameObject(name, typeof(RectTransform));
@@ -114,35 +90,10 @@ namespace Card5.Editor
             rectTransform.offsetMax = Vector2.zero;
         }
 
-        static CardData EnsureThirdRewardCard()
-        {
-            var existing = AssetDatabase.LoadAssetAtPath<CardData>(MarkCardPath);
-            if (existing != null) return existing;
-
-            var card = ScriptableObject.CreateInstance<CardData>();
-            AssetDatabase.CreateAsset(card, MarkCardPath);
-
-            SetStringValue(card, "_cardId", "BasicMarkCard");
-            SetStringValue(card, "_cardName", "印记卡");
-            SetStringValue(card, "_description", "施加基础印记。");
-            SetIntValue(card, "_energyCost", 1);
-
-            var effect = AssetDatabase.LoadAssetAtPath<CardEffectSO>("Assets/Data/Preset/ApplyMark/ApplyMarkEffect.asset");
-            if (effect != null)
-            {
-                var serializedObject = new SerializedObject(card);
-                SerializedProperty effects = serializedObject.FindProperty("_effects");
-                effects.arraySize = 1;
-                effects.GetArrayElementAtIndex(0).objectReferenceValue = effect;
-                serializedObject.ApplyModifiedPropertiesWithoutUndo();
-            }
-
-            EditorUtility.SetDirty(card);
-            return card;
-        }
-
         static BattleRewardConfigData CreateRewardConfigAsset()
         {
+            EnsureFolder("Assets/Data/Preset/Reward");
+
             var config = AssetDatabase.LoadAssetAtPath<BattleRewardConfigData>(RewardConfigPath);
             if (config == null)
             {
@@ -150,9 +101,7 @@ namespace Card5.Editor
                 AssetDatabase.CreateAsset(config, RewardConfigPath);
             }
 
-            CardData damage = AssetDatabase.LoadAssetAtPath<CardData>("Assets/Data/Preset/Cards/BasicDamageCard.asset");
-            CardData heal = AssetDatabase.LoadAssetAtPath<CardData>("Assets/Data/Preset/Cards/BasicHealCard.asset");
-            CardData mark = EnsureThirdRewardCard();
+            CardLibraryData cardLibrary = CreateCardLibraryAsset();
 
             var serializedObject = new SerializedObject(config);
             SerializedProperty groups = serializedObject.FindProperty("_rewardGroups");
@@ -161,16 +110,68 @@ namespace Card5.Editor
             SerializedProperty group = groups.GetArrayElementAtIndex(0);
             group.FindPropertyRelative("_rewardType").enumValueIndex = (int)BattleRewardType.Card;
             group.FindPropertyRelative("_choiceCount").intValue = 3;
-
-            SerializedProperty cardPool = group.FindPropertyRelative("_cardPool");
-            cardPool.arraySize = 3;
-            cardPool.GetArrayElementAtIndex(0).objectReferenceValue = damage;
-            cardPool.GetArrayElementAtIndex(1).objectReferenceValue = heal;
-            cardPool.GetArrayElementAtIndex(2).objectReferenceValue = mark;
+            group.FindPropertyRelative("_cardLibrary").objectReferenceValue = cardLibrary;
 
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(config);
             return config;
+        }
+
+        static CardLibraryData CreateCardLibraryAsset()
+        {
+            EnsureFolder("Assets/Data/Preset/CardLibrary");
+
+            var cardLibrary = AssetDatabase.LoadAssetAtPath<CardLibraryData>(CardLibraryPath);
+            if (cardLibrary == null)
+            {
+                cardLibrary = ScriptableObject.CreateInstance<CardLibraryData>();
+                AssetDatabase.CreateAsset(cardLibrary, CardLibraryPath);
+            }
+
+            CardData basic = AssetDatabase.LoadAssetAtPath<CardData>("Assets/Data/Preset/Cards/BasicDamageCard.asset");
+            CardData advanced = AssetDatabase.LoadAssetAtPath<CardData>("Assets/Data/Preset/Cards/AdvancedDamageCard.asset");
+            CardData great = AssetDatabase.LoadAssetAtPath<CardData>("Assets/Data/Preset/Cards/GreatDamageCard.asset");
+
+            var serializedObject = new SerializedObject(cardLibrary);
+            SerializedProperty entries = serializedObject.FindProperty("_entries");
+            entries.arraySize = 3;
+            SetCardLibraryEntry(entries.GetArrayElementAtIndex(0), basic, 3, 0, 0);
+            SetCardLibraryEntry(entries.GetArrayElementAtIndex(1), advanced, 2, 1, (int)CardUnlockConditionType.MinTurnNumber);
+            SetCardLibraryEntry(entries.GetArrayElementAtIndex(2), great, 1, 2, (int)CardUnlockConditionType.MinTurnNumber);
+            serializedObject.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(cardLibrary);
+            return cardLibrary;
+        }
+
+        static void SetCardLibraryEntry(SerializedProperty entry, CardData card, int weight, int conditionValue, int conditionType)
+        {
+            entry.FindPropertyRelative("_card").objectReferenceValue = card;
+            entry.FindPropertyRelative("_weight").intValue = weight;
+
+            SerializedProperty conditions = entry.FindPropertyRelative("_unlockConditions");
+            bool hasCondition = conditionType != (int)CardUnlockConditionType.Always;
+            conditions.arraySize = hasCondition ? 1 : 0;
+            if (!hasCondition) return;
+
+            SerializedProperty condition = conditions.GetArrayElementAtIndex(0);
+            condition.FindPropertyRelative("_conditionType").enumValueIndex = conditionType;
+            condition.FindPropertyRelative("_value").intValue = conditionValue;
+            condition.FindPropertyRelative("_card").objectReferenceValue = null;
+        }
+
+        static void EnsureFolder(string folder)
+        {
+            if (AssetDatabase.IsValidFolder(folder)) return;
+
+            string parent = System.IO.Path.GetDirectoryName(folder)?.Replace("\\", "/");
+            if (string.IsNullOrEmpty(parent))
+                parent = "Assets";
+
+            if (!AssetDatabase.IsValidFolder(parent))
+                EnsureFolder(parent);
+
+            string folderName = System.IO.Path.GetFileName(folder);
+            AssetDatabase.CreateFolder(parent, folderName);
         }
 
         static GameObject CreateRewardOptionPrefab()

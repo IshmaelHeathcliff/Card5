@@ -18,12 +18,15 @@ namespace Card5
     {
         [SerializeField] BattleRewardType _rewardType = BattleRewardType.Card;
         [SerializeField, MinValue(1)] int _choiceCount = 3;
-        [SerializeField, ShowIf(nameof(IsCardReward)), ListDrawerSettings(ShowPaging = true)] List<CardData> _cardPool = new List<CardData>();
+        [SerializeField, ShowIf(nameof(IsCardReward)), InlineEditor(InlineEditorObjectFieldModes.Boxed)] CardLibraryData _cardLibrary;
+        [SerializeField, ShowIf(nameof(UsesLegacyCardPool)), ListDrawerSettings(ShowPaging = true)] List<CardData> _cardPool = new List<CardData>();
 
         public BattleRewardType RewardType => _rewardType;
         public int ChoiceCount => _choiceCount;
+        public CardLibraryData CardLibrary => _cardLibrary;
         public IReadOnlyList<CardData> CardPool => _cardPool;
 
         bool IsCardReward => _rewardType == BattleRewardType.Card;
+        bool UsesLegacyCardPool => IsCardReward && _cardLibrary == null;
     }
 }

@@ -18,6 +18,7 @@ Assets/Scripts/
 │   ├── DeckPresetData.cs        # 牌组预设配置
 │   ├── EnemyData.cs             # 敌人配置
 │   ├── MarkData.cs              # 印记配置
+│   ├── CardLibraryData.cs       # 卡牌奖励牌库与解锁条件
 │   ├── BattleRewardConfigData.cs # 战斗奖励配置
 │   ├── GameGlobalConfigData.cs  # 全局游戏配置
 │   └── Effects/                 # 具体效果实现
@@ -115,7 +116,8 @@ Assets/Scripts/
 | `DeckPresetData` | Card5/Deck Preset | 牌组预设，包含卡牌及数量列表 |
 | `EnemyData` | Card5/Enemy | 敌人配置：名称、最大 HP、描述、头像 |
 | `MarkData` | Card5/Mark | 印记配置：名称、图标、持续时间（-1=永久）、触发时机、效果列表 |
-| `BattleRewardConfigData` | Card5/Battle Reward Config | 战斗奖励配置：每次奖励包含多个奖励组，当前支持卡牌奖励组三选一 |
+| `CardLibraryData` | Card5/Card Library | 卡牌奖励牌库：每张牌配置权重和解锁条件，奖励生成时按当前战斗状态筛选 |
+| `BattleRewardConfigData` | Card5/Battle Reward Config | 战斗奖励配置：每次奖励包含多个奖励组，卡牌奖励可引用牌库生成三选一，也兼容旧卡池 |
 | `GameGlobalConfigData` | Card5/Game Global Config | 全局游戏配置：启动牌组、敌人、奖励配置、玩家初始数值、目标帧率 |
 
 ---

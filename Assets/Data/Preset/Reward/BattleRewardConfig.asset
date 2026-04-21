@@ -15,6 +15,7 @@ MonoBehaviour:
   _rewardGroups:
   - _rewardType: 0
     _choiceCount: 3
+    _cardLibrary: {fileID: 11400000, guid: a297c790d0032074a8786f2692f9d911, type: 2}
     _cardPool:
     - {fileID: 11400000, guid: 8a1a231509d2cce4d964971713848d03, type: 2}
     - {fileID: 11400000, guid: 2221738a65b12b848a66fa6f0258c5c7, type: 2}
