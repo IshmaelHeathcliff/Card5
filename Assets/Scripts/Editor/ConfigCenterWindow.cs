@@ -472,13 +472,13 @@ namespace Card5.Editor
         {
             readonly ScriptableObject _asset;
 
-            [TableColumnWidth(180), ShowInInspector, ReadOnly, LabelText("名称")]
+            [TableColumnWidth(120, false), ShowInInspector, ReadOnly, LabelText("名称"), PropertyOrder(0)]
             string Name => _asset != null ? _asset.name : string.Empty;
 
-            [TableColumnWidth(300), ShowInInspector, ReadOnly, LabelText("路径")]
+            [TableColumnWidth(240), ShowInInspector, ReadOnly, LabelText("路径"), PropertyOrder(10)]
             string Path => _asset != null ? AssetDatabase.GetAssetPath(_asset) : string.Empty;
 
-            [ShowInInspector, InlineEditor(InlineEditorObjectFieldModes.Foldout), LabelText("资产")]
+            [TableColumnWidth(680), ShowInInspector, InlineEditor(InlineEditorObjectFieldModes.Boxed), LabelText("配置文件 Asset"), PropertyOrder(30)]
             public ScriptableObject Asset => _asset;
 
             public ConfigAssetTableRow(ScriptableObject asset)
@@ -486,6 +486,7 @@ namespace Card5.Editor
                 _asset = asset;
             }
 
+            [VerticalGroup("操作"), TableColumnWidth(96, false), PropertyOrder(20)]
             [Button("选中")]
             void Select()
             {
@@ -494,6 +495,7 @@ namespace Card5.Editor
                 EditorGUIUtility.PingObject(_asset);
             }
 
+            [VerticalGroup("操作"), PropertyOrder(21)]
             [Button("保存")]
             void Save()
             {
