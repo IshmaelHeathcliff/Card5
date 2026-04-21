@@ -19,11 +19,14 @@ Assets/Scripts/
 │   ├── EnemyData.cs             # 敌人配置
 │   ├── MarkData.cs              # 印记配置
 │   ├── BattleRewardConfigData.cs # 战斗奖励配置
+│   ├── GameGlobalConfigData.cs  # 全局游戏配置
 │   └── Effects/                 # 具体效果实现
 │       ├── DamageEffectSO.cs    # 伤害效果
 │       ├── HealEffectSO.cs      # 治疗效果
 │       └── ApplyMarkEffectSO.cs # 施加印记效果
 ├── Editor/                      # Unity 编辑器扩展
+│   ├── ConfigCenterWindow.cs    # Odin 配置中心
+│   └── BattleRewardSetupUtility.cs # 默认奖励配置/UI 生成工具
 ├── Gameplay/                    # 游戏机制
 │   ├── Battle/                  # 战斗系统
 │   │   ├── BattleModel.cs       # 战斗状态数据
@@ -113,6 +116,19 @@ Assets/Scripts/
 | `EnemyData` | Card5/Enemy | 敌人配置：名称、最大 HP、描述、头像 |
 | `MarkData` | Card5/Mark | 印记配置：名称、图标、持续时间（-1=永久）、触发时机、效果列表 |
 | `BattleRewardConfigData` | Card5/Battle Reward Config | 战斗奖励配置：每次奖励包含多个奖励组，当前支持卡牌奖励组三选一 |
+| `GameGlobalConfigData` | Card5/Game Global Config | 全局游戏配置：启动牌组、敌人、奖励配置、玩家初始数值、目标帧率 |
+
+---
+
+## Editor 配置中心
+
+入口：Unity 菜单 `Card5/配置中心`。
+
+- `全局配置`：加载或创建 `Assets/Data/Preset/GameGlobalConfig.asset`，可从当前场景 `GameManager` 同步默认值，也可把全局配置应用回当前场景。
+- `新建配置`：基于 Odin 下拉选择任意项目内 `ScriptableObject` 类型并创建 `.asset`。
+- `配置概览`：统计 `Assets/Data` 下现有配置数量和类型分布。
+- `全部配置/按目录` 与 `全部配置/按类型`：自动扫描并展示现有 `ScriptableObject` 配置，兼容当前所有数据资产。
+- `表格视图`：按具体 `ScriptableObject` 类型生成批量编辑页，支持同类配置表格浏览、展开内联编辑、Project 多选全部、批量保存。
 
 ---
 

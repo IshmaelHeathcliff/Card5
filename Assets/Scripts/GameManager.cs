@@ -11,6 +11,8 @@ namespace Card5
     /// </summary>
     public class GameManager : MonoBehaviour, IController
     {
+        [SerializeField] GameGlobalConfigData _globalConfig;
+
         [SerializeField, Required] DeckPresetData _startingDeck;
         [SerializeField, Required] EnemyData _enemyData;
         [SerializeField] BattleRewardConfigData _rewardConfig;
@@ -22,9 +24,25 @@ namespace Card5
 
         public IArchitecture GetArchitecture() => GameArchitecture.Interface;
 
+        DeckPresetData StartingDeck => _globalConfig != null && _globalConfig.StartingDeck != null
+            ? _globalConfig.StartingDeck
+            : _startingDeck;
+
+        EnemyData EnemyData => _globalConfig != null && _globalConfig.EnemyData != null
+            ? _globalConfig.EnemyData
+            : _enemyData;
+
+        BattleRewardConfigData RewardConfig => _globalConfig != null && _globalConfig.RewardConfig != null
+            ? _globalConfig.RewardConfig
+            : _rewardConfig;
+
+        int PlayerMaxHp => _globalConfig != null ? _globalConfig.PlayerMaxHp : _playerMaxHp;
+        int MaxEnergy => _globalConfig != null ? _globalConfig.MaxEnergy : _maxEnergy;
+        int TargetFrameRate => _globalConfig != null ? _globalConfig.TargetFrameRate : _targetFrameRate;
+
         void Awake()
         {
-            Application.targetFrameRate = _targetFrameRate;
+            Application.targetFrameRate = TargetFrameRate;
         }
 
         async UniTaskVoid Start()
@@ -42,13 +60,16 @@ namespace Card5
         [Button("开始战斗")]
         public void StartBattle()
         {
-            if (_startingDeck == null || _enemyData == null)
+            DeckPresetData startingDeck = StartingDeck;
+            EnemyData enemyData = EnemyData;
+
+            if (startingDeck == null || enemyData == null)
             {
                 Debug.LogWarning("[GameManager] 请在 Inspector 中设置 StartingDeck 和 EnemyData");
                 return;
             }
 
-            this.SendCommand(new StartBattleCommand(_startingDeck, _enemyData, _rewardConfig, _playerMaxHp, _maxEnergy));
+            this.SendCommand(new StartBattleCommand(startingDeck, enemyData, RewardConfig, PlayerMaxHp, MaxEnergy));
         }
     }
 }

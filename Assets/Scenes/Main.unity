@@ -1055,6 +1055,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 498f4a374d7d59c458e590afc494bf36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card5.GameManager
+  _globalConfig: {fileID: 11400000, guid: 8650c9d866b489e4ab0251d080b3fb07, type: 2}
   _startingDeck: {fileID: 11400000, guid: 4f575db2813b421458473d03e43049cf, type: 2}
   _enemyData: {fileID: 11400000, guid: 541e6b4d151d2ca458170789f1dfa784, type: 2}
   _rewardConfig: {fileID: 11400000, guid: 0e42b4a2c76c5304abc8b1ff3d4117c7, type: 2}

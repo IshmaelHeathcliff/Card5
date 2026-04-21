@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b95bccad4624415885e2890ca7848514, type: 3}
+  m_Name: GameGlobalConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Card5.GameGlobalConfigData
+  _startingDeck: {fileID: 11400000, guid: 4f575db2813b421458473d03e43049cf, type: 2}
+  _enemyData: {fileID: 11400000, guid: 541e6b4d151d2ca458170789f1dfa784, type: 2}
+  _rewardConfig: {fileID: 11400000, guid: 0e42b4a2c76c5304abc8b1ff3d4117c7, type: 2}
+  _playerMaxHp: 30
+  _maxEnergy: 8
+  _targetFrameRate: 120
