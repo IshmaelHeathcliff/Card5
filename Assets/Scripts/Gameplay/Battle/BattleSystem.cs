@@ -18,6 +18,12 @@ namespace Card5
         MarkSystem _markSystem;
         BattleRewardSystem _rewardSystem;
         BattleRewardModel _rewardModel;
+        DeckPresetData _lastDeckPreset;
+        MonsterListData _lastMonsterList;
+        EnemyData _lastEnemyData;
+        BattleRewardConfigData _lastRewardConfig;
+        int _lastPlayerMaxHp;
+        int _lastMaxEnergy;
 
         protected override void OnInit()
         {
@@ -43,28 +49,127 @@ namespace Card5
             int playerMaxHp = 30,
             int maxEnergy = 3)
         {
-            var battleModel = this.GetModel<BattleModel>();
-            var deckModel = this.GetModel<DeckModel>();
-            var cardSystem = this.GetSystem<CardSystem>();
+            StartBattle(deckPreset, null, enemyData, rewardConfig, playerMaxHp, maxEnergy);
+        }
+
+        public void StartBattle(
+            DeckPresetData deckPreset,
+            MonsterListData monsterList,
+            EnemyData enemyData,
+            BattleRewardConfigData rewardConfig,
+            int playerMaxHp = 30,
+            int maxEnergy = 3)
+        {
+            _lastDeckPreset = deckPreset;
+            _lastMonsterList = monsterList;
+            _lastEnemyData = enemyData;
+            _lastRewardConfig = rewardConfig;
+            _lastPlayerMaxHp = playerMaxHp;
+            _lastMaxEnergy = maxEnergy;
 
             var deckCards = deckPreset.BuildCardList();
-            cardSystem.Shuffle(deckCards);
+            _cardSystem.Shuffle(deckCards);
 
-            deckModel.InitDeck(deckCards);
-            battleModel.InitBattle(playerMaxHp, maxEnergy);
-            _markSystem.ClearAllMarks();
-            _rewardSystem.SetRewardConfig(rewardConfig);
+            ResetPlayerState(deckCards, playerMaxHp, maxEnergy, rewardConfig);
 
-            if (_enemyController != null)
-                _enemyController.InitEnemy(enemyData);
+            MonsterStageConfig firstMonster = GetMonsterConfig(0);
+            EnemyData firstEnemy = firstMonster != null ? firstMonster.EnemyData : enemyData;
+            int maxPlayRounds = firstMonster != null ? firstMonster.MaxPlayRounds : 2;
+
+            if (firstEnemy == null)
+            {
+                Debug.LogWarning("[BattleSystem] 没有可用的怪物配置，战斗无法开始。");
+                _battleModel.IsBattleOver = true;
+                this.SendEvent(new BattleEndedEvent { PlayerWon = false });
+                return;
+            }
 
             this.SendEvent(new BattleStartedEvent
             {
                 PlayerMaxHp = playerMaxHp,
-                EnemyMaxHp = enemyData.MaxHp
+                EnemyMaxHp = firstEnemy.MaxHp
             });
 
+            StartMonster(0, firstEnemy, maxPlayRounds);
             StartTurn();
+        }
+
+        public void RestartBattle()
+        {
+            if (_lastDeckPreset == null) return;
+            StartBattle(_lastDeckPreset, _lastMonsterList, _lastEnemyData, _lastRewardConfig, _lastPlayerMaxHp, _lastMaxEnergy);
+        }
+
+        void ResetPlayerState(List<CardData> deckCards, int playerMaxHp, int maxEnergy, BattleRewardConfigData rewardConfig)
+        {
+            _deckModel.InitDeck(deckCards);
+            _battleModel.InitBattle(playerMaxHp, maxEnergy);
+            _markSystem.ClearAllMarks();
+            _rewardSystem.SetRewardConfig(rewardConfig);
+
+            this.SendEvent(new HandRefreshedEvent { CardIds = new List<string>() });
+            this.SendEvent<SlotEffectsResolvedEvent>();
+            this.SendEvent(new DrawPileChangedEvent { Count = _deckModel.DrawPile.Count });
+            this.SendEvent(new DiscardPileChangedEvent { Count = _deckModel.DiscardPile.Count });
+            this.SendEvent(new PlayerHpChangedEvent
+            {
+                CurrentHp = _battleModel.PlayerHp.Value,
+                MaxHp = _battleModel.PlayerMaxHp
+            });
+            this.SendEvent(new EnergyChangedEvent
+            {
+                CurrentEnergy = _battleModel.CurrentEnergy.Value,
+                MaxEnergy = _battleModel.MaxEnergy.Value
+            });
+            this.SendEvent(new RedrawCountChangedEvent
+            {
+                Remaining = _battleModel.RedrawsRemaining,
+                Max = _battleModel.RedrawsPerTurn
+            });
+            this.SendEvent(new MonsterPlayRoundCountChangedEvent
+            {
+                CurrentRound = 0,
+                MaxCount = 0
+            });
+        }
+
+        MonsterStageConfig GetMonsterConfig(int monsterIndex)
+        {
+            if (_lastMonsterList == null || _lastMonsterList.Monsters == null) return null;
+            if (monsterIndex < 0 || monsterIndex >= _lastMonsterList.Monsters.Count) return null;
+            MonsterStageConfig config = _lastMonsterList.Monsters[monsterIndex];
+            return config != null && config.EnemyData != null ? config : null;
+        }
+
+        int GetMonsterCount()
+        {
+            if (_lastMonsterList == null || _lastMonsterList.Monsters == null || _lastMonsterList.Monsters.Count == 0)
+                return _lastEnemyData != null ? 1 : 0;
+            return _lastMonsterList.Monsters.Count;
+        }
+
+        void StartMonster(int monsterIndex, EnemyData enemyData, int maxPlayRounds)
+        {
+            int monsterCount = GetMonsterCount();
+            _battleModel.StartMonster(monsterIndex, monsterCount, maxPlayRounds);
+
+            if (_enemyController != null)
+                _enemyController.InitEnemy(enemyData);
+
+            this.SendEvent(new MonsterStartedEvent
+            {
+                MonsterIndex = monsterIndex,
+                MonsterCount = monsterCount,
+                EnemyName = enemyData.EnemyName,
+                EnemyMaxHp = enemyData.MaxHp,
+                MaxPlayRounds = maxPlayRounds
+            });
+
+            this.SendEvent(new MonsterPlayRoundCountChangedEvent
+            {
+                CurrentRound = _battleModel.CurrentMonsterPlayRounds,
+                MaxCount = _battleModel.CurrentMonsterMaxPlayRounds
+            });
         }
 
         /// <summary>尝试将手牌中的卡放入指定槽位。handIndex 指定手牌索引以区分相同 CardData 的多张牌，若 &lt; 0 则按 CardData 查找第一张。</summary>
@@ -152,12 +257,20 @@ namespace Card5
 
             this.SendEvent(new TurnEndedEvent { TurnNumber = _battleModel.TurnNumber.Value });
 
-            bool resolvedAnyCard = ResolveSlots();
+            ResolveSlots();
 
             if (_battleModel.IsBattleOver) return;
-            if (resolvedAnyCard && _rewardSystem.TryOfferTurnReward()) return;
+            if (_battleModel.IsCurrentMonsterDefeated)
+            {
+                if (_rewardSystem.TryOfferTurnReward()) return;
+                ContinueAfterMonsterReward();
+                return;
+            }
 
-            ContinueAfterTurnReward();
+            AddMonsterPlayRoundAndFailIfNeeded();
+            if (_battleModel.IsBattleOver) return;
+
+            ContinueAfterTurn();
         }
 
         public void ContinueAfterRewardIfReady()
@@ -165,10 +278,11 @@ namespace Card5
             if (_battleModel.IsBattleOver) return;
             if (_rewardModel.HasPendingReward) return;
 
-            ContinueAfterTurnReward();
+            if (_battleModel.IsCurrentMonsterDefeated)
+                ContinueAfterMonsterReward();
         }
 
-        void ContinueAfterTurnReward()
+        void ContinueAfterTurn()
         {
             _cardSystem.DiscardHand();
 
@@ -176,6 +290,24 @@ namespace Card5
 
             if (_battleModel.IsBattleOver) return;
 
+            StartTurn();
+        }
+
+        void ContinueAfterMonsterReward()
+        {
+            _cardSystem.DiscardHand();
+
+            int nextMonsterIndex = _battleModel.CurrentMonsterIndex + 1;
+            MonsterStageConfig nextMonster = GetMonsterConfig(nextMonsterIndex);
+
+            if (nextMonster == null)
+            {
+                _battleModel.IsBattleOver = true;
+                this.SendEvent(new BattleEndedEvent { PlayerWon = true });
+                return;
+            }
+
+            StartMonster(nextMonsterIndex, nextMonster.EnemyData, nextMonster.MaxPlayRounds);
             StartTurn();
         }
 
@@ -205,34 +337,77 @@ namespace Card5
                 _markSystem.ExecuteSlotMarks(i, MarkTrigger.BeforeCardEffects, context);
                 _markSystem.ExecuteCardMarks(card, MarkTrigger.BeforeCardEffects, context);
 
-                foreach (var effect in card.Effects)
+                if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
                 {
-                    effect.Execute(context);
-                    if (_battleModel.IsBattleOver) break;
+                    foreach (var effect in card.Effects)
+                    {
+                        effect.Execute(context);
+                        if (_battleModel.IsBattleOver) break;
+                        if (_battleModel.IsCurrentMonsterDefeated) break;
+                    }
                 }
 
-                if (!_battleModel.IsBattleOver)
+                if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
                 {
                     _markSystem.ExecuteSlotMarks(i, MarkTrigger.AfterCardEffects, context);
                     _markSystem.ExecuteCardMarks(card, MarkTrigger.AfterCardEffects, context);
                 }
 
-                _deckModel.DiscardPile.Add(card);
+                DiscardSlotCard(i);
 
                 if (_battleModel.IsBattleOver) break;
+                if (_battleModel.IsCurrentMonsterDefeated) break;
             }
 
-            _battleModel.ClearSlots();
+            DiscardRemainingSlotCards();
             this.SendEvent<SlotEffectsResolvedEvent>();
             this.SendEvent(new DiscardPileChangedEvent { Count = _deckModel.DiscardPile.Count });
 
             return resolvedAnyCard;
         }
 
+        void AddMonsterPlayRoundAndFailIfNeeded()
+        {
+            _battleModel.AddCurrentMonsterPlayRound();
+            this.SendEvent(new MonsterPlayRoundCountChangedEvent
+            {
+                CurrentRound = _battleModel.CurrentMonsterPlayRounds,
+                MaxCount = _battleModel.CurrentMonsterMaxPlayRounds
+            });
+
+            if (_battleModel.CurrentMonsterMaxPlayRounds > 0
+                && _battleModel.CurrentMonsterPlayRounds >= _battleModel.CurrentMonsterMaxPlayRounds)
+            {
+                FailBattle();
+            }
+        }
+
+        void DiscardSlotCard(int slotIndex)
+        {
+            CardData card = _battleModel.PlaySlots[slotIndex];
+            if (card == null) return;
+            _deckModel.DiscardPile.Add(card);
+            _battleModel.PlaySlots[slotIndex] = null;
+        }
+
+        void DiscardRemainingSlotCards()
+        {
+            for (int i = 0; i < BattleModel.SlotCount; i++)
+                DiscardSlotCard(i);
+        }
+
         void EnemyTurn()
         {
             // 敌人目前为木桩，无行动
             // 后续在此处调用 _enemyController 的行为接口
+        }
+
+        void FailBattle()
+        {
+            if (_battleModel.IsBattleOver) return;
+            _battleModel.IsBattleOver = true;
+            _battleModel.ClearSlots();
+            this.SendEvent(new BattleEndedEvent { PlayerWon = false });
         }
 
         /// <summary>丢弃指定手牌索引并重新抽取，每回合限定次数</summary>
@@ -329,9 +504,8 @@ namespace Card5
 
             if (currentHp <= 0 && !_battleModel.IsBattleOver)
             {
-                _battleModel.IsBattleOver = true;
+                _battleModel.MarkCurrentMonsterDefeated();
                 this.SendEvent<EnemyDiedEvent>();
-                this.SendEvent(new BattleEndedEvent { PlayerWon = true });
             }
         }
     }

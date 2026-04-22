@@ -55,10 +55,10 @@ namespace Card5
             {
                 case CardUnlockConditionType.Always:
                     return true;
-                case CardUnlockConditionType.MinTurnNumber:
-                    return context.TurnNumber >= _value;
-                case CardUnlockConditionType.MaxTurnNumber:
-                    return context.TurnNumber <= _value;
+                case CardUnlockConditionType.MinBattleCount:
+                    return context.BattleCount >= _value;
+                case CardUnlockConditionType.MaxBattleCount:
+                    return context.BattleCount <= _value;
                 case CardUnlockConditionType.MinDeckCardCount:
                     return context.DeckCardCount >= _value;
                 case CardUnlockConditionType.HasCardInDeck:
@@ -72,8 +72,8 @@ namespace Card5
             }
         }
 
-        bool UsesIntValue => _conditionType == CardUnlockConditionType.MinTurnNumber
-            || _conditionType == CardUnlockConditionType.MaxTurnNumber
+        bool UsesIntValue => _conditionType == CardUnlockConditionType.MinBattleCount
+            || _conditionType == CardUnlockConditionType.MaxBattleCount
             || _conditionType == CardUnlockConditionType.MinDeckCardCount
             || _conditionType == CardUnlockConditionType.PlayerHpPercentAtMost;
 
@@ -84,8 +84,8 @@ namespace Card5
     public enum CardUnlockConditionType
     {
         Always,
-        MinTurnNumber,
-        MaxTurnNumber,
+        MinBattleCount,
+        MaxBattleCount,
         MinDeckCardCount,
         HasCardInDeck,
         DoesNotHaveCardInDeck,
@@ -103,7 +103,7 @@ namespace Card5
             _deckModel = deckModel;
         }
 
-        public int TurnNumber => _battleModel != null ? _battleModel.TurnNumber.Value : 0;
+        public int BattleCount => _battleModel != null ? _battleModel.CurrentMonsterIndex + 1 : 0;
         public int DeckCardCount => _deckModel != null ? _deckModel.FullDeck.Count : 0;
 
         public int PlayerHpPercent

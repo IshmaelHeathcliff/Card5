@@ -18,6 +18,7 @@ alwaysApply: false
 | 战斗 System | `Assets/Scripts/Gameplay/Battle/BattleSystem.cs` |
 | 卡牌 System | `Assets/Scripts/Gameplay/Battle/CardSystem.cs` |
 | 印记 System | `Assets/Scripts/Gameplay/Marks/MarkSystem.cs` |
+| 怪物列表配置 | `Assets/Scripts/Data/MonsterListData.cs` |
 | 所有事件 | `Assets/Scripts/Gameplay/Events/BattleEvents.cs` |
 | 效果基类 | `Assets/Scripts/Data/CardEffectSO.cs` |
 | 具体效果 | `Assets/Scripts/Data/Effects/` |
@@ -32,10 +33,13 @@ GameManager.StartBattle()
        └─ BattleSystem.StartBattle()
             ├─ DeckModel.InitDeck()       // 加载 DeckPresetData，建完整牌组
             ├─ BattleModel.InitBattle()   // 重置 HP、能量、回合
+            ├─ BattleModel.StartMonster() // 加载 MonsterListData 的当前怪物与出牌轮数限制
             ├─ CardSystem.Shuffle()       // Fisher-Yates 洗牌
             ├─ CardSystem.DrawCards(8)    // 首回合抽 8 张
-            └─ 发送 BattleStartedEvent / TurnStartedEvent
+            └─ 发送 BattleStartedEvent / MonsterStartedEvent / TurnStartedEvent
 ```
+
+`GameGlobalConfigData` 优先使用 `MonsterListData` 作为战斗怪物队列；旧的 `EnemyData` 字段保留为兼容回退。每个怪物配置包含敌人数据与本怪物最大出牌轮数，一轮最多结算 5 张槽位卡。
 
 ### 出牌流程
 
@@ -57,9 +61,11 @@ HandViewController  监听 HandRefreshedEvent
             ├─ BattleSystem.ResolveSlots()  // 按槽位顺序结算
             │    ├─ MarkSystem.ExecuteSlotMarks(BeforeCardEffects)
             │    ├─ CardEffectSO.Execute(BattleContext)  // 卡牌效果
-            │    └─ MarkSystem.ExecuteSlotMarks(AfterCardEffects)
-            ├─ BattleRewardSystem.TryOfferTurnReward() // 若本回合结算过卡牌，生成奖励并暂停后续流程
-            ├─ SelectBattleRewardCommand // 玩家完成所有奖励组选择后继续
+            │    ├─ MarkSystem.ExecuteSlotMarks(AfterCardEffects)
+            │    └─ 一轮最多结算 5 张槽位卡
+            ├─ 若怪物被击败，生成奖励并暂停后续流程
+            ├─ SelectBattleRewardCommand // 玩家完成所有奖励组选择后进入下一只怪物或胜利
+            ├─ 若出牌轮数达到上限但怪物未被击败，战斗失败
             ├─ CardSystem.DiscardHand()     // 手牌全部弃掉
             ├─ EnemyTurn()
             ├─ 回合数 +1，恢复能量
@@ -67,6 +73,33 @@ HandViewController  监听 HandRefreshedEvent
             ├─ CardSystem.DrawCards(8)      // 新回合抽 8 张
             └─ 发送 TurnEndedEvent / TurnStartedEvent
 ```
+
+当前出牌轮数按每次结束回合后的槽位结算计数。若一张卡击败当前怪物，本轮后续槽位卡牌不再继续结算，并统一进入弃牌堆。
+`BattleUIController` 监听 `MonsterPlayRoundCountChangedEvent`，在战斗 UI 中显示当前怪物剩余出牌轮数。
+
+### 怪物推进与失败流程
+
+```
+当前怪物 HP 归零
+  └─ BattleSystem.NotifyEnemyHpChanged()
+       ├─ 标记当前怪物已击败
+       └─ 发送 EnemyDiedEvent
+
+BattleSystem.EndTurn()
+  └─ 若当前怪物已击败
+       ├─ BattleRewardSystem.TryOfferTurnReward()
+       ├─ 奖励领取完成后丢弃手牌并清理槽位
+       ├─ 若 MonsterListData 还有下一只怪物，StartMonster() 并开始下一回合
+       └─ 若没有下一只怪物，发送 BattleEndedEvent(PlayerWon = true)
+
+当前怪物已出牌轮数 >= MaxPlayRounds 且仍未击败
+  └─ BattleSystem.FailBattle()
+       ├─ 清理出牌槽
+       └─ 发送 BattleEndedEvent(PlayerWon = false)
+```
+
+战斗胜利或失败后，`BattleUIController` 显示结果确认 UI。玩家点击确认会发送 `RestartBattleCommand`，使用本次战斗的牌组、怪物列表、奖励配置和数值重新开始战斗。
+重开会先重置玩家战斗状态：手牌与手牌 UI、抽牌堆、弃牌堆、出牌槽、HP、能量、重抽次数、奖励待选、印记和怪物出牌轮数都会回到初始状态，再开始新一局。
 
 ### 撤牌 / 换牌
 
@@ -97,7 +130,7 @@ HandViewController  监听 HandRefreshedEvent
 ```
 BattleSystem.EndTurn()
   └─ ResolveSlots()
-       └─ 若至少结算过 1 张卡牌，调用 BattleRewardSystem.TryOfferTurnReward()
+       └─ 若当前怪物被击败，调用 BattleRewardSystem.TryOfferTurnReward()
             ├─ 根据 BattleRewardConfigData 生成本次奖励组
             ├─ 当前卡牌奖励组优先从 CardLibraryData 牌库中按解锁条件筛选
             ├─ 从已解锁卡牌中按权重无放回随机抽 3 张
@@ -109,7 +142,7 @@ BattleSystem.EndTurn()
        └─ BattleRewardSystem.ClaimReward()
             ├─ 卡牌奖励：CardSystem.AddCardToDeck()，加入弃牌堆并同步 FullDeck
             ├─ 若仍有奖励组，继续发送剩余待选项
-            └─ 全部奖励组完成后发送 BattleRewardCompletedEvent，并继续敌方回合/下一回合
+            └─ 全部奖励组完成后发送 BattleRewardCompletedEvent，并进入下一只怪物/战斗胜利
 ```
 
 `BattleRewardConfigData` 支持一次奖励配置多个奖励组；每个奖励组都是多选一。当前已实现 `Card` 类型，默认用于卡牌三选一；`Mark` 类型仅保留枚举扩展位，后续再接入印记奖励逻辑。
@@ -125,8 +158,8 @@ BattleSystem.EndTurn()
 | 条件 | 说明 |
 |------|------|
 | `Always` | 始终解锁 |
-| `MinTurnNumber` | 当前回合数大于等于指定值 |
-| `MaxTurnNumber` | 当前回合数小于等于指定值 |
+| `MinBattleCount` | 当前战斗次数大于等于指定值 |
+| `MaxBattleCount` | 当前战斗次数小于等于指定值 |
 | `MinDeckCardCount` | 玩家完整牌组数量大于等于指定值 |
 | `HasCardInDeck` | 玩家完整牌组中拥有指定卡 |
 | `DoesNotHaveCardInDeck` | 玩家完整牌组中没有指定卡 |
@@ -134,8 +167,9 @@ BattleSystem.EndTurn()
 
 默认配置与 UI：
 
-- `Assets/Data/Preset/CardLibrary/DefaultCardLibrary.asset`：默认卡牌奖励牌库，包含基础、进阶、超级伤害卡及回合数解锁条件。
+- `Assets/Data/Preset/CardLibrary/DefaultCardLibrary.asset`：默认卡牌奖励牌库，包含基础、进阶、超级伤害卡及战斗次数解锁条件。
 - `Assets/Data/Preset/Reward/BattleRewardConfig.asset`：默认战斗奖励配置，包含 1 个引用默认牌库的卡牌三选一奖励组。
+- `Assets/Data/Preset/Enemies/DefaultMonsterList.asset`：默认怪物列表配置，当前包含基础敌人与出牌轮数限制。
 - `Assets/Prefabs/BattleRewardOption.prefab`：单个奖励选项视图。
 - `Assets/Prefabs/BattleRewardPopup.prefab`：奖励选择弹窗，已挂到 `Assets/Scenes/Main.unity` 的 `View/BattleRewardPopup`。
 - `Assets/Scripts/Editor/BattleRewardSetupUtility.cs`：可通过 Unity 菜单 `Card5/Setup Battle Reward UI` 重新生成默认配置与 UI。
@@ -224,6 +258,7 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 | `AddCardToDeckCommand` | void | 新增卡牌到牌库（写入弃牌堆，同步 FullDeck） |
 | `RemoveCardFromDeckCommand` | bool | 从牌库移除一张卡牌（FullDeck + DrawPile/DiscardPile） |
 | `SelectBattleRewardCommand` | bool | 领取指定奖励组选项；全部奖励领取完成后恢复战斗流程 |
+| `RestartBattleCommand` | void | 战斗结果确认后，使用上次战斗配置重新开始 |
 
 ---
 
@@ -233,6 +268,8 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 |------|---------|
 | `BattleStartedEvent` | 战斗初始化完成 |
 | `BattleEndedEvent` | 战斗结束（含 IsVictory） |
+| `MonsterStartedEvent` | 当前怪物开始，包含怪物序号、总数与出牌轮数限制 |
+| `MonsterPlayRoundCountChangedEvent` | 当前怪物已出牌轮数变化 |
 | `TurnStartedEvent` | 新回合开始 |
 | `TurnEndedEvent` | 回合结算完成 |
 | `CardDrawnEvent` | 单张牌被抽取 |
@@ -257,6 +294,6 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 | `MarkRemovedEvent` | 印记移除 |
 | `CardAddedToDeckEvent` | 新卡牌加入牌库（弃牌堆 + FullDeck） |
 | `CardRemovedFromDeckEvent` | 卡牌从牌库移除 |
-| `BattleRewardOfferedEvent` | 战斗奖励生成，等待玩家选择 |
+| `BattleRewardOfferedEvent` | 击败怪物后的战斗奖励生成，等待玩家选择 |
 | `BattleRewardOptionClaimedEvent` | 某个奖励组选项被领取 |
 | `BattleRewardCompletedEvent` | 本次所有奖励组领取完成 |

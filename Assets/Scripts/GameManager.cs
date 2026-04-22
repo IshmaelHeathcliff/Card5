@@ -14,6 +14,7 @@ namespace Card5
         [SerializeField] GameGlobalConfigData _globalConfig;
 
         [SerializeField, Required] DeckPresetData _startingDeck;
+        [SerializeField] MonsterListData _monsterList;
         [SerializeField, Required] EnemyData _enemyData;
         [SerializeField] BattleRewardConfigData _rewardConfig;
 
@@ -27,6 +28,10 @@ namespace Card5
         DeckPresetData StartingDeck => _globalConfig != null && _globalConfig.StartingDeck != null
             ? _globalConfig.StartingDeck
             : _startingDeck;
+
+        MonsterListData MonsterList => _globalConfig != null && _globalConfig.MonsterList != null
+            ? _globalConfig.MonsterList
+            : _monsterList;
 
         EnemyData EnemyData => _globalConfig != null && _globalConfig.EnemyData != null
             ? _globalConfig.EnemyData
@@ -61,15 +66,16 @@ namespace Card5
         public void StartBattle()
         {
             DeckPresetData startingDeck = StartingDeck;
+            MonsterListData monsterList = MonsterList;
             EnemyData enemyData = EnemyData;
 
-            if (startingDeck == null || enemyData == null)
+            if (startingDeck == null || (monsterList == null && enemyData == null))
             {
-                Debug.LogWarning("[GameManager] 请在 Inspector 中设置 StartingDeck 和 EnemyData");
+                Debug.LogWarning("[GameManager] 请在 Inspector 中设置 StartingDeck，以及 MonsterList 或 EnemyData。");
                 return;
             }
 
-            this.SendCommand(new StartBattleCommand(startingDeck, enemyData, RewardConfig, PlayerMaxHp, MaxEnergy));
+            this.SendCommand(new StartBattleCommand(startingDeck, monsterList, enemyData, RewardConfig, PlayerMaxHp, MaxEnergy));
         }
     }
 }

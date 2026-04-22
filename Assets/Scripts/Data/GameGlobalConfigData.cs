@@ -8,6 +8,7 @@ namespace Card5
     {
         [Title("战斗入口")]
         [SerializeField, Required] DeckPresetData _startingDeck;
+        [SerializeField] MonsterListData _monsterList;
         [SerializeField, Required] EnemyData _enemyData;
         [SerializeField] BattleRewardConfigData _rewardConfig;
 
@@ -19,6 +20,7 @@ namespace Card5
         [SerializeField, MinValue(-1)] int _targetFrameRate = 60;
 
         public DeckPresetData StartingDeck => _startingDeck;
+        public MonsterListData MonsterList => _monsterList;
         public EnemyData EnemyData => _enemyData;
         public BattleRewardConfigData RewardConfig => _rewardConfig;
         public int PlayerMaxHp => _playerMaxHp;

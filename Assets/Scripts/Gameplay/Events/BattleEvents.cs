@@ -13,6 +13,21 @@ namespace Card5.Gameplay.Events
         public bool PlayerWon;
     }
 
+    public struct MonsterStartedEvent
+    {
+        public int MonsterIndex;
+        public int MonsterCount;
+        public string EnemyName;
+        public int EnemyMaxHp;
+        public int MaxPlayRounds;
+    }
+
+    public struct MonsterPlayRoundCountChangedEvent
+    {
+        public int CurrentRound;
+        public int MaxCount;
+    }
+
     public struct TurnStartedEvent
     {
         public int TurnNumber;

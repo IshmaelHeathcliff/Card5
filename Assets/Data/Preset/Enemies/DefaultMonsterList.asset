@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 545f5674890a0874781d21a3f009058c, type: 3}
+  m_Name: DefaultMonsterList
+  m_EditorClassIdentifier: Assembly-CSharp::Card5.MonsterListData
+  _monsters:
+  - _enemyData: {fileID: 11400000, guid: 541e6b4d151d2ca458170789f1dfa784, type: 2}
+    _maxPlayRounds: 5
+  - _enemyData: {fileID: 11400000, guid: b69a9b3315fd4e0408dfb2059bf395c9, type: 2}
+    _maxPlayRounds: 5
+  - _enemyData: {fileID: 11400000, guid: 2adc12f5b879f584e8be8d5d97471811, type: 2}
+    _maxPlayRounds: 5
+  - _enemyData: {fileID: 11400000, guid: e6bd683526e25fa45ad4ba0bc9f78feb, type: 2}
+    _maxPlayRounds: 5
+  - _enemyData: {fileID: 11400000, guid: a3e3f4ea725d3c744b72153b373f0fce, type: 2}
+    _maxPlayRounds: 5
+  - _enemyData: {fileID: 11400000, guid: 9cf2e2bc5e0848a488c7ebdbc54d6918, type: 2}
+    _maxPlayRounds: 5

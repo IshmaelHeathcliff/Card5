@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: BasicEnemy
   m_EditorClassIdentifier: Assembly-CSharp::Card5.EnemyData
   _enemyName: Timber
-  _maxHp: 100
+  _maxHp: 10
   _description: 
   _portrait: {fileID: 0}

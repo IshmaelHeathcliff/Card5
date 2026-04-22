@@ -27,6 +27,12 @@ namespace Card5
         /// <summary>当前回合剩余重抽次数</summary>
         public int RedrawsRemaining { get; set; }
 
+        public int CurrentMonsterIndex { get; private set; }
+        public int MonsterCount { get; private set; }
+        public int CurrentMonsterPlayRounds { get; private set; }
+        public int CurrentMonsterMaxPlayRounds { get; private set; }
+        public bool IsCurrentMonsterDefeated { get; private set; }
+
         protected override void OnInit()
         {
         }
@@ -40,7 +46,32 @@ namespace Card5
             TurnNumber.Value = 0;
             IsBattleOver = false;
             RedrawsRemaining = RedrawsPerTurn;
+            CurrentMonsterIndex = 0;
+            MonsterCount = 0;
+            CurrentMonsterPlayRounds = 0;
+            CurrentMonsterMaxPlayRounds = 0;
+            IsCurrentMonsterDefeated = false;
             ClearSlots();
+        }
+
+        public void StartMonster(int monsterIndex, int monsterCount, int maxPlayRounds)
+        {
+            CurrentMonsterIndex = monsterIndex;
+            MonsterCount = monsterCount;
+            CurrentMonsterPlayRounds = 0;
+            CurrentMonsterMaxPlayRounds = maxPlayRounds;
+            IsCurrentMonsterDefeated = false;
+            ClearSlots();
+        }
+
+        public void AddCurrentMonsterPlayRound()
+        {
+            CurrentMonsterPlayRounds++;
+        }
+
+        public void MarkCurrentMonsterDefeated()
+        {
+            IsCurrentMonsterDefeated = true;
         }
 
         public void ClearSlots()

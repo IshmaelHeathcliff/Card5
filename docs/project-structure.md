@@ -17,6 +17,7 @@ Assets/Scripts/
 │   ├── CardEffectSO.cs          # 卡牌效果基类
 │   ├── DeckPresetData.cs        # 牌组预设配置
 │   ├── EnemyData.cs             # 敌人配置
+│   ├── MonsterListData.cs       # 怪物列表与单怪物出牌轮数限制
 │   ├── MarkData.cs              # 印记配置
 │   ├── CardLibraryData.cs       # 卡牌奖励牌库与解锁条件
 │   ├── BattleRewardConfigData.cs # 战斗奖励配置
@@ -42,7 +43,8 @@ Assets/Scripts/
 │   │       ├── ReturnCardToHandCommand.cs
 │   │       ├── SwapSlotsCommand.cs
 │   │       ├── EndTurnCommand.cs
-│   │       └── RedrawCardsCommand.cs
+│   │       ├── RedrawCardsCommand.cs
+│   │       └── RestartBattleCommand.cs
 │   ├── Marks/                   # 印记系统
 │   │   ├── MarkModel.cs         # 印记状态数据
 │   │   ├── MarkSystem.cs        # 印记逻辑
@@ -86,7 +88,7 @@ Assets/Scripts/
 
 | 类 | 文件 | 职责 |
 |----|------|------|
-| `BattleModel` | `Gameplay/Battle/BattleModel.cs` | 战斗状态：玩家 HP、能量、回合数、5 个出牌槽、重抽次数 |
+| `BattleModel` | `Gameplay/Battle/BattleModel.cs` | 战斗状态：玩家 HP、能量、回合数、5 个出牌槽、重抽次数、当前怪物进度与出牌轮数上限 |
 | `DeckModel` | `Gameplay/Battle/DeckModel.cs` | 牌组状态：完整牌组、抽牌堆、手牌、弃牌堆 |
 | `MarkModel` | `Gameplay/Marks/MarkModel.cs` | 印记状态：槽位印记字典、卡牌印记字典 |
 | `BattleRewardModel` | `Gameplay/Rewards/BattleRewardModel.cs` | 奖励状态：当前待选奖励组、奖励批次编号 |
@@ -97,7 +99,7 @@ Assets/Scripts/
 
 | 类 | 文件 | 职责 |
 |----|------|------|
-| `BattleSystem` | `Gameplay/Battle/BattleSystem.cs` | 战斗流程：初始化、出牌/撤牌/换牌、结束回合、槽位效果结算 |
+| `BattleSystem` | `Gameplay/Battle/BattleSystem.cs` | 战斗流程：初始化、怪物列表推进、出牌/撤牌/换牌、结束回合、槽位效果结算、失败重开 |
 | `CardSystem` | `Gameplay/Battle/CardSystem.cs` | 牌操作：抽牌、洗牌、弃牌、重抽（Fisher-Yates 洗牌） |
 | `MarkSystem` | `Gameplay/Marks/MarkSystem.cs` | 印记：施加、执行、回合推进（Tick）、清理 |
 | `BattleRewardSystem` | `Gameplay/Rewards/BattleRewardSystem.cs` | 奖励：按配置生成奖励组、处理多选一领取、应用奖励 |
@@ -115,10 +117,11 @@ Assets/Scripts/
 | `ApplyMarkEffectSO` | Card5/Effects/ApplyMark | 施加印记（当前槽/左槽/右槽/当前卡牌） |
 | `DeckPresetData` | Card5/Deck Preset | 牌组预设，包含卡牌及数量列表 |
 | `EnemyData` | Card5/Enemy | 敌人配置：名称、最大 HP、描述、头像 |
+| `MonsterListData` | Card5/Monster List | 怪物列表配置：按顺序配置每只怪物与最大出牌轮数；一轮最多结算 5 张槽位卡 |
 | `MarkData` | Card5/Mark | 印记配置：名称、图标、持续时间（-1=永久）、触发时机、效果列表 |
 | `CardLibraryData` | Card5/Card Library | 卡牌奖励牌库：每张牌配置权重和解锁条件，奖励生成时按当前战斗状态筛选 |
 | `BattleRewardConfigData` | Card5/Battle Reward Config | 战斗奖励配置：每次奖励包含多个奖励组，卡牌奖励可引用牌库生成三选一，也兼容旧卡池 |
-| `GameGlobalConfigData` | Card5/Game Global Config | 全局游戏配置：启动牌组、敌人、奖励配置、玩家初始数值、目标帧率 |
+| `GameGlobalConfigData` | Card5/Game Global Config | 全局游戏配置：启动牌组、怪物列表、兼容敌人、奖励配置、玩家初始数值、目标帧率 |
 
 ---
 
