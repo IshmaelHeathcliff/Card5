@@ -41,7 +41,6 @@
 
 - UI脚本所需组件应设为 `SerializeField`，并在 `OnValidate` 中检查并尝试创建
 - UI 使用 UGUI
-- 尽量使用 `BetterUI` 组件替换 UGUI 组件
 - 使用 unityMCP 进行UI创建与布局
 
 ## 编码规范

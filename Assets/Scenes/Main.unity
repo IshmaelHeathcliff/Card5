@@ -3215,7 +3215,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMin.x
@@ -3223,7 +3223,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_SizeDelta.x
@@ -3263,11 +3263,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 598.8661
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -182.89885
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -3495,8 +3495,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -32}
-  m_SizeDelta: {x: -40, y: 50}
+  m_AnchoredPosition: {x: 0, y: -65}
+  m_SizeDelta: {x: -20, y: 50}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &879267328
 MonoBehaviour:
@@ -3540,7 +3540,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -3552,7 +3552,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -3648,15 +3648,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 937516348}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b54b16f2fcdba244b49be1f398b6562, type: 3}
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheraBytes.BetterUi.BetterAxisAlignedLayoutGroup
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
   m_Padding:
     m_Left: 0
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 4
+  m_ChildAlignment: 1
   m_Spacing: 0
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
@@ -3665,75 +3665,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
-  paddingSizerFallback:
-    screenConfigName: 
-    OptimizedSize:
-      left: 0
-      right: 0
-      top: 0
-      bottom: 0
-    MinSize:
-      left: 0
-      right: 0
-      top: 0
-      bottom: 0
-    MaxSize:
-      left: 1000
-      right: 1000
-      top: 1000
-      bottom: 1000
-    UseMinSize: 0
-    UseMaxSize: 0
-    ModLeft:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 1
-        Impact: 1
-    ModRight:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 1
-        Impact: 1
-    ModTop:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 1
-        Impact: 1
-    ModBottom:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 1
-        Impact: 1
-  customPaddingSizers:
-    items: []
-  spacingSizerFallback:
-    screenConfigName: 
-    OptimizedSize: 0
-    MinSize: 0
-    MaxSize: 300
-    UseMinSize: 0
-    UseMaxSize: 0
-    Mod:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 0
-        Impact: 1
-  customSpacingSizers:
-    items: []
-  settingsFallback:
-    ChildAlignment: 4
-    ReverseArrangement: 0
-    ChildForceExpandHeight: 1
-    ChildForceExpandWidth: 1
-    ChildScaleWidth: 0
-    ChildScaleHeight: 0
-    ChildControlWidth: 0
-    ChildControlHeight: 0
-    Orientation: 0
-    screenConfigName: Fallback
-  customSettings:
-    items: []
-  orientation: 0
 --- !u!1 &971978937
 GameObject:
   m_ObjectHideFlags: 0
@@ -3997,13 +3928,13 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 216532683}
+  - {fileID: 879267327}
   - {fileID: 60602060}
   - {fileID: 1857399969}
   - {fileID: 625998016}
   - {fileID: 971978938}
   - {fileID: 1506249247}
   - {fileID: 1467138343}
-  - {fileID: 879267327}
   m_Father: {fileID: 1603904233}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -4420,7 +4351,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMin.x
@@ -4428,7 +4359,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_SizeDelta.x
@@ -4468,11 +4399,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 838.4125
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -182.89885
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -4542,7 +4473,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMin.x
@@ -4550,7 +4481,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_SizeDelta.x
@@ -4590,11 +4521,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 359.31964
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -182.89885
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -4627,10 +4558,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1195089229}
-  - component: {fileID: 1195089230}
   - component: {fileID: 1195089231}
   - component: {fileID: 1195089233}
   - component: {fileID: 1195089235}
+  - component: {fileID: 1195089236}
   m_Layer: 0
   m_Name: HandContainer
   m_TagString: Untagged
@@ -4657,99 +4588,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1195089230
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1195089228}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b54b16f2fcdba244b49be1f398b6562, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheraBytes.BetterUi.BetterAxisAlignedLayoutGroup
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 4
-  m_Spacing: -30
-  m_ChildForceExpandWidth: 0
-  m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
-  paddingSizerFallback:
-    screenConfigName: 
-    OptimizedSize:
-      left: 0
-      right: 0
-      top: 0
-      bottom: 0
-    MinSize:
-      left: 0
-      right: 0
-      top: 0
-      bottom: 0
-    MaxSize:
-      left: 1000
-      right: 1000
-      top: 1000
-      bottom: 1000
-    UseMinSize: 0
-    UseMaxSize: 0
-    ModLeft:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 1
-        Impact: 1
-    ModRight:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 1
-        Impact: 1
-    ModTop:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 1
-        Impact: 1
-    ModBottom:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 1
-        Impact: 1
-  customPaddingSizers:
-    items: []
-  spacingSizerFallback:
-    screenConfigName: 
-    OptimizedSize: -30
-    MinSize: 0
-    MaxSize: 300
-    UseMinSize: 0
-    UseMaxSize: 0
-    Mod:
-      ExponentialScale: 1
-      SizeModifiers: []
-  customSpacingSizers:
-    items: []
-  settingsFallback:
-    ChildAlignment: 4
-    ReverseArrangement: 0
-    ChildForceExpandHeight: 0
-    ChildForceExpandWidth: 0
-    ChildScaleWidth: 0
-    ChildScaleHeight: 0
-    ChildControlWidth: 0
-    ChildControlHeight: 0
-    Orientation: 0
-    screenConfigName: Fallback
-  customSettings:
-    items: []
-  orientation: 0
 --- !u!114 &1195089231
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4786,6 +4624,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2812b9171de70345bded1b098a3bea3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card5.HandDropZone
+--- !u!114 &1195089236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195089228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 4
+  m_Spacing: -30
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &1297904694
 GameObject:
   m_ObjectHideFlags: 0
@@ -4831,9 +4695,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1297904694}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0a3df3c9b5bf4694dab5926dc4fd7a7d, type: 3}
+  m_Script: {fileID: 11500000, guid: 8a8695521f0d02e499659fee002a26c2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheraBytes.BetterUi.BetterGridLayoutGroup
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GridLayoutGroup
   m_Padding:
     m_Left: 20
     m_Right: 20
@@ -4846,98 +4710,6 @@ MonoBehaviour:
   m_Spacing: {x: 40, y: 40}
   m_Constraint: 0
   m_ConstraintCount: 2
-  paddingSizerFallback:
-    screenConfigName: 
-    OptimizedSize:
-      left: 20
-      right: 20
-      top: 20
-      bottom: 20
-    MinSize:
-      left: 0
-      right: 0
-      top: 0
-      bottom: 0
-    MaxSize:
-      left: 1000
-      right: 1000
-      top: 1000
-      bottom: 1000
-    UseMinSize: 0
-    UseMaxSize: 0
-    ModLeft:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 1
-        Impact: 1
-    ModRight:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 1
-        Impact: 1
-    ModTop:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 1
-        Impact: 1
-    ModBottom:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 1
-        Impact: 1
-  customPaddingSizers:
-    items: []
-  cellSizerFallback:
-    screenConfigName: 
-    OptimizedSize: {x: 137.9, y: 239.4}
-    MinSize: {x: 10, y: 10}
-    MaxSize: {x: 300, y: 300}
-    UseMinSize: 0
-    UseMaxSize: 0
-    ModX:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 0
-        Impact: 1
-    ModY:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 0
-        Impact: 1
-  customCellSizers:
-    items: []
-  spacingSizerFallback:
-    screenConfigName: 
-    OptimizedSize: {x: 40, y: 40}
-    MinSize: {x: 0, y: 0}
-    MaxSize: {x: 300, y: 300}
-    UseMinSize: 0
-    UseMaxSize: 0
-    ModX:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 0
-        Impact: 1
-    ModY:
-      ExponentialScale: 1
-      SizeModifiers:
-      - Mode: 0
-        Impact: 1
-  customSpacingSizers:
-    items: []
-  settingsFallback:
-    Constraint: 0
-    ConstraintCount: 2
-    ChildAlignment: 0
-    StartAxis: 0
-    StartCorner: 0
-    Fit: 0
-    KeepCellAspectRatio: 0
-    screenConfigName: Fallback
-  customSettings:
-    items: []
-  fit: 0
-  keepCellAspectRatio: 0
 --- !u!1 &1411209694
 GameObject:
   m_ObjectHideFlags: 0
@@ -6285,7 +6057,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMin.x
@@ -6293,7 +6065,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_SizeDelta.x
@@ -6333,11 +6105,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 1077.959
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -182.89885
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -7590,7 +7362,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMin.x
@@ -7598,7 +7370,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_SizeDelta.x
@@ -7638,11 +7410,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 119.77322
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -182.89885
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8898672212589858164, guid: 57b37b6c65c84f049bbf3f9485fea1be, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
