@@ -22,6 +22,7 @@ alwaysApply: false
 | 所有事件 | `Assets/Scripts/Gameplay/Events/BattleEvents.cs` |
 | 效果基类 | `Assets/Scripts/Data/CardEffectSO.cs` |
 | 具体效果 | `Assets/Scripts/Data/Effects/` |
+| 效果数值提升 | `Assets/Scripts/Gameplay/Battle/CardEffectBoost.cs` |
 
 ---
 
@@ -76,6 +77,7 @@ HandViewController  监听 HandRefreshedEvent
 
 当前出牌轮数按每次结束回合后的槽位结算计数。若一张卡击败当前怪物，本轮后续槽位卡牌不再继续结算，并统一进入弃牌堆。
 `CardData` 可配置 1-5 号位的任意生效组合，并在 Odin Inspector 中提供「任意位置」「奇数位」「偶数位」快捷按钮。卡牌放在未配置的槽位时仍会被结算并进入弃牌堆，但不会触发该卡效果、卡牌印记或槽位印记；槽位背景会按状态显示为灰色空槽、绿色有效、红色无效。
+`BoostSlotCardEffectSO` 可以提高指定槽位本轮后续主卡牌效果数值，支持固定增加、百分比增加和倍率提升；当前通过 `BattleContext.DealDamage()` 与 `BattleContext.ApplyHeal()` 生效。
 `BattleUIController` 监听 `MonsterPlayRoundCountChangedEvent`，在战斗 UI 中显示当前怪物剩余出牌轮数。
 
 ### 怪物推进与失败流程

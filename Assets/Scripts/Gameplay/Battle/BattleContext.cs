@@ -24,6 +24,8 @@ namespace Card5
         /// <summary>当前正在结算的牌数据</summary>
         public CardData CurrentCard { get; }
 
+        bool _useCardEffectBoost;
+
         public BattleContext(
             BattleModel battleModel,
             DeckModel deckModel,
@@ -49,6 +51,8 @@ namespace Card5
         /// <summary>对指定目标造成伤害</summary>
         public void DealDamage(int amount, DamageTarget target)
         {
+            amount = GetModifiedEffectAmount(amount);
+
             if (target == DamageTarget.Enemy)
             {
                 Enemy.TakeDamage(amount);
@@ -64,6 +68,8 @@ namespace Card5
         /// <summary>对指定目标恢复生命值</summary>
         public void ApplyHeal(int amount, HealTarget target)
         {
+            amount = GetModifiedEffectAmount(amount);
+
             if (target == HealTarget.Player)
             {
                 int newHp = BattleModel.PlayerHp.Value + amount;
@@ -75,6 +81,17 @@ namespace Card5
             {
                 Enemy.Heal(amount);
             }
+        }
+
+        internal void SetUseCardEffectBoost(bool useCardEffectBoost)
+        {
+            _useCardEffectBoost = useCardEffectBoost;
+        }
+
+        int GetModifiedEffectAmount(int amount)
+        {
+            if (!_useCardEffectBoost) return amount;
+            return BattleSystem != null ? BattleSystem.ModifyCardEffectAmount(SlotIndex, amount) : amount;
         }
     }
 }

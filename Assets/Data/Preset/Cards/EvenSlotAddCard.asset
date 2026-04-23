@@ -10,23 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3aef7f1b0ea5558408ad3b45b6f33c78, type: 3}
-  m_Name: GreatDamageCard
+  m_Name: EvenSlotAddCard
   m_EditorClassIdentifier: Assembly-CSharp::Card5.CardData
   serializationData:
     SerializedFormat: 2
-    SerializedBytes: 
+    SerializedBytes:
     ReferencedUnityObjects: []
-    SerializedBytesString: 
+    SerializedBytesString:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes: []
-  _cardId: great_damage
-  _cardName: "\u8D85\u7EA7\u4F24\u5BB3\u5361"
-  _description: "\u65BD\u52A0\u57FA\u7840\u5370\u8BB0\u3002"
+  _cardId: even_slot_add
+  _cardName: "\u5076\u6570\u589E\u4F24"
+  _description: "\u63D0\u9AD8\u5076\u6570\u69FD\u4F4D\u540E\u7EED\u5361\u724C\u6548\u679C\u3002"
   _energyCost: 2
   _tags: 0
-  _activationPositions: 31
-  _artwork: {fileID: -6072499149093677281, guid: e1bfb8cb322109041836117c64dc4e6c, type: 3}
+  _activationPositions: 21
+  _artwork: {fileID: 1723567750138976891, guid: c45975effe1c58f4fb9ad69ac196b618, type: 3}
   _effects:
-  - {fileID: 11400000, guid: 8c14ea4fff518c24f9e7e4370019de19, type: 2}
+  - {fileID: 11400000, guid: 952136fac869825498fe939197f69553, type: 2}

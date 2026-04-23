@@ -24,6 +24,7 @@ namespace Card5
         BattleRewardConfigData _lastRewardConfig;
         int _lastPlayerMaxHp;
         int _lastMaxEnergy;
+        readonly List<SlotCardEffectBoost> _slotCardEffectBoosts = new List<SlotCardEffectBoost>();
 
         protected override void OnInit()
         {
@@ -314,6 +315,7 @@ namespace Card5
         bool ResolveSlots()
         {
             bool resolvedAnyCard = false;
+            _slotCardEffectBoosts.Clear();
 
             for (int i = 0; i < BattleModel.SlotCount; i++)
             {
@@ -345,12 +347,16 @@ namespace Card5
 
                 if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
                 {
-                    foreach (var effect in card.Effects)
+                    context.SetUseCardEffectBoost(true);
+                    foreach (CardEffectSO effect in card.Effects)
                     {
+                        if (effect == null) continue;
+
                         effect.Execute(context);
                         if (_battleModel.IsBattleOver) break;
                         if (_battleModel.IsCurrentMonsterDefeated) break;
                     }
+                    context.SetUseCardEffectBoost(false);
                 }
 
                 if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
@@ -369,7 +375,28 @@ namespace Card5
             this.SendEvent<SlotEffectsResolvedEvent>();
             this.SendEvent(new DiscardPileChangedEvent { Count = _deckModel.DiscardPile.Count });
 
+            _slotCardEffectBoosts.Clear();
             return resolvedAnyCard;
+        }
+
+        public void AddCardEffectBoost(int slotIndex, CardEffectBoost boost)
+        {
+            if (slotIndex < 0 || slotIndex >= BattleModel.SlotCount) return;
+            _slotCardEffectBoosts.Add(new SlotCardEffectBoost(slotIndex, boost));
+        }
+
+        public int ModifyCardEffectAmount(int slotIndex, int amount)
+        {
+            if (amount <= 0) return amount;
+
+            float result = amount;
+            foreach (SlotCardEffectBoost slotBoost in _slotCardEffectBoosts)
+            {
+                if (slotBoost.SlotIndex != slotIndex) continue;
+                result = slotBoost.Boost.Apply(result);
+            }
+
+            return Mathf.Max(0, Mathf.RoundToInt(result));
         }
 
         void AddMonsterPlayRoundAndFailIfNeeded()
@@ -513,6 +540,18 @@ namespace Card5
                 _battleModel.MarkCurrentMonsterDefeated();
                 this.SendEvent<EnemyDiedEvent>();
             }
+        }
+
+        readonly struct SlotCardEffectBoost
+        {
+            public SlotCardEffectBoost(int slotIndex, CardEffectBoost boost)
+            {
+                SlotIndex = slotIndex;
+                Boost = boost;
+            }
+
+            public int SlotIndex { get; }
+            public CardEffectBoost Boost { get; }
         }
     }
 }
