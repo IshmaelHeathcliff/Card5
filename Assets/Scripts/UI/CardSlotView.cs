@@ -23,6 +23,9 @@ namespace Card5
         [SerializeField] GameObject _filledIndicator;
 
         [SerializeField, MinValue(5)] float _dragThreshold = 10f;
+        [SerializeField] Color _emptySlotColor = new Color(0.45f, 0.45f, 0.45f, 1f);
+        [SerializeField] Color _validPositionColor = new Color(0.2f, 0.85f, 0.35f, 1f);
+        [SerializeField] Color _invalidPositionColor = new Color(1f, 0.2f, 0.2f, 1f);
 
         [ShowInInspector, ReadOnly] CardData _currentCard;
 
@@ -215,12 +218,18 @@ namespace Card5
         {
             bool isDraggingThisSlot = s_draggingSlotIndex == _slotIndex;
             bool filled = _currentCard != null && !isDraggingThisSlot;
+            bool invalidPosition = filled && !_currentCard.CanActivateAtSlot(_slotIndex);
 
             if (_emptyIndicator != null) _emptyIndicator.SetActive(!filled);
             if (_filledIndicator != null) _filledIndicator.SetActive(filled);
 
+            if (_slotBackground != null)
+                _slotBackground.color = GetSlotBackgroundColor(filled, invalidPosition);
+
             if (_cardNameText != null)
+            {
                 _cardNameText.text = filled ? _currentCard.CardName : string.Empty;
+            }
 
             if (_cardArtwork != null)
             {
@@ -228,6 +237,12 @@ namespace Card5
                 if (filled && _currentCard.Artwork != null)
                     _cardArtwork.sprite = _currentCard.Artwork;
             }
+        }
+
+        Color GetSlotBackgroundColor(bool filled, bool invalidPosition)
+        {
+            if (!filled) return _emptySlotColor;
+            return invalidPosition ? _invalidPositionColor : _validPositionColor;
         }
 
         /// <summary>供外部按钮绑定：点击将本槽卡牌放回手牌</summary>

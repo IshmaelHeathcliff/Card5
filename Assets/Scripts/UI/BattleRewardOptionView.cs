@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -59,12 +58,7 @@ namespace Card5
             if (_costText != null) _costText.text = card.EnergyCost.ToString();
 
             if (_descriptionText != null)
-            {
-                var description = new StringBuilder();
-                foreach (CardEffectSO effect in card.Effects)
-                    description.AppendLine(effect.GetDescription());
-                _descriptionText.text = description.ToString().TrimEnd();
-            }
+                _descriptionText.text = card.GetFullDescription();
 
             if (_artworkImage != null)
             {

@@ -66,12 +66,7 @@ namespace Card5
             if (_artwork != null && data.Artwork != null) _artwork.sprite = data.Artwork;
 
             if (_descriptionText != null)
-            {
-                var sb = new System.Text.StringBuilder();
-                foreach (var effect in data.Effects)
-                    sb.AppendLine(effect.GetDescription());
-                _descriptionText.text = sb.ToString().TrimEnd();
-            }
+                _descriptionText.text = data.GetFullDescription();
         }
 
         public void SetRedrawSelected(bool selected)

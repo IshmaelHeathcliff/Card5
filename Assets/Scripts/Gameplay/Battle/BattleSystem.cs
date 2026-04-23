@@ -334,6 +334,12 @@ namespace Card5
                     _battleModel.GetRightNeighbor(i)
                 );
 
+                if (!card.CanActivateAtSlot(i))
+                {
+                    DiscardSlotCard(i);
+                    continue;
+                }
+
                 _markSystem.ExecuteSlotMarks(i, MarkTrigger.BeforeCardEffects, context);
                 _markSystem.ExecuteCardMarks(card, MarkTrigger.BeforeCardEffects, context);
 

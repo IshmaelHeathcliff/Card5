@@ -62,7 +62,7 @@ HandViewController  监听 HandRefreshedEvent
             │    ├─ MarkSystem.ExecuteSlotMarks(BeforeCardEffects)
             │    ├─ CardEffectSO.Execute(BattleContext)  // 卡牌效果
             │    ├─ MarkSystem.ExecuteSlotMarks(AfterCardEffects)
-            │    └─ 一轮最多结算 5 张槽位卡
+            │    └─ 一轮最多结算 5 张槽位卡；卡牌只在配置的生效位置执行效果
             ├─ 若怪物被击败，生成奖励并暂停后续流程
             ├─ SelectBattleRewardCommand // 玩家完成所有奖励组选择后进入下一只怪物或胜利
             ├─ 若出牌轮数达到上限但怪物未被击败，战斗失败
@@ -75,6 +75,7 @@ HandViewController  监听 HandRefreshedEvent
 ```
 
 当前出牌轮数按每次结束回合后的槽位结算计数。若一张卡击败当前怪物，本轮后续槽位卡牌不再继续结算，并统一进入弃牌堆。
+`CardData` 可配置 1-5 号位的任意生效组合，并在 Odin Inspector 中提供「任意位置」「奇数位」「偶数位」快捷按钮。卡牌放在未配置的槽位时仍会被结算并进入弃牌堆，但不会触发该卡效果、卡牌印记或槽位印记；槽位背景会按状态显示为灰色空槽、绿色有效、红色无效。
 `BattleUIController` 监听 `MonsterPlayRoundCountChangedEvent`，在战斗 UI 中显示当前怪物剩余出牌轮数。
 
 ### 怪物推进与失败流程

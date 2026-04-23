@@ -25,6 +25,7 @@ MonoBehaviour:
   _cardName: "\u8FDB\u9636\u4F24\u5BB3\u5361"
   _description: 
   _energyCost: 1
+  _activationPositions: 21
   _artwork: {fileID: -2524091797026239206, guid: 04bade7f4b51d0f4bbadc9ac39867d59, type: 3}
   _effects:
   - {fileID: 11400000, guid: 6117a237385665448a122dc24264fdf8, type: 2}
