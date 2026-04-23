@@ -29,6 +29,19 @@ namespace Card5
         Any = Position1 | Position2 | Position3 | Position4 | Position5
     }
 
+    [Flags]
+    public enum CardTag
+    {
+        [InspectorName("无")]
+        None = 0,
+        [InspectorName("仪式")]
+        Ritual = 1 << 0,
+        [InspectorName("法术")]
+        Spell = 1 << 1,
+        [InspectorName("战意")]
+        BattleWill = 1 << 2
+    }
+
     [CreateAssetMenu(fileName = "NewCard", menuName = "Card5/Card")]
     public class CardData : SerializedScriptableObject
     {
@@ -36,6 +49,7 @@ namespace Card5
         [SerializeField] string _cardName;
         [SerializeField, TextArea] string _description;
         [SerializeField, MinValue(0)] int _energyCost;
+        [SerializeField, LabelText("卡牌标签"), EnumToggleButtons] CardTag _tags = CardTag.None;
         [SerializeField, LabelText("生效位置"), EnumToggleButtons] CardActivationPosition _activationPositions = CardActivationPosition.Any;
         [SerializeField] Sprite _artwork;
         [SerializeField] List<CardEffectSO> _effects = new List<CardEffectSO>();
@@ -44,11 +58,47 @@ namespace Card5
         public string CardName => _cardName;
         public string Description => _description;
         public int EnergyCost => _energyCost;
+        public CardTag Tags => NormalizeTags(_tags);
+        [ShowInInspector, ReadOnly, LabelText("标签说明")]
+        public string TagDescription => GetTagDescription();
         public CardActivationPosition ActivationPositions => NormalizeActivationPositions(_activationPositions);
         [ShowInInspector, ReadOnly, LabelText("生效位置说明")]
         public string ActivationPositionDescription => GetActivationPositionDescription();
         public Sprite Artwork => _artwork;
         public IReadOnlyList<CardEffectSO> Effects => _effects;
+
+        public bool HasTag(CardTag tag)
+        {
+            CardTag normalizedTag = NormalizeTags(tag);
+            if (normalizedTag == CardTag.None) return Tags == CardTag.None;
+            return (Tags & normalizedTag) == normalizedTag;
+        }
+
+        public bool HasAnyTag(CardTag tags)
+        {
+            CardTag normalizedTags = NormalizeTags(tags);
+            if (normalizedTags == CardTag.None) return Tags == CardTag.None;
+            return (Tags & normalizedTags) != 0;
+        }
+
+        public bool HasAllTags(CardTag tags)
+        {
+            CardTag normalizedTags = NormalizeTags(tags);
+            if (normalizedTags == CardTag.None) return true;
+            return (Tags & normalizedTags) == normalizedTags;
+        }
+
+        public string GetTagDescription()
+        {
+            CardTag tags = Tags;
+            if (tags == CardTag.None) return "无";
+
+            var builder = new StringBuilder();
+            AppendTagName(builder, tags, CardTag.Ritual, "仪式");
+            AppendTagName(builder, tags, CardTag.Spell, "法术");
+            AppendTagName(builder, tags, CardTag.BattleWill, "战意");
+            return builder.ToString();
+        }
 
         public bool CanActivateAtSlot(int slotIndex)
         {
@@ -84,6 +134,8 @@ namespace Card5
         public string GetFullDescription()
         {
             var builder = new StringBuilder();
+            if (Tags != CardTag.None)
+                builder.AppendLine($"标签：{GetTagDescription()}");
             builder.AppendLine($"生效位置：{GetActivationPositionDescription()}");
 
             if (!string.IsNullOrWhiteSpace(_description))
@@ -128,12 +180,27 @@ namespace Card5
                 _cardId = name;
             if (_activationPositions == CardActivationPosition.None)
                 _activationPositions = CardActivationPosition.Any;
+            _tags = NormalizeTags(_tags);
         }
 
         static CardActivationPosition NormalizeActivationPositions(CardActivationPosition positions)
         {
             CardActivationPosition normalized = positions & CardActivationPosition.Any;
             return normalized == CardActivationPosition.None ? CardActivationPosition.Any : normalized;
+        }
+
+        static CardTag NormalizeTags(CardTag tags)
+        {
+            return tags & (CardTag.Ritual | CardTag.Spell | CardTag.BattleWill);
+        }
+
+        static void AppendTagName(StringBuilder builder, CardTag tags, CardTag tag, string tagName)
+        {
+            if ((tags & tag) == 0) return;
+
+            if (builder.Length > 0)
+                builder.Append("、");
+            builder.Append(tagName);
         }
     }
 }
