@@ -12,11 +12,7 @@ namespace Card5
     public class CardViewController : MonoBehaviour, IController,
         IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
     {
-        [SerializeField] TMPro.TextMeshProUGUI _nameText;
-        [SerializeField] TMPro.TextMeshProUGUI _descriptionText;
-        [SerializeField] TMPro.TextMeshProUGUI _costText;
-        [SerializeField] Image _artwork;
-        [SerializeField] Image _cardFrame;
+        [SerializeField] CardDisplayView _displayView;
         [SerializeField] Canvas _canvas;
         [SerializeField] RectTransform _rectTransform;
         [SerializeField] GameObject _selectionHighlight;
@@ -49,6 +45,9 @@ namespace Card5
 
             if (_rectTransform == null)
                 _rectTransform = gameObject.GetComponent<RectTransform>();
+
+            if (_displayView == null)
+                _displayView = gameObject.GetComponent<CardDisplayView>();
         }
 
         void Awake()
@@ -60,13 +59,7 @@ namespace Card5
         public void Setup(CardData data)
         {
             _cardData = data;
-
-            if (_nameText != null) _nameText.text = data.CardName;
-            if (_costText != null) _costText.text = data.EnergyCost.ToString();
-            if (_artwork != null && data.Artwork != null) _artwork.sprite = data.Artwork;
-
-            if (_descriptionText != null)
-                _descriptionText.text = data.GetFullDescription();
+            GetDisplayView().Setup(data);
         }
 
         public void SetRedrawSelected(bool selected)
@@ -192,6 +185,18 @@ namespace Card5
                     insertPos++;
             }
             return insertPos;
+        }
+
+        CardDisplayView GetDisplayView()
+        {
+            if (_displayView == null)
+            {
+                _displayView = gameObject.GetComponent<CardDisplayView>();
+                if (_displayView == null)
+                    _displayView = gameObject.AddComponent<CardDisplayView>();
+            }
+
+            return _displayView;
         }
     }
 }

@@ -16,8 +16,7 @@ namespace Card5
     {
         [SerializeField, Range(0, 4)] int _slotIndex;
         [SerializeField] TMPro.TextMeshProUGUI _slotLabel;
-        [SerializeField] TMPro.TextMeshProUGUI _cardNameText;
-        [SerializeField] Image _cardArtwork;
+        [SerializeField] CardDisplayView _displayView;
         [SerializeField] Image _slotBackground;
         [SerializeField] GameObject _emptyIndicator;
         [SerializeField] GameObject _filledIndicator;
@@ -53,6 +52,7 @@ namespace Card5
                 _canvasRect = _rootCanvas.GetComponent<RectTransform>();
 
             _battleModel = this.GetModel<BattleModel>();
+            GetDisplayView();
         }
 
         void OnEnable()
@@ -226,17 +226,11 @@ namespace Card5
             if (_slotBackground != null)
                 _slotBackground.color = GetSlotBackgroundColor(filled, invalidPosition);
 
-            if (_cardNameText != null)
-            {
-                _cardNameText.text = filled ? _currentCard.CardName : string.Empty;
-            }
-
-            if (_cardArtwork != null)
-            {
-                _cardArtwork.enabled = filled && _currentCard.Artwork != null;
-                if (filled && _currentCard.Artwork != null)
-                    _cardArtwork.sprite = _currentCard.Artwork;
-            }
+            CardDisplayView displayView = GetDisplayView();
+            if (filled)
+                displayView.Setup(_currentCard, CardDisplayMode.Slot);
+            else
+                displayView.Clear();
         }
 
         Color GetSlotBackgroundColor(bool filled, bool invalidPosition)
@@ -250,6 +244,18 @@ namespace Card5
         {
             if (_currentCard == null) return;
             this.SendCommand(new ReturnCardToHandCommand(_slotIndex));
+        }
+
+        CardDisplayView GetDisplayView()
+        {
+            if (_displayView == null)
+            {
+                _displayView = GetComponentInChildren<CardDisplayView>();
+                if (_displayView == null)
+                    _displayView = gameObject.AddComponent<CardDisplayView>();
+            }
+
+            return _displayView;
         }
     }
 }

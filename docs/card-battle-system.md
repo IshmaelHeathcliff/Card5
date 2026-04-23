@@ -18,6 +18,7 @@ alwaysApply: false
 | 战斗 System | `Assets/Scripts/Gameplay/Battle/BattleSystem.cs` |
 | 卡牌 System | `Assets/Scripts/Gameplay/Battle/CardSystem.cs` |
 | 印记 System | `Assets/Scripts/Gameplay/Marks/MarkSystem.cs` |
+| 卡牌显示组件 | `Assets/Scripts/UI/CardDisplayView.cs` |
 | 怪物列表配置 | `Assets/Scripts/Data/MonsterListData.cs` |
 | 所有事件 | `Assets/Scripts/Gameplay/Events/BattleEvents.cs` |
 | 效果基类 | `Assets/Scripts/Data/CardEffectSO.cs` |
@@ -47,6 +48,7 @@ GameManager.StartBattle()
 ```
 HandViewController  监听 HandRefreshedEvent
   └─ 实例化（或从对象池取出）CardViewController
+       └─ CardDisplayView 统一刷新名称、费用、描述和图片
 
 玩家拖拽卡牌到 CardSlotView
   └─ PlayCardCommand(cardData, slotIndex)
@@ -79,6 +81,7 @@ HandViewController  监听 HandRefreshedEvent
 `CardData` 可配置 1-5 号位的任意生效组合，并在 Odin Inspector 中提供「任意位置」「奇数位」「偶数位」快捷按钮。卡牌放在未配置的槽位时仍会被结算并进入弃牌堆，但不会触发该卡效果、卡牌印记或槽位印记；槽位背景会按状态显示为灰色空槽、绿色有效、红色无效。
 `BoostSlotCardEffectSO` 可以提高指定槽位本轮后续主卡牌效果数值，支持固定增加、百分比增加和倍率提升；当前通过 `BattleContext.DealDamage()` 与 `BattleContext.ApplyHeal()` 生效。
 `BattleUIController` 监听 `MonsterPlayRoundCountChangedEvent`，在战斗 UI 中显示当前怪物剩余出牌轮数。
+手牌、奖励选项、牌堆弹窗和出牌槽都通过 `CardDisplayView` 显示卡牌基础信息；各容器只负责自身交互和额外状态，例如槽位背景的有效/无效颜色。
 
 ### 怪物推进与失败流程
 

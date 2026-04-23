@@ -7,10 +7,7 @@ namespace Card5
     public class BattleRewardOptionView : MonoBehaviour
     {
         [SerializeField] Button _button;
-        [SerializeField] TMPro.TextMeshProUGUI _nameText;
-        [SerializeField] TMPro.TextMeshProUGUI _costText;
-        [SerializeField] TMPro.TextMeshProUGUI _descriptionText;
-        [SerializeField] Image _artworkImage;
+        [SerializeField] CardDisplayView _displayView;
 
         BattleRewardOffer _offer;
         BattleRewardOption _option;
@@ -21,12 +18,15 @@ namespace Card5
         {
             if (_button == null)
                 _button = GetComponent<Button>();
+            if (_displayView == null)
+                _displayView = GetComponent<CardDisplayView>();
         }
 
         void Awake()
         {
             if (_button == null)
                 _button = GetComponent<Button>();
+            GetDisplayView();
         }
 
         void OnEnable()
@@ -52,26 +52,25 @@ namespace Card5
 
         void SetupCard(CardData card)
         {
-            if (card == null) return;
-
-            if (_nameText != null) _nameText.text = card.CardName;
-            if (_costText != null) _costText.text = card.EnergyCost.ToString();
-
-            if (_descriptionText != null)
-                _descriptionText.text = card.GetFullDescription();
-
-            if (_artworkImage != null)
-            {
-                _artworkImage.enabled = card.Artwork != null;
-                if (card.Artwork != null)
-                    _artworkImage.sprite = card.Artwork;
-            }
+            GetDisplayView().Setup(card);
         }
 
         void OnClicked()
         {
             if (_offer == null || _option == null) return;
             Clicked?.Invoke(_offer, _option);
+        }
+
+        CardDisplayView GetDisplayView()
+        {
+            if (_displayView == null)
+            {
+                _displayView = GetComponent<CardDisplayView>();
+                if (_displayView == null)
+                    _displayView = gameObject.AddComponent<CardDisplayView>();
+            }
+
+            return _displayView;
         }
     }
 }

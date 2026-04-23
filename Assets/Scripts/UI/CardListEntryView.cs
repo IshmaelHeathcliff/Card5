@@ -8,21 +8,29 @@ namespace Card5
     /// </summary>
     public class CardListEntryView : MonoBehaviour
     {
-        [SerializeField] TMPro.TextMeshProUGUI _nameText;
-        [SerializeField] TMPro.TextMeshProUGUI _costText;
-        [SerializeField] TMPro.TextMeshProUGUI _descriptionText;
-        [SerializeField] Image _artworkImage;
+        [SerializeField] CardDisplayView _displayView;
+
+        void OnValidate()
+        {
+            if (_displayView == null)
+                _displayView = GetComponent<CardDisplayView>();
+        }
 
         public void Setup(CardData card)
         {
-            if (_nameText != null) _nameText.text = card.CardName;
-            if (_costText != null) _costText.text = card.EnergyCost.ToString();
+            GetDisplayView().Setup(card);
+        }
 
-            if (_descriptionText != null)
-                _descriptionText.text = card.GetFullDescription();
+        CardDisplayView GetDisplayView()
+        {
+            if (_displayView == null)
+            {
+                _displayView = GetComponent<CardDisplayView>();
+                if (_displayView == null)
+                    _displayView = gameObject.AddComponent<CardDisplayView>();
+            }
 
-            if (_artworkImage != null && card.Artwork != null)
-                _artworkImage.sprite = card.Artwork;
+            return _displayView;
         }
     }
 }
