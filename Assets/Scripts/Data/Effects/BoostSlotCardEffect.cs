@@ -1,11 +1,12 @@
+using System;
 using System.Text;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Card5
 {
-    [CreateAssetMenu(fileName = "BoostSlotCardEffect", menuName = "Card5/Effects/Boost Slot Card")]
-    public class BoostSlotCardEffectSO : CardEffectSO
+    [Serializable]
+    public class BoostSlotCardEffect : CardEffect
     {
         [SerializeField, LabelText("目标槽位"), EnumToggleButtons]
         CardActivationPosition _targetSlots = CardActivationPosition.Any;
@@ -45,11 +46,6 @@ namespace Card5
         public override string GetDescription()
         {
             return $"使{GetTargetSlotDescription()}本轮后续卡牌效果{GetBoostDescription()}";
-        }
-
-        void OnValidate()
-        {
-            _targetSlots = NormalizeTargetSlots(_targetSlots);
         }
 
         float GetBoostValue()

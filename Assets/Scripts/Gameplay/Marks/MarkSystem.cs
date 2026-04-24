@@ -68,7 +68,11 @@ namespace Card5
                 if (mark.Data.Trigger != trigger) continue;
 
                 foreach (var effect in mark.Data.Effects)
+                {
+                    if (effect == null) continue;
+
                     effect.Execute(context);
+                }
             }
         }
 

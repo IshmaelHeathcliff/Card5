@@ -14,6 +14,15 @@
 
 代码中可通过 `CardData.HasTag()`、`CardData.HasAnyTag()`、`CardData.HasAllTags()` 判断卡牌标签。
 
+## 卡牌效果
+
+卡牌效果直接配置在 `CardData` 资产中，不再创建独立效果资产。
+
+- `CardEffect` 是效果基类，具体效果继承它并实现 `Execute(BattleContext)`。
+- `CardData` 使用 Odin 多态序列化显示「卡牌效果」列表，可在同一张卡牌内添加多个不同类型的效果。
+- 当前内置效果包括 `DamageCardEffect`、`HealCardEffect`、`ApplyMarkCardEffect`、`BoostSlotCardEffect`。
+- `MarkData` 的印记效果也复用同一套内联 `CardEffect` 配置。
+
 ## 卡牌显示
 
 手牌、奖励选项、牌堆弹窗和出牌槽统一使用 `CardDisplayView` 刷新卡牌名称、费用、描述和图片。
@@ -44,7 +53,7 @@
 
 ## 增伤效果
 
-`BoostSlotCardEffectSO` 用于提高指定槽位的后续主卡牌效果数值，可配置目标槽位和提升方式。
+`BoostSlotCardEffect` 用于提高指定槽位的后续主卡牌效果数值，可配置目标槽位和提升方式。
 
 目标槽位支持 1-5 号位任意组合，也可以直接选择任意槽位、奇数槽位或偶数槽位。
 

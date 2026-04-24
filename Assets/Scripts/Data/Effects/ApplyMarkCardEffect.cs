@@ -1,19 +1,19 @@
+using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Card5
 {
-    [CreateAssetMenu(fileName = "ApplyMarkEffect", menuName = "Card5/Effects/ApplyMark")]
-    public class ApplyMarkEffectSO : CardEffectSO
+    [Serializable]
+    public class ApplyMarkCardEffect : CardEffect
     {
         [SerializeField, Required] MarkData _mark;
-
         [SerializeField, Tooltip("印记施加到哪个目标")]
         MarkApplyTarget _applyTo = MarkApplyTarget.CurrentSlot;
 
         public override void Execute(BattleContext context)
         {
-            var markSystem = context.MarkSystem;
+            MarkSystem markSystem = context.MarkSystem;
             if (markSystem == null || _mark == null) return;
 
             switch (_applyTo)
@@ -43,6 +43,7 @@ namespace Card5
         public override string GetDescription()
         {
             if (_mark == null) return "施加印记";
+
             string targetStr = _applyTo switch
             {
                 MarkApplyTarget.CurrentSlot => "当前槽位",
@@ -51,7 +52,8 @@ namespace Card5
                 MarkApplyTarget.CurrentCard => "本张卡牌",
                 _                           => "目标"
             };
-            return $"对{targetStr}施加印记【{_mark.MarkName}】";
+
+            return $"对{targetStr}施加印记《{_mark.MarkName}》";
         }
     }
 
@@ -63,7 +65,7 @@ namespace Card5
         LeftSlot,
         /// <summary>施加到右侧相邻槽位</summary>
         RightSlot,
-        /// <summary>施加到当前卡牌本身（跟随牌组）</summary>
+        /// <summary>施加到当前卡牌本身，跟随牌组</summary>
         CurrentCard
     }
 }

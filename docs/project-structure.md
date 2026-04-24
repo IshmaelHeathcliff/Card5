@@ -14,7 +14,7 @@ Assets/Scripts/
 │   └── GameArchitecture.cs      # 架构入口，注册所有 Model/System
 ├── Data/                        # 数据配置
 │   ├── CardData.cs              # 卡牌 ScriptableObject
-│   ├── CardEffectSO.cs          # 卡牌效果基类
+│   ├── CardEffect.cs            # 内联效果基类
 │   ├── DeckPresetData.cs        # 牌组预设配置
 │   ├── EnemyData.cs             # 敌人配置
 │   ├── MonsterListData.cs       # 怪物列表与单怪物出牌轮数限制
@@ -23,9 +23,10 @@ Assets/Scripts/
 │   ├── BattleRewardConfigData.cs # 战斗奖励配置
 │   ├── GameGlobalConfigData.cs  # 全局游戏配置
 │   └── Effects/                 # 具体效果实现
-│       ├── DamageEffectSO.cs    # 伤害效果
-│       ├── HealEffectSO.cs      # 治疗效果
-│       └── ApplyMarkEffectSO.cs # 施加印记效果
+│       ├── DamageCardEffect.cs    # 伤害效果
+│       ├── HealCardEffect.cs      # 治疗效果
+│       ├── ApplyMarkCardEffect.cs # 施加印记效果
+│       └── BoostSlotCardEffect.cs # 槽位增伤效果
 ├── Editor/                      # Unity 编辑器扩展
 │   ├── ConfigCenterWindow.cs    # Odin 配置中心
 │   └── BattleRewardSetupUtility.cs # 默认奖励配置/UI 生成工具
@@ -110,15 +111,16 @@ Assets/Scripts/
 
 | 类 | 菜单路径 | 说明 |
 |----|---------|------|
-| `CardData` | Card5/Card | 卡牌配置：名称、费用、图片、效果列表 |
-| `CardEffectSO`（抽象） | — | 卡牌效果基类，实现 `Execute(BattleContext)` |
-| `DamageEffectSO` | Card5/Effects/Damage | 造成伤害（可选目标：敌人/玩家） |
-| `HealEffectSO` | Card5/Effects/Heal | 恢复 HP（可选目标：玩家/敌人） |
-| `ApplyMarkEffectSO` | Card5/Effects/ApplyMark | 施加印记（当前槽/左槽/右槽/当前卡牌） |
+| `CardData` | Card5/Card | 卡牌配置：名称、费用、图片、标签、生效位置、内联效果列表 |
+| `CardEffect`（抽象） | — | 内联效果基类，实现 `Execute(BattleContext)`；通过 `CardData` 或 `MarkData` 内部多态配置 |
+| `DamageCardEffect` | — | 造成伤害（可选目标：敌人/玩家） |
+| `HealCardEffect` | — | 恢复 HP（可选目标：玩家/敌人） |
+| `ApplyMarkCardEffect` | — | 施加印记（当前槽/左槽/右槽/当前卡牌） |
+| `BoostSlotCardEffect` | — | 提高指定槽位后续主卡牌效果数值 |
 | `DeckPresetData` | Card5/Deck Preset | 牌组预设，包含卡牌及数量列表 |
 | `EnemyData` | Card5/Enemy | 敌人配置：名称、最大 HP、描述、头像 |
 | `MonsterListData` | Card5/Monster List | 怪物列表配置：按顺序配置每只怪物与最大出牌轮数；一轮最多结算 5 张槽位卡 |
-| `MarkData` | Card5/Mark | 印记配置：名称、图标、持续时间（-1=永久）、触发时机、效果列表 |
+| `MarkData` | Card5/Mark | 印记配置：名称、图标、持续时间（-1=永久）、触发时机、内联效果列表 |
 | `CardLibraryData` | Card5/Card Library | 卡牌奖励牌库：每张牌配置权重和解锁条件，奖励生成时按当前战斗状态筛选 |
 | `BattleRewardConfigData` | Card5/Battle Reward Config | 战斗奖励配置：每次奖励包含多个奖励组，卡牌奖励可引用牌库生成三选一，也兼容旧卡池 |
 | `GameGlobalConfigData` | Card5/Game Global Config | 全局游戏配置：启动牌组、怪物列表、兼容敌人、奖励配置、玩家初始数值、目标帧率 |

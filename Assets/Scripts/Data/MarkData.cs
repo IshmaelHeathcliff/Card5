@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using UnityEngine;
 
 namespace Card5
@@ -21,8 +22,8 @@ namespace Card5
         [SerializeField, Tooltip("印记效果触发时机")]
         MarkTrigger _trigger = MarkTrigger.AfterCardEffects;
 
-        [SerializeField]
-        List<CardEffectSO> _effects = new List<CardEffectSO>();
+        [OdinSerialize, LabelText("印记效果"), ListDrawerSettings(ShowFoldout = true, DefaultExpandedState = true), PolymorphicDrawerSettings(ShowBaseType = false)]
+        List<CardEffect> _effects = new List<CardEffect>();
 
         public string MarkId => _markId;
         public string MarkName => _markName;
@@ -33,7 +34,7 @@ namespace Card5
         public int Duration => _duration;
 
         public MarkTrigger Trigger => _trigger;
-        public IReadOnlyList<CardEffectSO> Effects => _effects;
+        public IReadOnlyList<CardEffect> Effects => _effects;
 
         void OnValidate()
         {

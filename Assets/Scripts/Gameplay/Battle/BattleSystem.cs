@@ -348,7 +348,7 @@ namespace Card5
                 if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
                 {
                     context.SetUseCardEffectBoost(true);
-                    foreach (CardEffectSO effect in card.Effects)
+                    foreach (CardEffect effect in card.Effects)
                     {
                         if (effect == null) continue;
 

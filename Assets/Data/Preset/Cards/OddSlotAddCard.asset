@@ -20,7 +20,44 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes: []
+    SerializationNodes:
+    - Name: _inlineEffects
+      Entry: 7
+      Data: 0|System.Collections.Generic.List`1[[Card5.CardEffect, Assembly-CSharp]],
+        mscorlib
+    - Name:
+      Entry: 12
+      Data: 1
+    - Name:
+      Entry: 7
+      Data: 1|Card5.BoostSlotCardEffect, Assembly-CSharp
+    - Name: _description
+      Entry: 6
+      Data:
+    - Name: _targetSlots
+      Entry: 3
+      Data: 21
+    - Name: _boostMode
+      Entry: 3
+      Data: 0
+    - Name: _flatAmount
+      Entry: 3
+      Data: 1
+    - Name: _percentAmount
+      Entry: 4
+      Data: 50
+    - Name: _multiplier
+      Entry: 4
+      Data: 2
+    - Name:
+      Entry: 8
+      Data:
+    - Name:
+      Entry: 13
+      Data:
+    - Name:
+      Entry: 8
+      Data:
   _cardId: odd_slot_add
   _cardName: "\u5947\u6570\u589E\u4F24"
   _description: "\u63D0\u9AD8\u5947\u6570\u69FD\u4F4D\u540E\u7EED\u5361\u724C\u6548\u679C\u3002"
@@ -28,5 +65,3 @@ MonoBehaviour:
   _tags: 0
   _activationPositions: 10
   _artwork: {fileID: 3752572798022221216, guid: 453a65207dd1dc243919bfc0bf4d6ff9, type: 3}
-  _effects:
-  - {fileID: 11400000, guid: 0f112a7630aeccd449bbb649dbf814a1, type: 2}

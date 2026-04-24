@@ -14,18 +14,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Card5.MarkData
   serializationData:
     SerializedFormat: 2
-    SerializedBytes: 
+    SerializedBytes:
     ReferencedUnityObjects: []
-    SerializedBytesString: 
+    SerializedBytesString:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes: []
+    SerializationNodes:
+    - Name: _effects
+      Entry: 7
+      Data: 0|System.Collections.Generic.List`1[[Card5.CardEffect, Assembly-CSharp]],
+        mscorlib
+    - Name:
+      Entry: 12
+      Data: 0
+    - Name:
+      Entry: 13
+      Data:
+    - Name:
+      Entry: 8
+      Data:
   _markId: double_damage
   _markName: "\u53CC\u500D\u4F24\u5BB3"
-  _description: 
+  _description:
   _icon: {fileID: 0}
   _duration: 3
   _trigger: 0
-  _effects:
-  - {fileID: 0}

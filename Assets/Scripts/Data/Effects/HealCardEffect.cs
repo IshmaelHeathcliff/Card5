@@ -1,13 +1,13 @@
+using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Card5
 {
-    [CreateAssetMenu(fileName = "HealEffect", menuName = "Card5/Effects/Heal")]
-    public class HealEffectSO : CardEffectSO
+    [Serializable]
+    public class HealCardEffect : CardEffect
     {
         [SerializeField, MinValue(1)] int _healAmount = 1;
-
         [SerializeField] HealTarget _target = HealTarget.Player;
 
         public int HealAmount => _healAmount;

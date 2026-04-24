@@ -21,7 +21,7 @@ alwaysApply: false
 | 卡牌显示组件 | `Assets/Scripts/UI/CardDisplayView.cs` |
 | 怪物列表配置 | `Assets/Scripts/Data/MonsterListData.cs` |
 | 所有事件 | `Assets/Scripts/Gameplay/Events/BattleEvents.cs` |
-| 效果基类 | `Assets/Scripts/Data/CardEffectSO.cs` |
+| 效果基类 | `Assets/Scripts/Data/CardEffect.cs` |
 | 具体效果 | `Assets/Scripts/Data/Effects/` |
 | 效果数值提升 | `Assets/Scripts/Gameplay/Battle/CardEffectBoost.cs` |
 
@@ -63,7 +63,7 @@ HandViewController  监听 HandRefreshedEvent
        └─ BattleSystem.EndTurn()
             ├─ BattleSystem.ResolveSlots()  // 按槽位顺序结算
             │    ├─ MarkSystem.ExecuteSlotMarks(BeforeCardEffects)
-            │    ├─ CardEffectSO.Execute(BattleContext)  // 卡牌效果
+            │    ├─ CardEffect.Execute(BattleContext)    // 卡牌内联效果
             │    ├─ MarkSystem.ExecuteSlotMarks(AfterCardEffects)
             │    └─ 一轮最多结算 5 张槽位卡；卡牌只在配置的生效位置执行效果
             ├─ 若怪物被击败，生成奖励并暂停后续流程
@@ -79,7 +79,8 @@ HandViewController  监听 HandRefreshedEvent
 
 当前出牌轮数按每次结束回合后的槽位结算计数。若一张卡击败当前怪物，本轮后续槽位卡牌不再继续结算，并统一进入弃牌堆。
 `CardData` 可配置 1-5 号位的任意生效组合，并在 Odin Inspector 中提供「任意位置」「奇数位」「偶数位」快捷按钮。卡牌放在未配置的槽位时仍会被结算并进入弃牌堆，但不会触发该卡效果、卡牌印记或槽位印记；槽位背景会按状态显示为灰色空槽、绿色有效、红色无效。
-`BoostSlotCardEffectSO` 可以提高指定槽位本轮后续主卡牌效果数值，支持固定增加、百分比增加和倍率提升；当前通过 `BattleContext.DealDamage()` 与 `BattleContext.ApplyHeal()` 生效。
+`CardData` 的效果直接内联配置在卡牌资产中，基于 Odin 多态序列化选择具体 `CardEffect` 类型，不再创建独立效果资产。
+`BoostSlotCardEffect` 可以提高指定槽位本轮后续主卡牌效果数值，支持固定增加、百分比增加和倍率提升；当前通过 `BattleContext.DealDamage()` 与 `BattleContext.ApplyHeal()` 生效。
 `BattleUIController` 监听 `MonsterPlayRoundCountChangedEvent`，在战斗 UI 中显示当前怪物剩余出牌轮数。
 手牌、奖励选项、牌堆弹窗和出牌槽都通过 `CardDisplayView` 显示卡牌基础信息；各容器只负责自身交互和额外状态，例如槽位背景的有效/无效颜色。
 
@@ -186,12 +187,17 @@ BattleSystem.EndTurn()
 
 ## 新增卡牌效果
 
-继承 `CardEffectSO`，加 `[CreateAssetMenu]`，实现 `Execute(BattleContext ctx)`：
+继承 `CardEffect`，实现 `Execute(BattleContext ctx)`。效果不再创建独立 `ScriptableObject` 资产，而是在 `CardData` 的「卡牌效果」列表中直接选择和配置。
 
 ```csharp
-[CreateAssetMenu(fileName = "XxxEffect", menuName = "Card5/Effects/Xxx")]
-public class XxxEffectSO : CardEffectSO
+using System;
+using UnityEngine;
+
+[Serializable]
+public class XxxCardEffect : CardEffect
 {
+    [SerializeField] int _amount = 1;
+
     public override void Execute(BattleContext context)
     {
         // context.BattleModel          — 玩家战斗状态（HP、能量、槽位）

@@ -1,13 +1,13 @@
+using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Card5
 {
-    [CreateAssetMenu(fileName = "DamageEffect", menuName = "Card5/Effects/Damage")]
-    public class DamageEffectSO : CardEffectSO
+    [Serializable]
+    public class DamageCardEffect : CardEffect
     {
         [SerializeField, MinValue(1)] int _damage = 1;
-
         [SerializeField] DamageTarget _target = DamageTarget.Enemy;
 
         public int Damage => _damage;

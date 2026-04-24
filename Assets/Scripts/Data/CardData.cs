@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using UnityEngine;
 
 namespace Card5
@@ -52,7 +53,8 @@ namespace Card5
         [SerializeField, LabelText("卡牌标签"), EnumToggleButtons] CardTag _tags = CardTag.None;
         [SerializeField, LabelText("生效位置"), EnumToggleButtons] CardActivationPosition _activationPositions = CardActivationPosition.Any;
         [SerializeField] Sprite _artwork;
-        [SerializeField] List<CardEffectSO> _effects = new List<CardEffectSO>();
+        [OdinSerialize, LabelText("卡牌效果"), ListDrawerSettings(ShowFoldout = true, DefaultExpandedState = true), PolymorphicDrawerSettings(ShowBaseType = false)]
+        List<CardEffect> _inlineEffects = new List<CardEffect>();
 
         public string CardId => _cardId;
         public string CardName => _cardName;
@@ -65,7 +67,7 @@ namespace Card5
         [ShowInInspector, ReadOnly, LabelText("生效位置说明")]
         public string ActivationPositionDescription => GetActivationPositionDescription();
         public Sprite Artwork => _artwork;
-        public IReadOnlyList<CardEffectSO> Effects => _effects;
+        public IReadOnlyList<CardEffect> Effects => _inlineEffects;
 
         public bool HasTag(CardTag tag)
         {
@@ -141,7 +143,7 @@ namespace Card5
             if (!string.IsNullOrWhiteSpace(_description))
                 builder.AppendLine(_description.Trim());
 
-            foreach (CardEffectSO effect in _effects)
+            foreach (CardEffect effect in _inlineEffects)
             {
                 if (effect == null) continue;
 
