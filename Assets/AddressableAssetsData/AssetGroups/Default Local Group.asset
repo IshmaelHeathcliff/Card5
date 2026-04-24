@@ -15,6 +15,16 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 7dcd2f8d721292f499a1488c1fb46d4e
   m_SerializeEntries:
+  - m_GUID: 871cfeddbc2fdce4bb691fa7841c9082
+    m_Address: Assets/Prefabs/CardListPopup.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 98aea4b9b45beaa48811b1526bb891b5
+    m_Address: Assets/Prefabs/BattleRewardPopup.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d524ef97b0f34054aabc71e477a88155
     m_Address: Assets/Prefabs/CardView.prefab
     m_ReadOnly: 0

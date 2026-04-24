@@ -2,7 +2,6 @@ using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace Card5
 {
@@ -13,8 +12,8 @@ namespace Card5
         IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
     {
         [SerializeField] CardDisplayView _displayView;
-        [SerializeField] Canvas _canvas;
         [SerializeField] RectTransform _rectTransform;
+        [SerializeField] CanvasGroup _canvasGroup;
         [SerializeField] GameObject _selectionHighlight;
 
         [ShowInInspector, ReadOnly] CardData _cardData;
@@ -36,15 +35,11 @@ namespace Card5
 
         void OnValidate()
         {
-            if (_canvas == null)
-            {
-                _canvas = gameObject.GetComponent<Canvas>();
-                if (_canvas == null)
-                    _canvas = gameObject.AddComponent<Canvas>();
-            }
-
             if (_rectTransform == null)
                 _rectTransform = gameObject.GetComponent<RectTransform>();
+
+            if (_canvasGroup == null)
+                _canvasGroup = gameObject.GetComponent<CanvasGroup>();
 
             if (_displayView == null)
                 _displayView = gameObject.GetComponent<CardDisplayView>();
@@ -52,8 +47,15 @@ namespace Card5
 
         void Awake()
         {
-            _canvas.overrideSorting = true;
-            _canvas.sortingOrder = 0;
+            if (_rectTransform == null)
+                _rectTransform = gameObject.GetComponent<RectTransform>();
+
+            if (_canvasGroup == null)
+            {
+                _canvasGroup = gameObject.GetComponent<CanvasGroup>();
+                if (_canvasGroup == null)
+                    _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            }
         }
 
         public void Setup(CardData data)
@@ -76,7 +78,8 @@ namespace Card5
             _originalPosition = transform.localPosition;
             _originalSiblingIndex = transform.GetSiblingIndex();
 
-            _canvas.sortingOrder = 100;
+            SetRaycastBlock(false);
+            UILayerManager.MoveToLayer(transform, UILayer.Drag, true);
             MoveToPointer(eventData);
         }
 
@@ -103,7 +106,7 @@ namespace Card5
         public void OnEndDrag(PointerEventData eventData)
         {
             _isDragging = false;
-            _canvas.sortingOrder = 0;
+            SetRaycastBlock(true);
 
             if (_hasInvokedDrop)
                 return;
@@ -117,6 +120,7 @@ namespace Card5
             else
             {
                 int newSiblingIndex = ComputeSiblingIndexFromX(eventData);
+                RestoreOriginalParent(true);
                 if (OnHandReorder != null)
                     OnHandReorder.Invoke(this, newSiblingIndex);
                 else
@@ -133,9 +137,7 @@ namespace Card5
         public void ReturnToHand()
         {
             ResetDragState();
-            transform.SetParent(_originalParent, true);
-            transform.SetSiblingIndex(_originalSiblingIndex);
-            transform.localPosition = _originalPosition;
+            RestoreOriginalParent(true);
         }
 
         /// <summary>重置拖拽相关状态，取用/归还对象池时调用</summary>
@@ -143,7 +145,7 @@ namespace Card5
         {
             _isDragging = false;
             _hasInvokedDrop = false;
-            _canvas.sortingOrder = 0;
+            SetRaycastBlock(true);
             SetRedrawSelected(false);
         }
 
@@ -154,10 +156,10 @@ namespace Card5
 
             foreach (var result in results)
             {
-                if (result.gameObject.GetComponent<CardViewController>() != null)
+                if (result.gameObject.GetComponentInParent<CardViewController>() != null)
                     continue;
 
-                var slot = result.gameObject.GetComponent<CardSlotView>();
+                var slot = result.gameObject.GetComponentInParent<CardSlotView>();
                 if (slot != null)
                     return slot.SlotIndex;
             }
@@ -185,6 +187,21 @@ namespace Card5
                     insertPos++;
             }
             return insertPos;
+        }
+
+        void RestoreOriginalParent(bool worldPositionStays)
+        {
+            if (_originalParent == null) return;
+
+            transform.SetParent(_originalParent, worldPositionStays);
+            transform.SetSiblingIndex(_originalSiblingIndex);
+            transform.localPosition = _originalPosition;
+        }
+
+        void SetRaycastBlock(bool blocksRaycasts)
+        {
+            if (_canvasGroup != null)
+                _canvasGroup.blocksRaycasts = blocksRaycasts;
         }
 
         CardDisplayView GetDisplayView()

@@ -34,8 +34,8 @@ namespace Card5
         Vector2 _dragPreviewTargetLocalPosition;
         GameObject _dragPreview;
         RectTransform _dragPreviewRect;
+        RectTransform _dragPreviewParentRect;
         Canvas _rootCanvas;
-        RectTransform _canvasRect;
         BattleModel _battleModel;
 
         public int SlotIndex => _slotIndex;
@@ -48,8 +48,6 @@ namespace Card5
                 _slotLabel.text = $"槽 {_slotIndex + 1}";
 
             _rootCanvas = GetComponentInParent<Canvas>();
-            if (_rootCanvas != null)
-                _canvasRect = _rootCanvas.GetComponent<RectTransform>();
 
             _battleModel = this.GetModel<BattleModel>();
             GetDisplayView();
@@ -162,7 +160,10 @@ namespace Card5
             if (_rootCanvas == null || _currentCard == null) return;
 
             _dragPreview = new GameObject("SlotDragPreview");
-            _dragPreview.transform.SetParent(_rootCanvas.transform, false);
+            RectTransform dragLayer = UILayerManager.GetLayer(_rootCanvas, UILayer.Drag);
+            Transform previewParent = dragLayer != null ? dragLayer : _rootCanvas.transform;
+            _dragPreviewParentRect = previewParent as RectTransform;
+            _dragPreview.transform.SetParent(previewParent, false);
 
             _dragPreviewRect = _dragPreview.AddComponent<RectTransform>();
             _dragPreviewRect.sizeDelta = new Vector2(120f, 160f);
@@ -175,17 +176,16 @@ namespace Card5
             canvasGroup.alpha = 0.9f;
             canvasGroup.blocksRaycasts = false;
 
-            _dragPreview.transform.SetAsLastSibling();
             UpdateDragPreviewPosition(eventData);
             _dragPreviewRect.localPosition = _dragPreviewTargetLocalPosition;
         }
 
         void UpdateDragPreviewPosition(PointerEventData eventData)
         {
-            if (_canvasRect == null) return;
+            if (_dragPreviewParentRect == null) return;
 
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _canvasRect,
+                _dragPreviewParentRect,
                 eventData.position,
                 eventData.pressEventCamera,
                 out _dragPreviewTargetLocalPosition);
@@ -205,6 +205,7 @@ namespace Card5
                 Destroy(_dragPreview);
                 _dragPreview = null;
                 _dragPreviewRect = null;
+                _dragPreviewParentRect = null;
             }
         }
 

@@ -1,4 +1,5 @@
 using Card5.Gameplay.Events;
+using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,9 +20,6 @@ namespace Card5
 
         [SerializeField, LabelText("显示名称")]
         string _pileName = "牌堆";
-
-        [SerializeField, Required]
-        CardListPopupView _popup;
 
         public IArchitecture GetArchitecture() => GameArchitecture.Interface;
 
@@ -62,14 +60,18 @@ namespace Card5
 
         void OnClick()
         {
-            if (_popup == null) return;
+            if (UIPopupManager.Instance == null)
+            {
+                Debug.LogWarning("[DeckPileView] UIPopupManager 未就绪，无法打开牌堆弹窗");
+                return;
+            }
 
             var deck = this.GetModel<DeckModel>();
             var cards = _isDrawPile
                 ? (System.Collections.Generic.IReadOnlyList<CardData>)deck.DrawPile
                 : deck.DiscardPile;
 
-            _popup.Show(_pileName, cards);
+            UIPopupManager.Instance.ShowCardListAsync(_pileName, cards).Forget();
         }
     }
 }

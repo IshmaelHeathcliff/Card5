@@ -23,6 +23,7 @@ namespace Card5
 
         void Awake()
         {
+            UILayerManager.MoveToLayer(transform, UILayer.Popup, false);
             gameObject.SetActive(false);
         }
 
@@ -54,6 +55,7 @@ namespace Card5
                 entry.Setup(card);
             }
 
+            transform.SetAsLastSibling();
             gameObject.SetActive(true);
         }
 

@@ -33,6 +33,27 @@
 
 各 UI 容器只负责交互和额外状态，不再分别拼接卡牌描述或直接刷新基础字段。卡槽的灰色、绿色、红色背景仍由 `CardSlotView` 根据槽位状态控制。
 
+## UI 层级
+
+运行时 UI 通过 `UILayerManager` 在根 `Canvas` 下创建统一层级，不再给单张手牌单独挂 `Canvas` 调整排序。
+
+层级从低到高为：
+
+| 层级 | 用途 |
+|------|------|
+| `DragLayer` | 拖动中的手牌和槽位拖拽预览 |
+| `PopupLayer` | 奖励选择、牌堆列表等普通弹窗 |
+| `SystemLayer` | 战斗胜利/失败等系统级遮罩 |
+
+手牌常态保留在手牌容器中；开始拖拽时临时移动到 `DragLayer`，放回手牌或对象池回收时再恢复父级。弹窗始终位于 `PopupLayer` 或 `SystemLayer`，因此不会被拖动中的手牌遮挡。
+
+弹窗类 UI 由场景中的 `UIPopupManager` 常驻监听事件并按需加载：
+
+- `BattleRewardPopup` 与 `CardListPopup` 通过 `AssetReferenceGameObject` 引用 Addressables 预制体，并动态实例化到 `PopupLayer`。
+- 战斗胜利/失败结果面板由 `UIPopupManager` 运行时创建到 `SystemLayer`。
+- 战斗主 HUD、手牌区、出牌槽、牌堆按钮等高频基础 UI 仍保留在场景中。
+- 具体弹窗 View 只负责显示和交互，不直接监听打开弹窗的业务事件。
+
 ## 生效位置
 
 每张 `CardData` 都有生效位置配置，用于控制卡牌放在 1-5 号槽位中的哪些位置时会执行效果。

@@ -28,14 +28,15 @@ GetComponent 会遍历 GameObject 及其子节点，拖拽时每帧 60 次调用
 
 ### 4. 布局与层级变化（中影响）
 
-- 手牌从 HandContainer 移到 Root Canvas 时，HandContainer 的 LayoutGroup 会重新布局剩余手牌，可能触发一次 RebuildLayout。
+- 手牌开始拖拽时会从 `HandContainer` 临时移动到 `UILayerManager` 创建的 `DragLayer`，HandContainer 的 LayoutGroup 会重新布局剩余手牌，可能触发一次 RebuildLayout。
 - 槽位在 BeginDrag 时调用 `RefreshUI()`，若槽位在 LayoutGroup 下可能触发布局。
-- 建议：手牌容器使用 CanvasGroup 或占位符避免布局抖动；槽位区域尽量独立于敏感布局。
+- 建议：手牌容器使用 CanvasGroup 或占位符避免布局抖动；槽位区域尽量独立于敏感布局。不要再给单张手牌添加独立 Canvas 来处理置顶，拖拽置顶统一交给 `DragLayer`。
 
 ### 5. Canvas 与 Graphic 数量（环境相关）
 
 - 大量手牌 + 多个 Graphic（Image、TextMeshPro）会增大 Canvas 的 Rebuild 成本。
-- 可考虑：手牌使用单一 Canvas、减少嵌套、或对非可见区域做裁剪/禁用。
+- 当前手牌共用根 Canvas，单张 `HandCard` 只保留 `CanvasGroup` 控制拖拽时射线阻挡，不再包含独立 Canvas 和 GraphicRaycaster。
+- 可考虑：继续减少嵌套、或对非可见区域做裁剪/禁用。
 
 ## 优化优先级
 

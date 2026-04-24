@@ -19,6 +19,8 @@ alwaysApply: false
 | 卡牌 System | `Assets/Scripts/Gameplay/Battle/CardSystem.cs` |
 | 印记 System | `Assets/Scripts/Gameplay/Marks/MarkSystem.cs` |
 | 卡牌显示组件 | `Assets/Scripts/UI/CardDisplayView.cs` |
+| UI 层级管理 | `Assets/Scripts/UI/UILayerManager.cs` |
+| 弹窗动态加载 | `Assets/Scripts/UI/UIPopupManager.cs` |
 | 怪物列表配置 | `Assets/Scripts/Data/MonsterListData.cs` |
 | 所有事件 | `Assets/Scripts/Gameplay/Events/BattleEvents.cs` |
 | 效果基类 | `Assets/Scripts/Data/CardEffect.cs` |
@@ -83,6 +85,8 @@ HandViewController  监听 HandRefreshedEvent
 `BoostSlotCardEffect` 可以提高指定槽位本轮后续主卡牌效果数值，支持固定增加、百分比增加和倍率提升；当前通过 `BattleContext.DealDamage()` 与 `BattleContext.ApplyHeal()` 生效。
 `BattleUIController` 监听 `MonsterPlayRoundCountChangedEvent`，在战斗 UI 中显示当前怪物剩余出牌轮数。
 手牌、奖励选项、牌堆弹窗和出牌槽都通过 `CardDisplayView` 显示卡牌基础信息；各容器只负责自身交互和额外状态，例如槽位背景的有效/无效颜色。
+UI 层级由 `UILayerManager` 统一管理：拖动中的卡牌和槽位预览进入 `DragLayer`，奖励与牌堆弹窗进入 `PopupLayer`，胜利/失败结果进入 `SystemLayer`。单张手牌不再使用独立 `Canvas` 抢占排序，避免手牌遮挡奖励等更高优先级 UI。
+弹窗类 UI 由 `UIPopupManager` 常驻监听业务事件并动态加载。奖励弹窗与牌堆列表弹窗通过 `AssetReferenceGameObject` 引用 Addressables 预制体并实例化，结果确认面板运行时创建；战斗主 HUD、手牌区和出牌槽仍保留在场景中。
 
 ### 怪物推进与失败流程
 
@@ -180,7 +184,8 @@ BattleSystem.EndTurn()
 - `Assets/Data/Preset/Reward/BattleRewardConfig.asset`：默认战斗奖励配置，包含 1 个引用默认牌库的卡牌三选一奖励组。
 - `Assets/Data/Preset/Enemies/DefaultMonsterList.asset`：默认怪物列表配置，当前包含基础敌人与出牌轮数限制。
 - `Assets/Prefabs/BattleRewardOption.prefab`：单个奖励选项视图。
-- `Assets/Prefabs/BattleRewardPopup.prefab`：奖励选择弹窗，已挂到 `Assets/Scenes/Main.unity` 的 `View/BattleRewardPopup`。
+- `Assets/Prefabs/BattleRewardPopup.prefab`：奖励选择弹窗，由 `UIPopupManager` 按需加载到 `PopupLayer`。
+- `Assets/Prefabs/CardListPopup.prefab`：牌堆列表弹窗，由 `UIPopupManager` 按需加载到 `PopupLayer`。
 - `Assets/Scripts/Editor/BattleRewardSetupUtility.cs`：可通过 Unity 菜单 `Card5/Setup Battle Reward UI` 重新生成默认配置与 UI。
 
 ---

@@ -73,6 +73,9 @@ Assets/Scripts/
 │   ├── CardListEntryView.cs     # 弹窗单条卡牌记录
 │   ├── BattleRewardPopupView.cs # 战斗奖励选择弹窗
 │   ├── BattleRewardOptionView.cs # 战斗奖励选项视图
+│   ├── UILayer.cs               # UI 层级枚举
+│   ├── UILayerManager.cs        # 运行时 UI 层级管理
+│   ├── UIPopupManager.cs        # 弹窗动态加载与显示管理
 │   └── EmptyGraphic.cs          # 空白可交互图形
 ├── Utilities/                   # 辅助工具类
 └── GameManager.cs               # 游戏入口

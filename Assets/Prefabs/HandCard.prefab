@@ -12,8 +12,7 @@ GameObject:
   - component: {fileID: 4523031223814157231}
   - component: {fileID: 2126235093026934013}
   - component: {fileID: 410391821144549565}
-  - component: {fileID: 70646481394363013}
-  - component: {fileID: 3269114537206882658}
+  - component: {fileID: 4072562612642840429}
   m_Layer: 0
   m_Name: HandCard
   m_TagString: Untagged
@@ -56,8 +55,8 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Card5.CardViewController
   _displayView: {fileID: 298828324794819095}
-  _canvas: {fileID: 70646481394363013}
   _rectTransform: {fileID: 8658597259205140460}
+  _canvasGroup: {fileID: 4072562612642840429}
   _selectionHighlight: {fileID: 8932749125512022895}
 --- !u!114 &2126235093026934013
 MonoBehaviour:
@@ -83,47 +82,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1276184707926214005}
   m_CullTransparentMesh: 1
---- !u!223 &70646481394363013
-Canvas:
+--- !u!225 &4072562612642840429
+CanvasGroup:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1276184707926214005}
   m_Enabled: 1
-  serializedVersion: 3
-  m_RenderMode: 2
-  m_Camera: {fileID: 0}
-  m_PlaneDistance: 100
-  m_PixelPerfect: 0
-  m_ReceivesEvents: 1
-  m_OverrideSorting: 1
-  m_OverridePixelPerfect: 0
-  m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 1
-  m_UseReflectionProbes: 0
-  m_AdditionalShaderChannelsFlag: 0
-  m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
-  m_TargetDisplay: 0
---- !u!114 &3269114537206882658
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1276184707926214005}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 55
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &3802907417410905117
 GameObject:
   m_ObjectHideFlags: 0

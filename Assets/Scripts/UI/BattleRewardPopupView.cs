@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Card5.Gameplay.Events;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -28,29 +27,11 @@ namespace Card5
 
         void Awake()
         {
+            UILayerManager.MoveToLayer(transform, UILayer.Popup, false);
             Hide();
         }
 
-        void OnEnable()
-        {
-            this.RegisterEvent<BattleRewardOfferedEvent>(OnRewardOffered).UnRegisterWhenGameObjectDestroyed(gameObject);
-            this.RegisterEvent<BattleRewardOptionClaimedEvent>(OnRewardOptionClaimed).UnRegisterWhenGameObjectDestroyed(gameObject);
-            this.RegisterEvent<BattleRewardCompletedEvent>(_ => Hide()).UnRegisterWhenGameObjectDestroyed(gameObject);
-            this.RegisterEvent<BattleEndedEvent>(_ => Hide()).UnRegisterWhenGameObjectDestroyed(gameObject);
-        }
-
-        void OnRewardOffered(BattleRewardOfferedEvent e)
-        {
-            Show(e.Offers);
-        }
-
-        void OnRewardOptionClaimed(BattleRewardOptionClaimedEvent e)
-        {
-            if (e.RemainingOffers.Count > 0)
-                Show(e.RemainingOffers);
-        }
-
-        void Show(IReadOnlyList<BattleRewardOffer> offers)
+        public void Show(IReadOnlyList<BattleRewardOffer> offers)
         {
             ClearOptions();
 
@@ -64,7 +45,10 @@ namespace Card5
             }
 
             if (_root != null)
+            {
+                transform.SetAsLastSibling();
                 _root.SetActive(true);
+            }
         }
 
         void SpawnOption(BattleRewardOffer offer, BattleRewardOption option)
@@ -81,7 +65,7 @@ namespace Card5
             this.SendCommand(new SelectBattleRewardCommand(offer.OfferId, option.OptionId));
         }
 
-        void Hide()
+        public void Hide()
         {
             ClearOptions();
 
