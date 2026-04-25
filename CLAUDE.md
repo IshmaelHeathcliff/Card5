@@ -8,6 +8,7 @@
 
 ## 文档维护
 
+- 使用 UTF-8 编码
 - 所有文档都放在 `docs/` 目录下。
 - 修改代码前先阅读相关文档。
 - 如果文档与代码冲突，以代码现状为准，并同步修正文档。
@@ -36,6 +37,7 @@
     - 在 `OnEnable` 中注册输入事件，在 `OnDisable` 中注销
 - 在开发中使用 `Odin Inspector` 构建方便使用的Editor UI
 - 使用 `SerializedScriptableObject` 或 `ScriptableObject` 作为主要的数据配置类
+    - 数据配置类中各种字段、枚举等标注中文
 - 使用 `PrimeTween` 进行动画和补间操作
 
 ### Unity UI
