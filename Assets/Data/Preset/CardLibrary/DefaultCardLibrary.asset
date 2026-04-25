@@ -34,6 +34,9 @@ MonoBehaviour:
     - _conditionType: 4
       _value: 0
       _card: {fileID: 11400000, guid: 2e96da86fccf66d4abc311a103b4de80, type: 2}
+    - _conditionType: 1
+      _value: 3
+      _card: {fileID: 0}
   - _card: {fileID: 11400000, guid: 6fd9a079ab3ff2741921b6ccc38ed868, type: 2}
     _weight: 1
     _unlockConditions:

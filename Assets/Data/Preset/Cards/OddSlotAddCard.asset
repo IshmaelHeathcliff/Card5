@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Card5.CardData
   serializationData:
     SerializedFormat: 2
-    SerializedBytes:
+    SerializedBytes: 
     ReferencedUnityObjects: []
-    SerializedBytesString:
+    SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
@@ -25,15 +25,15 @@ MonoBehaviour:
       Entry: 7
       Data: 0|System.Collections.Generic.List`1[[Card5.CardEffect, Assembly-CSharp]],
         mscorlib
-    - Name:
+    - Name: 
       Entry: 12
       Data: 1
-    - Name:
+    - Name: 
       Entry: 7
       Data: 1|Card5.BoostSlotCardEffect, Assembly-CSharp
     - Name: _description
       Entry: 6
-      Data:
+      Data: 
     - Name: _targetSlots
       Entry: 3
       Data: 21
@@ -49,18 +49,18 @@ MonoBehaviour:
     - Name: _multiplier
       Entry: 4
       Data: 2
-    - Name:
+    - Name: 
       Entry: 8
-      Data:
-    - Name:
+      Data: 
+    - Name: 
       Entry: 13
-      Data:
-    - Name:
+      Data: 
+    - Name: 
       Entry: 8
-      Data:
+      Data: 
   _cardId: odd_slot_add
-  _cardName: "\u5947\u6570\u589E\u4F24"
-  _description: "\u63D0\u9AD8\u5947\u6570\u69FD\u4F4D\u540E\u7EED\u5361\u724C\u6548\u679C\u3002"
+  _cardName: "\u5973\u7687"
+  _description: "\u5947\u6570\u69FD\u4F4D\u4F24\u5BB3+1"
   _energyCost: 2
   _tags: 0
   _activationPositions: 10

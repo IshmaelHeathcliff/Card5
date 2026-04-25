@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Card5.CardData
   serializationData:
     SerializedFormat: 2
-    SerializedBytes:
+    SerializedBytes: 
     ReferencedUnityObjects: []
-    SerializedBytesString:
+    SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
@@ -25,33 +25,33 @@ MonoBehaviour:
       Entry: 7
       Data: 0|System.Collections.Generic.List`1[[Card5.CardEffect, Assembly-CSharp]],
         mscorlib
-    - Name:
+    - Name: 
       Entry: 12
       Data: 1
-    - Name:
+    - Name: 
       Entry: 7
       Data: 1|Card5.DamageCardEffect, Assembly-CSharp
     - Name: _description
       Entry: 6
-      Data:
+      Data: 
     - Name: _damage
       Entry: 3
       Data: 2
     - Name: _target
       Entry: 3
       Data: 0
-    - Name:
+    - Name: 
       Entry: 8
-      Data:
-    - Name:
+      Data: 
+    - Name: 
       Entry: 13
-      Data:
-    - Name:
+      Data: 
+    - Name: 
       Entry: 8
-      Data:
+      Data: 
   _cardId: advanced_damage
-  _cardName: "\u8FDB\u9636\u4F24\u5BB3\u5361"
-  _description:
+  _cardName: "\u9B54\u672F\u5E08"
+  _description: 
   _energyCost: 1
   _tags: 0
   _activationPositions: 21
