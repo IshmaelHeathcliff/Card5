@@ -7,8 +7,8 @@ namespace Card5
     [Serializable]
     public class DamageCardEffect : CardEffect
     {
-        [SerializeField, MinValue(1)] int _damage = 1;
-        [SerializeField] DamageTarget _target = DamageTarget.Enemy;
+        [SerializeField, LabelText("伤害数值"), MinValue(1)] int _damage = 1;
+        [SerializeField, LabelText("目标")] DamageTarget _target = DamageTarget.Enemy;
 
         public int Damage => _damage;
         public DamageTarget Target => _target;
@@ -27,7 +27,9 @@ namespace Card5
 
     public enum DamageTarget
     {
+        [InspectorName("敌人")]
         Enemy,
+        [InspectorName("玩家")]
         Player
     }
 }

@@ -7,8 +7,8 @@ namespace Card5
     [Serializable]
     public class ApplyMarkCardEffect : CardEffect
     {
-        [SerializeField, Required] MarkData _mark;
-        [SerializeField, Tooltip("印记施加到哪个目标")]
+        [SerializeField, LabelText("印记"), Required] MarkData _mark;
+        [SerializeField, LabelText("施加目标"), Tooltip("印记施加到哪个目标")]
         MarkApplyTarget _applyTo = MarkApplyTarget.CurrentSlot;
 
         public override void Execute(BattleContext context)
@@ -60,12 +60,16 @@ namespace Card5
     public enum MarkApplyTarget
     {
         /// <summary>施加到当前出牌所在的槽位</summary>
+        [InspectorName("当前槽位")]
         CurrentSlot,
         /// <summary>施加到左侧相邻槽位</summary>
+        [InspectorName("左侧槽位")]
         LeftSlot,
         /// <summary>施加到右侧相邻槽位</summary>
+        [InspectorName("右侧槽位")]
         RightSlot,
         /// <summary>施加到当前卡牌本身，跟随牌组</summary>
+        [InspectorName("当前卡牌")]
         CurrentCard
     }
 }

@@ -8,7 +8,7 @@ namespace Card5
     [CreateAssetMenu(fileName = "NewBattleRewardConfig", menuName = "Card5/Battle Reward Config")]
     public class BattleRewardConfigData : ScriptableObject
     {
-        [SerializeField, ListDrawerSettings(ShowPaging = false)] List<BattleRewardGroupConfig> _rewardGroups = new List<BattleRewardGroupConfig>();
+        [SerializeField, LabelText("奖励组"), ListDrawerSettings(ShowPaging = false)] List<BattleRewardGroupConfig> _rewardGroups = new List<BattleRewardGroupConfig>();
 
         public IReadOnlyList<BattleRewardGroupConfig> RewardGroups => _rewardGroups;
     }
@@ -16,10 +16,10 @@ namespace Card5
     [Serializable]
     public class BattleRewardGroupConfig
     {
-        [SerializeField] BattleRewardType _rewardType = BattleRewardType.Card;
-        [SerializeField, MinValue(1)] int _choiceCount = 3;
-        [SerializeField, ShowIf(nameof(IsCardReward)), InlineEditor(InlineEditorObjectFieldModes.Boxed)] CardLibraryData _cardLibrary;
-        [SerializeField, ShowIf(nameof(UsesLegacyCardPool)), ListDrawerSettings(ShowPaging = true)] List<CardData> _cardPool = new List<CardData>();
+        [SerializeField, LabelText("奖励类型")] BattleRewardType _rewardType = BattleRewardType.Card;
+        [SerializeField, LabelText("可选数量"), MinValue(1)] int _choiceCount = 3;
+        [SerializeField, LabelText("卡牌牌库"), ShowIf(nameof(IsCardReward)), InlineEditor(InlineEditorObjectFieldModes.Boxed)] CardLibraryData _cardLibrary;
+        [SerializeField, LabelText("兼容卡池"), ShowIf(nameof(UsesLegacyCardPool)), ListDrawerSettings(ShowPaging = true)] List<CardData> _cardPool = new List<CardData>();
 
         public BattleRewardType RewardType => _rewardType;
         public int ChoiceCount => _choiceCount;

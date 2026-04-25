@@ -7,8 +7,8 @@ namespace Card5
     [Serializable]
     public class HealCardEffect : CardEffect
     {
-        [SerializeField, MinValue(1)] int _healAmount = 1;
-        [SerializeField] HealTarget _target = HealTarget.Player;
+        [SerializeField, LabelText("治疗数值"), MinValue(1)] int _healAmount = 1;
+        [SerializeField, LabelText("目标")] HealTarget _target = HealTarget.Player;
 
         public int HealAmount => _healAmount;
         public HealTarget Target => _target;
@@ -27,7 +27,9 @@ namespace Card5
 
     public enum HealTarget
     {
+        [InspectorName("玩家")]
         Player,
+        [InspectorName("敌人")]
         Enemy
     }
 }

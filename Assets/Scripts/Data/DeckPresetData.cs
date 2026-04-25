@@ -7,8 +7,8 @@ namespace Card5
     [CreateAssetMenu(fileName = "NewDeckPreset", menuName = "Card5/Deck Preset")]
     public class DeckPresetData : ScriptableObject
     {
-        [SerializeField] string _deckName;
-        [SerializeField, ListDrawerSettings(ShowPaging = true)] List<CardEntry> _cards = new List<CardEntry>();
+        [SerializeField, LabelText("牌组名称")] string _deckName;
+        [SerializeField, LabelText("卡牌列表"), ListDrawerSettings(ShowPaging = true)] List<CardEntry> _cards = new List<CardEntry>();
 
         public string DeckName => _deckName;
         public IReadOnlyList<CardEntry> Cards => _cards;
@@ -29,7 +29,7 @@ namespace Card5
     [System.Serializable]
     public class CardEntry
     {
-        [HorizontalGroup, HideLabel] public CardData Card;
-        [HorizontalGroup(Width = 50), HideLabel, MinValue(1), MaxValue(10)] public int Count = 1;
+        [HorizontalGroup, LabelText("卡牌")] public CardData Card;
+        [HorizontalGroup(Width = 90), LabelText("数量"), MinValue(1), MaxValue(10)] public int Count = 1;
     }
 }

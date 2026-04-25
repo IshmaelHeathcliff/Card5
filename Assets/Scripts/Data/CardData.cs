@@ -46,13 +46,15 @@ namespace Card5
     [CreateAssetMenu(fileName = "NewCard", menuName = "Card5/Card")]
     public class CardData : SerializedScriptableObject
     {
-        [SerializeField] string _cardId;
-        [SerializeField] string _cardName;
-        [SerializeField, TextArea] string _description;
-        [SerializeField, MinValue(0)] int _energyCost;
+        [Title("基础信息")]
+        [SerializeField, LabelText("卡牌ID")] string _cardId;
+        [SerializeField, LabelText("卡牌名称")] string _cardName;
+        [SerializeField, LabelText("描述"), TextArea] string _description;
+        [SerializeField, LabelText("能量消耗"), MinValue(0)] int _energyCost;
         [SerializeField, LabelText("卡牌标签"), EnumToggleButtons] CardTag _tags = CardTag.None;
         [SerializeField, LabelText("生效位置"), EnumToggleButtons] CardActivationPosition _activationPositions = CardActivationPosition.Any;
-        [SerializeField] Sprite _artwork;
+        [SerializeField, LabelText("卡面图片")] Sprite _artwork;
+        [Title("效果配置")]
         [OdinSerialize, LabelText("卡牌效果"), ListDrawerSettings(ShowFoldout = true, DefaultExpandedState = true), PolymorphicDrawerSettings(ShowBaseType = false)]
         List<CardEffect> _inlineEffects = new List<CardEffect>();
 

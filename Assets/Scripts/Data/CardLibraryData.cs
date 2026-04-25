@@ -8,7 +8,7 @@ namespace Card5
     [CreateAssetMenu(fileName = "NewCardLibrary", menuName = "Card5/Card Library")]
     public class CardLibraryData : ScriptableObject
     {
-        [SerializeField, ListDrawerSettings(ShowPaging = true, DraggableItems = true)] List<CardLibraryEntry> _entries = new List<CardLibraryEntry>();
+        [SerializeField, LabelText("牌库条目"), ListDrawerSettings(ShowPaging = true, DraggableItems = true)] List<CardLibraryEntry> _entries = new List<CardLibraryEntry>();
 
         public IReadOnlyList<CardLibraryEntry> Entries => _entries;
     }
@@ -16,9 +16,9 @@ namespace Card5
     [Serializable]
     public class CardLibraryEntry
     {
-        [SerializeField, Required] CardData _card;
-        [SerializeField, MinValue(1)] int _weight = 1;
-        [SerializeField, ListDrawerSettings(ShowPaging = false)] List<CardUnlockCondition> _unlockConditions = new List<CardUnlockCondition>();
+        [SerializeField, LabelText("卡牌"), Required] CardData _card;
+        [SerializeField, LabelText("权重"), MinValue(1)] int _weight = 1;
+        [SerializeField, LabelText("解锁条件"), ListDrawerSettings(ShowPaging = false)] List<CardUnlockCondition> _unlockConditions = new List<CardUnlockCondition>();
 
         public CardData Card => _card;
         public int Weight => _weight;
@@ -83,12 +83,19 @@ namespace Card5
 
     public enum CardUnlockConditionType
     {
+        [InspectorName("始终解锁")]
         Always,
+        [InspectorName("最少战斗次数")]
         MinBattleCount,
+        [InspectorName("最多战斗次数")]
         MaxBattleCount,
+        [InspectorName("最少牌组数量")]
         MinDeckCardCount,
+        [InspectorName("牌组中拥有卡牌")]
         HasCardInDeck,
+        [InspectorName("牌组中没有卡牌")]
         DoesNotHaveCardInDeck,
+        [InspectorName("玩家生命百分比至多")]
         PlayerHpPercentAtMost
     }
 

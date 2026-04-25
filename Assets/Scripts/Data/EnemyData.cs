@@ -6,10 +6,10 @@ namespace Card5
     [CreateAssetMenu(fileName = "NewEnemy", menuName = "Card5/Enemy")]
     public class EnemyData : ScriptableObject
     {
-        [SerializeField] string _enemyName;
-        [SerializeField, MinValue(1)] int _maxHp = 100;
-        [SerializeField, TextArea] string _description;
-        [SerializeField] Sprite _portrait;
+        [SerializeField, LabelText("敌人名称")] string _enemyName;
+        [SerializeField, LabelText("最大生命值"), MinValue(1)] int _maxHp = 100;
+        [SerializeField, LabelText("描述"), TextArea] string _description;
+        [SerializeField, LabelText("立绘")] Sprite _portrait;
 
         public string EnemyName => _enemyName;
         public int MaxHp => _maxHp;

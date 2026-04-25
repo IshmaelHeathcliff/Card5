@@ -11,15 +11,15 @@ namespace Card5
     [CreateAssetMenu(fileName = "NewMark", menuName = "Card5/Mark")]
     public class MarkData : SerializedScriptableObject
     {
-        [SerializeField] string _markId;
-        [SerializeField] string _markName;
-        [SerializeField, TextArea] string _description;
-        [SerializeField] Sprite _icon;
+        [SerializeField, LabelText("印记ID")] string _markId;
+        [SerializeField, LabelText("印记名称")] string _markName;
+        [SerializeField, LabelText("描述"), TextArea] string _description;
+        [SerializeField, LabelText("图标")] Sprite _icon;
 
-        [SerializeField, Tooltip("持续回合数，-1 表示永久")]
+        [SerializeField, LabelText("持续回合数"), Tooltip("持续回合数，-1 表示永久")]
         int _duration = 3;
 
-        [SerializeField, Tooltip("印记效果触发时机")]
+        [SerializeField, LabelText("触发时机"), Tooltip("印记效果触发时机")]
         MarkTrigger _trigger = MarkTrigger.AfterCardEffects;
 
         [OdinSerialize, LabelText("印记效果"), ListDrawerSettings(ShowFoldout = true, DefaultExpandedState = true), PolymorphicDrawerSettings(ShowBaseType = false)]
@@ -52,8 +52,10 @@ namespace Card5
     public enum MarkTrigger
     {
         /// <summary>在该槽/卡的主效果之前触发</summary>
+        [InspectorName("卡牌效果前")]
         BeforeCardEffects,
         /// <summary>在该槽/卡的主效果之后触发</summary>
+        [InspectorName("卡牌效果后")]
         AfterCardEffects
     }
 }
