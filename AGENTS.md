@@ -25,16 +25,9 @@
     - 在 Controller 中注册 Event 来实现事件回调
     - Controller 中只能注册 Event，不能发送 Event
     - 在 System、Model、Command中完成操作时发送 Event 通知 Controller
-- 使用 `UniTask` 处理异步操作
-    - 尽量使用异步操作代替协程、 `Update` 等
-    - 使用 `Forget()` 处理不需要等待的异步操作
-    - 及时合理的位置释放 `AsyncOperationHandle`
+- 使用 `UniTask` 处理异步操作，尽量使用异步操作代替协程、 `Update` 等
 - 使用Unity的 `Addressables` 进行资源管理
-    - 使用 `AddressablesManager.Release` 释放异步资源加载产生的handle
-    - 使用 `Addressables.InstantiateAsync` 加载 Prefab
-    - 使用 `Addressables.ReleaseInstance` 卸载实例
 - 使用 Unity 的新输入系统 InputSystem
-    - 在 `OnEnable` 中注册输入事件，在 `OnDisable` 中注销
 - 在开发中使用 `Odin Inspector` 构建方便使用的Editor UI
 - 使用 `SerializedScriptableObject` 或 `ScriptableObject` 作为主要的数据配置类
     - 数据配置类中各种字段、枚举等标注中文
@@ -143,11 +136,9 @@
 使用中文
 
 ```cs
-<type>(<scope>): <subject>
+<type>: <subject>
 
 <body>
-
-<footer>
 ```
 
 ### header
@@ -182,10 +173,6 @@
     - chore
         - 不修改src或者test的其余修改，例如构建过程或辅助工具的变动
 
-### scope
-
-影响范围，非必须
-
 ### subject
 
 简短描述，不超过50个字符
@@ -199,30 +186,10 @@
 - 使用第一人称现在时
 - 说明代码变动动机，与之前行为对比
 
-#### revert
+### revert
 
 ```cs
 revert: feat(...): ...
 
 This reverts commit <hash>.
 ```
-
-### Footer
-
-#### 不兼容变动
-
-与上一个版本不兼容
-
-`BREAKING CHANGE`开头，对变动的描述、变动理由、迁移方法
-
-```cs
-BREAKING CHANGE:...
-```
-
-#### 关联Issue
-
-在详细内容中关联：
-
-- Fixes #1
-- Close #1
-- Resolves #1
