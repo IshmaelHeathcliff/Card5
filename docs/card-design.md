@@ -20,7 +20,7 @@
 
 - `CardEffect` 是效果基类，具体效果继承它并实现 `Execute(BattleContext)`。
 - `CardData` 使用 Odin 多态序列化显示「卡牌效果」列表，可在同一张卡牌内添加多个不同类型的效果。
-- 当前内置效果包括 `DamageCardEffect`、`HealCardEffect`、`ApplyMarkCardEffect`、`BoostSlotCardEffect`。
+- 当前内置效果包括 `DamageCardEffect`、`ApplyMarkCardEffect`、`BoostSlotCardEffect`。
 - `MarkData` 的印记效果也复用同一套内联 `CardEffect` 配置。
 
 ## 卡牌显示
@@ -86,4 +86,4 @@
 | 百分比增加 | 按百分比提高原始效果数值  |
 | 倍率提升  | 将原始效果数值乘以指定倍率 |
 
-增伤只在本轮槽位结算期间存在。若增伤卡位于目标槽位之前，会影响目标槽位后续结算的主卡牌伤害和治疗数值；若目标槽位已经结算完成，则不会回溯生效。
+增伤只在本轮槽位结算期间存在。若增伤卡位于目标槽位之前，会影响目标槽位后续结算的主卡牌伤害数值；若目标槽位已经结算完成，则不会回溯生效。

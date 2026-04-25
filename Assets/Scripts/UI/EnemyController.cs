@@ -73,18 +73,6 @@ namespace Card5
             RefreshUI();
         }
 
-        public void Heal(int amount)
-        {
-            if (!IsAlive) return;
-
-            _currentHp += amount;
-            if (_currentHp > _maxHp) _currentHp = _maxHp;
-
-            this.GetSystem<BattleSystem>().NotifyEnemyHealed(amount, _currentHp, _maxHp);
-
-            RefreshUI();
-        }
-
         void RefreshUI()
         {
             if (_hpSlider != null)

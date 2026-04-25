@@ -16,6 +16,5 @@ MonoBehaviour:
   _monsterList: {fileID: 11400000, guid: 40da603103d3b9f4ba07bb7f7dddec9d, type: 2}
   _enemyData: {fileID: 11400000, guid: 541e6b4d151d2ca458170789f1dfa784, type: 2}
   _rewardConfig: {fileID: 11400000, guid: 0e42b4a2c76c5304abc8b1ff3d4117c7, type: 2}
-  _playerMaxHp: 30
   _maxEnergy: 8
   _targetFrameRate: 120

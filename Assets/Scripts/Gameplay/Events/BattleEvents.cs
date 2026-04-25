@@ -4,7 +4,6 @@ namespace Card5.Gameplay.Events
 {
     public struct BattleStartedEvent
     {
-        public int PlayerMaxHp;
         public int EnemyMaxHp;
     }
 
@@ -102,19 +101,6 @@ namespace Card5.Gameplay.Events
     public struct DamageDealtEvent
     {
         public int Amount;
-        public bool ToPlayer;
-    }
-
-    public struct HealAppliedEvent
-    {
-        public int Amount;
-        public bool ToPlayer;
-    }
-
-    public struct PlayerHpChangedEvent
-    {
-        public int CurrentHp;
-        public int MaxHp;
     }
 
     public struct EnemyHpChangedEvent
@@ -124,10 +110,6 @@ namespace Card5.Gameplay.Events
     }
 
     public struct EnemyDiedEvent
-    {
-    }
-
-    public struct PlayerDiedEvent
     {
     }
 

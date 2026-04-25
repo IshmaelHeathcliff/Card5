@@ -22,7 +22,6 @@ namespace Card5
         MonsterListData _lastMonsterList;
         EnemyData _lastEnemyData;
         BattleRewardConfigData _lastRewardConfig;
-        int _lastPlayerMaxHp;
         int _lastMaxEnergy;
         readonly List<SlotCardEffectBoost> _slotCardEffectBoosts = new List<SlotCardEffectBoost>();
 
@@ -47,10 +46,9 @@ namespace Card5
             DeckPresetData deckPreset,
             EnemyData enemyData,
             BattleRewardConfigData rewardConfig,
-            int playerMaxHp = 30,
             int maxEnergy = 3)
         {
-            StartBattle(deckPreset, null, enemyData, rewardConfig, playerMaxHp, maxEnergy);
+            StartBattle(deckPreset, null, enemyData, rewardConfig, maxEnergy);
         }
 
         public void StartBattle(
@@ -58,20 +56,18 @@ namespace Card5
             MonsterListData monsterList,
             EnemyData enemyData,
             BattleRewardConfigData rewardConfig,
-            int playerMaxHp = 30,
             int maxEnergy = 3)
         {
             _lastDeckPreset = deckPreset;
             _lastMonsterList = monsterList;
             _lastEnemyData = enemyData;
             _lastRewardConfig = rewardConfig;
-            _lastPlayerMaxHp = playerMaxHp;
             _lastMaxEnergy = maxEnergy;
 
             var deckCards = deckPreset.BuildCardList();
             _cardSystem.Shuffle(deckCards);
 
-            ResetPlayerState(deckCards, playerMaxHp, maxEnergy, rewardConfig);
+            ResetPlayerState(deckCards, maxEnergy, rewardConfig);
 
             MonsterStageConfig firstMonster = GetMonsterConfig(0);
             EnemyData firstEnemy = firstMonster != null ? firstMonster.EnemyData : enemyData;
@@ -87,7 +83,6 @@ namespace Card5
 
             this.SendEvent(new BattleStartedEvent
             {
-                PlayerMaxHp = playerMaxHp,
                 EnemyMaxHp = firstEnemy.MaxHp
             });
 
@@ -98,13 +93,13 @@ namespace Card5
         public void RestartBattle()
         {
             if (_lastDeckPreset == null) return;
-            StartBattle(_lastDeckPreset, _lastMonsterList, _lastEnemyData, _lastRewardConfig, _lastPlayerMaxHp, _lastMaxEnergy);
+            StartBattle(_lastDeckPreset, _lastMonsterList, _lastEnemyData, _lastRewardConfig, _lastMaxEnergy);
         }
 
-        void ResetPlayerState(List<CardData> deckCards, int playerMaxHp, int maxEnergy, BattleRewardConfigData rewardConfig)
+        void ResetPlayerState(List<CardData> deckCards, int maxEnergy, BattleRewardConfigData rewardConfig)
         {
             _deckModel.InitDeck(deckCards);
-            _battleModel.InitBattle(playerMaxHp, maxEnergy);
+            _battleModel.InitBattle(maxEnergy);
             _markSystem.ClearAllMarks();
             _rewardSystem.SetRewardConfig(rewardConfig);
 
@@ -112,11 +107,6 @@ namespace Card5
             this.SendEvent<SlotEffectsResolvedEvent>();
             this.SendEvent(new DrawPileChangedEvent { Count = _deckModel.DrawPile.Count });
             this.SendEvent(new DiscardPileChangedEvent { Count = _deckModel.DiscardPile.Count });
-            this.SendEvent(new PlayerHpChangedEvent
-            {
-                CurrentHp = _battleModel.PlayerHp.Value,
-                MaxHp = _battleModel.PlayerMaxHp
-            });
             this.SendEvent(new EnergyChangedEvent
             {
                 CurrentEnergy = _battleModel.CurrentEnergy.Value,
@@ -533,43 +523,9 @@ namespace Card5
             });
         }
 
-        public void NotifyPlayerDamaged(int amount)
-        {
-            this.SendEvent(new DamageDealtEvent { Amount = amount, ToPlayer = true });
-            NotifyPlayerHpChanged();
-        }
-
-        public void NotifyPlayerHealed(int amount)
-        {
-            this.SendEvent(new HealAppliedEvent { Amount = amount, ToPlayer = true });
-            NotifyPlayerHpChanged();
-        }
-
-        public void NotifyPlayerHpChanged()
-        {
-            this.SendEvent(new PlayerHpChangedEvent
-            {
-                CurrentHp = _battleModel.PlayerHp.Value,
-                MaxHp = _battleModel.PlayerMaxHp
-            });
-
-            if (_battleModel.PlayerHp.Value <= 0 && !_battleModel.IsBattleOver)
-            {
-                _battleModel.IsBattleOver = true;
-                this.SendEvent<PlayerDiedEvent>();
-                this.SendEvent(new BattleEndedEvent { PlayerWon = false });
-            }
-        }
-
         public void NotifyEnemyDamaged(int amount, int currentHp, int maxHp)
         {
-            this.SendEvent(new DamageDealtEvent { Amount = amount, ToPlayer = false });
-            NotifyEnemyHpChanged(currentHp, maxHp);
-        }
-
-        public void NotifyEnemyHealed(int amount, int currentHp, int maxHp)
-        {
-            this.SendEvent(new HealAppliedEvent { Amount = amount, ToPlayer = false });
+            this.SendEvent(new DamageDealtEvent { Amount = amount });
             NotifyEnemyHpChanged(currentHp, maxHp);
         }
 

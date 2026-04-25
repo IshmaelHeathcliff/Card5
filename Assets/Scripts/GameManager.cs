@@ -18,7 +18,6 @@ namespace Card5
         [SerializeField, Required] EnemyData _enemyData;
         [SerializeField] BattleRewardConfigData _rewardConfig;
 
-        [SerializeField] int _playerMaxHp = 30;
         [SerializeField] int _maxEnergy = 3;
 
         [SerializeField] int _targetFrameRate = 60;
@@ -41,7 +40,6 @@ namespace Card5
             ? _globalConfig.RewardConfig
             : _rewardConfig;
 
-        int PlayerMaxHp => _globalConfig != null ? _globalConfig.PlayerMaxHp : _playerMaxHp;
         int MaxEnergy => _globalConfig != null ? _globalConfig.MaxEnergy : _maxEnergy;
         int TargetFrameRate => _globalConfig != null ? _globalConfig.TargetFrameRate : _targetFrameRate;
 
@@ -75,7 +73,7 @@ namespace Card5
                 return;
             }
 
-            this.SendCommand(new StartBattleCommand(startingDeck, monsterList, enemyData, RewardConfig, PlayerMaxHp, MaxEnergy));
+            this.SendCommand(new StartBattleCommand(startingDeck, monsterList, enemyData, RewardConfig, MaxEnergy));
         }
     }
 }

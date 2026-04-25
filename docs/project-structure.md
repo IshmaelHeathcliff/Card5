@@ -24,7 +24,6 @@ Assets/Scripts/
 │   ├── GameGlobalConfigData.cs  # 全局游戏配置
 │   └── Effects/                 # 具体效果实现
 │       ├── DamageCardEffect.cs    # 伤害效果
-│       ├── HealCardEffect.cs      # 治疗效果
 │       ├── ApplyMarkCardEffect.cs # 施加印记效果
 │       └── BoostSlotCardEffect.cs # 槽位增伤效果
 ├── Editor/                      # Unity 编辑器扩展
@@ -61,7 +60,7 @@ Assets/Scripts/
 │   └── Events/
 │       └── BattleEvents.cs      # 全部事件定义
 ├── UI/                          # UI 层
-│   ├── BattleUIController.cs    # 战斗主 UI（HP/能量/按钮）
+│   ├── BattleUIController.cs    # 战斗主 UI（能量/回合/按钮）
 │   ├── EnemyController.cs       # 敌人视图 Controller
 │   ├── HandViewController.cs    # 手牌区域管理
 │   ├── HandDropZone.cs          # 拖放目标标记
@@ -92,7 +91,7 @@ Assets/Scripts/
 
 | 类 | 文件 | 职责 |
 |----|------|------|
-| `BattleModel` | `Gameplay/Battle/BattleModel.cs` | 战斗状态：玩家 HP、能量、回合数、5 个出牌槽、重抽次数、当前怪物进度与出牌轮数上限 |
+| `BattleModel` | `Gameplay/Battle/BattleModel.cs` | 战斗状态：能量、回合数、5 个出牌槽、重抽次数、当前怪物进度与出牌轮数上限 |
 | `DeckModel` | `Gameplay/Battle/DeckModel.cs` | 牌组状态：完整牌组、抽牌堆、手牌、弃牌堆 |
 | `MarkModel` | `Gameplay/Marks/MarkModel.cs` | 印记状态：槽位印记字典、卡牌印记字典 |
 | `BattleRewardModel` | `Gameplay/Rewards/BattleRewardModel.cs` | 奖励状态：当前待选奖励组、奖励批次编号 |
@@ -116,8 +115,7 @@ Assets/Scripts/
 |----|---------|------|
 | `CardData` | Card5/Card | 卡牌配置：名称、费用、图片、标签、生效位置、内联效果列表 |
 | `CardEffect`（抽象） | — | 内联效果基类，实现 `Execute(BattleContext)`；通过 `CardData` 或 `MarkData` 内部多态配置 |
-| `DamageCardEffect` | — | 造成伤害（可选目标：敌人/玩家） |
-| `HealCardEffect` | — | 恢复 HP（可选目标：玩家/敌人） |
+| `DamageCardEffect` | — | 对敌人造成伤害 |
 | `ApplyMarkCardEffect` | — | 施加印记（当前槽/左槽/右槽/当前卡牌） |
 | `BoostSlotCardEffect` | — | 提高指定槽位后续主卡牌效果数值 |
 | `DeckPresetData` | Card5/Deck Preset | 牌组预设，包含卡牌及数量列表 |
@@ -126,7 +124,7 @@ Assets/Scripts/
 | `MarkData` | Card5/Mark | 印记配置：名称、图标、持续时间（-1=永久）、触发时机、内联效果列表 |
 | `CardLibraryData` | Card5/Card Library | 卡牌奖励牌库：每张牌配置权重和解锁条件，奖励生成时按当前战斗状态筛选 |
 | `BattleRewardConfigData` | Card5/Battle Reward Config | 战斗奖励配置：每次奖励包含多个奖励组，卡牌奖励可引用牌库生成三选一，也兼容旧卡池 |
-| `GameGlobalConfigData` | Card5/Game Global Config | 全局游戏配置：启动牌组、怪物列表、兼容敌人、奖励配置、玩家初始数值、目标帧率 |
+| `GameGlobalConfigData` | Card5/Game Global Config | 全局游戏配置：启动牌组、怪物列表、兼容敌人、奖励配置、玩家初始能量、目标帧率 |
 
 ---
 

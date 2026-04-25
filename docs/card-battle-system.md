@@ -36,7 +36,7 @@ GameManager.StartBattle()
   └─ StartBattleCommand
        └─ BattleSystem.StartBattle()
             ├─ DeckModel.InitDeck()       // 加载 DeckPresetData，建完整牌组
-            ├─ BattleModel.InitBattle()   // 重置 HP、能量、回合
+            ├─ BattleModel.InitBattle()   // 重置能量、回合
             ├─ BattleModel.StartMonster() // 加载 MonsterListData 的当前怪物与出牌轮数限制
             ├─ CardSystem.Shuffle()       // Fisher-Yates 洗牌
             ├─ CardSystem.DrawCards(8)    // 首回合抽 8 张
@@ -82,7 +82,7 @@ HandViewController  监听 HandRefreshedEvent
 当前出牌轮数按每次结束回合后的槽位结算计数。若一张卡击败当前怪物，本轮后续槽位卡牌不再继续结算，并统一进入弃牌堆。
 `CardData` 可配置 1-5 号位的任意生效组合，并在 Odin Inspector 中提供「任意位置」「奇数位」「偶数位」快捷按钮。卡牌放在未配置的槽位时仍会被结算并进入弃牌堆，但不会触发该卡效果、卡牌印记或槽位印记；槽位背景会按状态显示为灰色空槽、绿色有效、红色无效。
 `CardData` 的效果直接内联配置在卡牌资产中，基于 Odin 多态序列化选择具体 `CardEffect` 类型，不再创建独立效果资产。
-`BoostSlotCardEffect` 可以提高指定槽位本轮后续主卡牌效果数值，支持固定增加、百分比增加和倍率提升；当前通过 `BattleContext.DealDamage()` 与 `BattleContext.ApplyHeal()` 生效。
+`BoostSlotCardEffect` 可以提高指定槽位本轮后续主卡牌效果数值，支持固定增加、百分比增加和倍率提升；当前通过 `BattleContext.DealDamage()` 生效。
 `BattleUIController` 监听 `MonsterPlayRoundCountChangedEvent`，在战斗 UI 中显示当前怪物剩余出牌轮数。
 手牌、奖励选项、牌堆弹窗和出牌槽都通过 `CardDisplayView` 显示卡牌基础信息；各容器只负责自身交互和额外状态，例如槽位背景的有效/无效颜色。
 手牌与槽位之间的飞行动画会临时切到 `CardDisplayMode.Compact`，直接隐藏名称、费用和描述节点，只保留卡面主体；动画结束后恢复正常手牌显示。
@@ -111,7 +111,7 @@ BattleSystem.EndTurn()
 ```
 
 战斗胜利或失败后，`BattleUIController` 显示结果确认 UI。玩家点击确认会发送 `RestartBattleCommand`，使用本次战斗的牌组、怪物列表、奖励配置和数值重新开始战斗。
-重开会先重置玩家战斗状态：手牌与手牌 UI、抽牌堆、弃牌堆、出牌槽、HP、能量、重抽次数、奖励待选、印记和怪物出牌轮数都会回到初始状态，再开始新一局。
+重开会先重置玩家战斗状态：手牌与手牌 UI、抽牌堆、弃牌堆、出牌槽、能量、重抽次数、奖励待选、印记和怪物出牌轮数都会回到初始状态，再开始新一局。
 
 ### 撤牌 / 换牌
 
@@ -177,7 +177,6 @@ BattleSystem.EndTurn()
 | `MinDeckCardCount` | 玩家完整牌组数量大于等于指定值 |
 | `HasCardInDeck` | 玩家完整牌组中拥有指定卡 |
 | `DoesNotHaveCardInDeck` | 玩家完整牌组中没有指定卡 |
-| `PlayerHpPercentAtMost` | 玩家当前 HP 百分比小于等于指定值 |
 
 默认配置与 UI：
 
@@ -206,9 +205,9 @@ public class XxxCardEffect : CardEffect
 
     public override void Execute(BattleContext context)
     {
-        // context.BattleModel          — 玩家战斗状态（HP、能量、槽位）
+        // context.BattleModel          — 玩家战斗状态（能量、槽位）
         // context.DeckModel            — 牌组状态（抽牌堆、弃牌堆）
-        // context.Enemy                — 敌人（TakeDamage、Heal）
+        // context.Enemy                — 敌人（TakeDamage）
         // context.BattleSystem         — 调用战斗系统方法
         // context.MarkSystem           — 施加印记
         // context.LeftNeighbor         — 左邻槽卡牌（可为 null）
@@ -216,7 +215,6 @@ public class XxxCardEffect : CardEffect
         // context.SlotIndex            — 当前槽位索引（0-4）
         // context.CurrentCard          — 当前卡牌数据
         // context.DealDamage(amount)   — 便捷伤害方法（含事件）
-        // context.ApplyHeal(amount)    — 便捷治疗方法（含事件）
     }
 }
 ```
@@ -300,11 +298,8 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 | `CardRemovedFromSlotEvent` | 卡牌从槽位移除 |
 | `SlotsSwappedEvent` | 两个槽位内容交换 |
 | `SlotEffectsResolvedEvent` | 本回合所有槽位效果结算完毕 |
-| `DamageDealtEvent` | 伤害事件（含来源、目标、数值） |
-| `HealAppliedEvent` | 治疗事件 |
-| `PlayerHpChangedEvent` | 玩家 HP 变化 |
+| `DamageDealtEvent` | 对敌人造成伤害 |
 | `EnemyHpChangedEvent` | 敌人 HP 变化 |
-| `PlayerDiedEvent` | 玩家死亡 |
 | `EnemyDiedEvent` | 敌人死亡 |
 | `EnergyChangedEvent` | 能量变化 |
 | `RedrawCountChangedEvent` | 剩余重抽次数变化 |

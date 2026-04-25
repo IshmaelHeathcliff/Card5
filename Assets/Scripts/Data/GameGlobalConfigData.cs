@@ -13,7 +13,6 @@ namespace Card5
         [SerializeField, LabelText("奖励配置")] BattleRewardConfigData _rewardConfig;
 
         [Title("玩家初始数值")]
-        [SerializeField, LabelText("玩家最大生命值"), MinValue(1)] int _playerMaxHp = 30;
         [SerializeField, LabelText("最大能量"), MinValue(0)] int _maxEnergy = 3;
 
         [Title("运行设置")]
@@ -23,7 +22,6 @@ namespace Card5
         public MonsterListData MonsterList => _monsterList;
         public EnemyData EnemyData => _enemyData;
         public BattleRewardConfigData RewardConfig => _rewardConfig;
-        public int PlayerMaxHp => _playerMaxHp;
         public int MaxEnergy => _maxEnergy;
         public int TargetFrameRate => _targetFrameRate;
     }

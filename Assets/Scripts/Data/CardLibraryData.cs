@@ -65,8 +65,6 @@ namespace Card5
                     return _card != null && context.HasCardInDeck(_card);
                 case CardUnlockConditionType.DoesNotHaveCardInDeck:
                     return _card != null && !context.HasCardInDeck(_card);
-                case CardUnlockConditionType.PlayerHpPercentAtMost:
-                    return context.PlayerHpPercent <= _value;
                 default:
                     return false;
             }
@@ -74,8 +72,7 @@ namespace Card5
 
         bool UsesIntValue => _conditionType == CardUnlockConditionType.MinBattleCount
             || _conditionType == CardUnlockConditionType.MaxBattleCount
-            || _conditionType == CardUnlockConditionType.MinDeckCardCount
-            || _conditionType == CardUnlockConditionType.PlayerHpPercentAtMost;
+            || _conditionType == CardUnlockConditionType.MinDeckCardCount;
 
         bool UsesCardValue => _conditionType == CardUnlockConditionType.HasCardInDeck
             || _conditionType == CardUnlockConditionType.DoesNotHaveCardInDeck;
@@ -94,9 +91,7 @@ namespace Card5
         [InspectorName("牌组中拥有卡牌")]
         HasCardInDeck,
         [InspectorName("牌组中没有卡牌")]
-        DoesNotHaveCardInDeck,
-        [InspectorName("玩家生命百分比至多")]
-        PlayerHpPercentAtMost
+        DoesNotHaveCardInDeck
     }
 
     public class CardUnlockContext
@@ -112,16 +107,6 @@ namespace Card5
 
         public int BattleCount => _battleModel != null ? _battleModel.CurrentMonsterIndex + 1 : 0;
         public int DeckCardCount => _deckModel != null ? _deckModel.FullDeck.Count : 0;
-
-        public int PlayerHpPercent
-        {
-            get
-            {
-                if (_battleModel == null || _battleModel.PlayerMaxHp <= 0)
-                    return 0;
-                return Mathf.RoundToInt((float)_battleModel.PlayerHp.Value / _battleModel.PlayerMaxHp * 100f);
-            }
-        }
 
         public bool HasCardInDeck(CardData card)
         {

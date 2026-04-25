@@ -178,7 +178,6 @@ namespace Card5.Editor
             CopyObjectReference(gameManagerObject, configObject, "_startingDeck");
             CopyObjectReference(gameManagerObject, configObject, "_enemyData");
             CopyObjectReference(gameManagerObject, configObject, "_rewardConfig");
-            CopyInt(gameManagerObject, configObject, "_playerMaxHp");
             CopyInt(gameManagerObject, configObject, "_maxEnergy");
             CopyInt(gameManagerObject, configObject, "_targetFrameRate");
 

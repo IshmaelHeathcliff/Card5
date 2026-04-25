@@ -48,39 +48,11 @@ namespace Card5
             RightNeighbor = rightNeighbor;
         }
 
-        /// <summary>对指定目标造成伤害</summary>
-        public void DealDamage(int amount, DamageTarget target)
+        /// <summary>对敌人造成伤害</summary>
+        public void DealDamage(int amount)
         {
             amount = GetModifiedEffectAmount(amount);
-
-            if (target == DamageTarget.Enemy)
-            {
-                Enemy.TakeDamage(amount);
-            }
-            else
-            {
-                int newHp = BattleModel.PlayerHp.Value - amount;
-                BattleModel.PlayerHp.Value = newHp < 0 ? 0 : newHp;
-                BattleSystem.NotifyPlayerDamaged(amount);
-            }
-        }
-
-        /// <summary>对指定目标恢复生命值</summary>
-        public void ApplyHeal(int amount, HealTarget target)
-        {
-            amount = GetModifiedEffectAmount(amount);
-
-            if (target == HealTarget.Player)
-            {
-                int newHp = BattleModel.PlayerHp.Value + amount;
-                int maxHp = BattleModel.PlayerMaxHp;
-                BattleModel.PlayerHp.Value = newHp > maxHp ? maxHp : newHp;
-                BattleSystem.NotifyPlayerHealed(amount);
-            }
-            else
-            {
-                Enemy.Heal(amount);
-            }
+            Enemy.TakeDamage(amount);
         }
 
         internal void SetUseCardEffectBoost(bool useCardEffectBoost)
