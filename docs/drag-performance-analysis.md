@@ -43,3 +43,10 @@ GetComponent 会遍历 GameObject 及其子节点，拖拽时每帧 60 次调用
 1. **必做**：去掉拖拽过程中每帧的 GetComponent，改为缓存引用。
 2. **推荐**：手牌 OnDrag 使用缓存的 Canvas RectTransform + `ScreenPointToLocalPointInRectangle` 写 localPosition。
 3. **可选**：松手时复用 RaycastResult 列表、减少 GetComponent 次数；检查手牌/槽位所在 Canvas 与布局结构。
+
+## 本次补充
+
+- 手牌容器已移除 `HorizontalLayoutGroup`，改为脚本计算布局，避免布局系统在拖拽和动画过程中频繁重建。
+- 手牌拖拽过程会实时重排其余卡牌的位置预览，重点优化“重叠手牌 + 插入预览”的可读性。
+- 右键自动出牌和手牌与槽位交换，统一通过临时卡牌视图播放飞行动画，减少视觉瞬移。
+- 拖拽避让只在预览插入位变化时才重排，且旋转补间统一使用归一化角度，避免卡牌绕圈。

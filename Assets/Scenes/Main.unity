@@ -2293,6 +2293,16 @@ MonoBehaviour:
   _redrawPanel: {fileID: 767061224}
   _confirmRedrawButton: {fileID: 1757309093}
   _cancelRedrawButton: {fileID: 1420521319}
+  _preferredSpacing: 150
+  _cardMoveDuration: 0.18
+  _ghostMoveDuration: 0.2
+  _hoverLift: 28
+  _hoverNeighborOffset: 40
+  _hoverOuterOffset: 16
+  _baseCardScale: 0.8
+  _hoverCardScale: 0.9
+  _fanAngle: 6
+  _slotGhostScale: 0.8
 --- !u!114 &819997980
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3438,7 +3448,6 @@ GameObject:
   - component: {fileID: 1195089231}
   - component: {fileID: 1195089233}
   - component: {fileID: 1195089235}
-  - component: {fileID: 1195089236}
   m_Layer: 0
   m_Name: HandContainer
   m_TagString: Untagged
@@ -3501,32 +3510,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2812b9171de70345bded1b098a3bea3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card5.HandDropZone
---- !u!114 &1195089236
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1195089228}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 4
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 0
-  m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
 --- !u!1 &1196962030
 GameObject:
   m_ObjectHideFlags: 0
@@ -4392,8 +4375,8 @@ RectTransform:
   m_Children:
   - {fileID: 1603904233}
   - {fileID: 1651106614}
-  - {fileID: 819997978}
   - {fileID: 937516349}
+  - {fileID: 819997978}
   m_Father: {fileID: 973714615}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}

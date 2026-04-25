@@ -85,6 +85,7 @@ HandViewController  监听 HandRefreshedEvent
 `BoostSlotCardEffect` 可以提高指定槽位本轮后续主卡牌效果数值，支持固定增加、百分比增加和倍率提升；当前通过 `BattleContext.DealDamage()` 与 `BattleContext.ApplyHeal()` 生效。
 `BattleUIController` 监听 `MonsterPlayRoundCountChangedEvent`，在战斗 UI 中显示当前怪物剩余出牌轮数。
 手牌、奖励选项、牌堆弹窗和出牌槽都通过 `CardDisplayView` 显示卡牌基础信息；各容器只负责自身交互和额外状态，例如槽位背景的有效/无效颜色。
+手牌与槽位之间的飞行动画会临时切到 `CardDisplayMode.Compact`，直接隐藏名称、费用和描述节点，只保留卡面主体；动画结束后恢复正常手牌显示。
 UI 层级由 `UILayerManager` 统一管理：拖动中的卡牌和槽位预览进入 `DragLayer`，奖励与牌堆弹窗进入 `PopupLayer`，胜利/失败结果进入 `SystemLayer`。单张手牌不再使用独立 `Canvas` 抢占排序，避免手牌遮挡奖励等更高优先级 UI。
 弹窗类 UI 由 `UIPopupManager` 常驻监听业务事件并动态加载。奖励弹窗与牌堆列表弹窗通过 `AssetReferenceGameObject` 引用 Addressables 预制体并实例化，结果确认面板运行时创建；战斗主 HUD、手牌区和出牌槽仍保留在场景中。
 
@@ -316,3 +317,20 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 | `BattleRewardOfferedEvent` | 击败怪物后的战斗奖励生成，等待玩家选择 |
 | `BattleRewardOptionClaimedEvent` | 某个奖励组选项被领取 |
 | `BattleRewardCompletedEvent` | 本次所有奖励组领取完成 |
+
+---
+
+## 手牌交互补充
+
+- `HandViewController` 已改为脚本布局，不再依赖 `HorizontalLayoutGroup` 控制手牌位置。
+- 手牌数量较多时会自动压缩间距形成重叠，鼠标悬停时会抬起当前卡牌并展开附近卡牌。
+- 手牌拖拽过程中会实时计算插入预览位置，其余卡牌通过 `PrimeTween` 做避让动画。
+- 手牌拖到已占用槽位时，通过 `SwapHandWithSlotCommand` 直接与槽位中的卡牌交换。
+- 右键交互更新：手牌右键会尝试放入最左侧空槽位，并在飞行动画结束后才显示到槽位；槽位右键会将该槽位中的卡牌撤回手牌。
+- 非拖拽触发的出牌使用临时卡牌视图做飞行动画，避免直接瞬移。
+
+### 本次新增命令与事件
+
+- `SwapHandWithSlotCommand`
+- `CardReturnedToHandEvent`
+- `HandSlotSwappedEvent`

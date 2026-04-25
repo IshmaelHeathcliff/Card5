@@ -55,7 +55,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.3018868, g: 0.3018868, b: 0.3018868, a: 1}
@@ -130,7 +130,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -303,7 +303,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 1, b: 0.19187117, a: 1}
@@ -376,7 +376,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bdba0d1bfc040d44c8c98ed6e9b915d6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card5.CardSlotView
   _slotIndex: 0
   _slotLabel: {fileID: 7282297241100951004}
@@ -388,6 +388,10 @@ MonoBehaviour:
   _emptySlotColor: {r: 0.45, g: 0.45, b: 0.45, a: 1}
   _validPositionColor: {r: 0.2, g: 0.85, b: 0.35, a: 1}
   _invalidPositionColor: {r: 1, g: 0.2, b: 0.2, a: 1}
+  _dragPreviewSize: {x: 197, y: 342}
+  _dragPreviewScale: 0.8
+  _dragPreviewAlpha: 0.9
+  _dragPreviewColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!222 &447943298994069499
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -406,7 +410,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 187e1a1047c74bdb8fab2cc22cf38774, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card5.EmptyGraphic
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -467,7 +471,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0, b: 0, a: 1}
@@ -531,21 +535,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8898672212589858164}
     m_Modifications:
-    - target: {fileID: 1072745084180145437, guid: 6ded5775a973df1439a7120e3da93b2d, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 1276184707926214005, guid: 6ded5775a973df1439a7120e3da93b2d, type: 3}
       propertyPath: m_Name
       value: CardDisplay
-      objectReference: {fileID: 0}
-    - target: {fileID: 4737531283703057117, guid: 6ded5775a973df1439a7120e3da93b2d, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5701506851682495826, guid: 6ded5775a973df1439a7120e3da93b2d, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8658597259205140460, guid: 6ded5775a973df1439a7120e3da93b2d, type: 3}
       propertyPath: m_Pivot.x
@@ -578,18 +570,6 @@ PrefabInstance:
     - target: {fileID: 8658597259205140460, guid: 6ded5775a973df1439a7120e3da93b2d, type: 3}
       propertyPath: m_SizeDelta.y
       value: 342
-      objectReference: {fileID: 0}
-    - target: {fileID: 8658597259205140460, guid: 6ded5775a973df1439a7120e3da93b2d, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8658597259205140460, guid: 6ded5775a973df1439a7120e3da93b2d, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8658597259205140460, guid: 6ded5775a973df1439a7120e3da93b2d, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8658597259205140460, guid: 6ded5775a973df1439a7120e3da93b2d, type: 3}
       propertyPath: m_LocalPosition.x
@@ -658,5 +638,5 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 78d4e8dd6df14b64bb6c6e7a0d98e07c, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card5.CardDisplayView

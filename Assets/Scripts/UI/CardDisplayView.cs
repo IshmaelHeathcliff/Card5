@@ -17,18 +17,9 @@ namespace Card5
         [SerializeField] TextMeshProUGUI _costText;
         [SerializeField] TextMeshProUGUI _descriptionText;
         [SerializeField] Image _artworkImage;
-
-        public void Bind(
-            TextMeshProUGUI nameText,
-            TextMeshProUGUI costText,
-            TextMeshProUGUI descriptionText,
-            Image artworkImage)
-        {
-            _nameText = nameText;
-            _costText = costText;
-            _descriptionText = descriptionText;
-            _artworkImage = artworkImage;
-        }
+        [SerializeField] Transform _name;
+        [SerializeField] Transform _cost;
+        [SerializeField] Transform _description;
 
         public void Setup(CardData card, CardDisplayMode mode = CardDisplayMode.Full)
         {
@@ -38,11 +29,16 @@ namespace Card5
                 return;
             }
 
-            bool showCost = mode != CardDisplayMode.Slot;
+            bool showName = mode != CardDisplayMode.Compact;
+            bool showCost = mode == CardDisplayMode.Full;
             bool showDescription = mode == CardDisplayMode.Full;
 
+            SetNodeActive(_name, showName);
+            SetNodeActive(_cost, showCost);
+            SetNodeActive(_description, showDescription);
+
             if (_nameText != null)
-                _nameText.text = card.CardName;
+                _nameText.text = showName ? card.CardName : string.Empty;
 
             if (_costText != null)
                 _costText.text = showCost ? card.EnergyCost.ToString() : string.Empty;
@@ -60,6 +56,10 @@ namespace Card5
 
         public void Clear()
         {
+            SetNodeActive(_name, false);
+            SetNodeActive(_cost, false);
+            SetNodeActive(_description, false);
+
             if (_nameText != null)
                 _nameText.text = string.Empty;
             if (_costText != null)
@@ -68,6 +68,12 @@ namespace Card5
                 _descriptionText.text = string.Empty;
             if (_artworkImage != null)
                 _artworkImage.enabled = false;
+        }
+
+        static void SetNodeActive(Transform node, bool active)
+        {
+            if (node != null && node.gameObject.activeSelf != active)
+                node.gameObject.SetActive(active);
         }
     }
 }

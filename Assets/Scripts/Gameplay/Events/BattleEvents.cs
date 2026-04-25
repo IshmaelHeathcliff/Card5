@@ -62,6 +62,13 @@ namespace Card5.Gameplay.Events
         public int HandIndex;
     }
 
+    public struct CardReturnedToHandEvent
+    {
+        public string CardId;
+        public int HandIndex;
+        public int SourceSlotIndex;
+    }
+
     public struct CardPlayedEvent
     {
         public string CardId;
@@ -78,6 +85,14 @@ namespace Card5.Gameplay.Events
     {
         public int SlotA;
         public int SlotB;
+    }
+
+    public struct HandSlotSwappedEvent
+    {
+        public string HandCardId;
+        public string SlotCardId;
+        public int HandIndex;
+        public int SlotIndex;
     }
 
     public struct SlotEffectsResolvedEvent

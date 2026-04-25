@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using Card5.Gameplay.Events;
+using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -8,11 +10,10 @@ using UnityEngine.UI;
 namespace Card5
 {
     /// <summary>
-    /// 出牌槽视图：显示槽位编号和当前放置的卡牌。
-    /// 拖动：拖到手牌区域放回手牌，拖到另一槽位则交换。
+    /// 出牌槽视图：显示槽位卡牌，支持拖回手牌区和槽位间交换。
     /// </summary>
     public class CardSlotView : MonoBehaviour, IController,
-        IBeginDragHandler, IDragHandler, IEndDragHandler
+        IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
     {
         [SerializeField, Range(0, 4)] int _slotIndex;
         [SerializeField] TMPro.TextMeshProUGUI _slotLabel;
@@ -25,6 +26,11 @@ namespace Card5
         [SerializeField] Color _emptySlotColor = new Color(0.45f, 0.45f, 0.45f, 1f);
         [SerializeField] Color _validPositionColor = new Color(0.2f, 0.85f, 0.35f, 1f);
         [SerializeField] Color _invalidPositionColor = new Color(1f, 0.2f, 0.2f, 1f);
+        [Title("拖拽预览")]
+        [SerializeField, LabelText("预览尺寸")] Vector2 _dragPreviewSize;
+        [SerializeField, LabelText("预览缩放")] float _dragPreviewScale;
+        [SerializeField, LabelText("预览透明度"), Range(0f, 1f)] float _dragPreviewAlpha = 0.9f;
+        [SerializeField, LabelText("预览颜色")] Color _dragPreviewColor = Color.white;
 
         [ShowInInspector, ReadOnly] CardData _currentCard;
 
@@ -35,8 +41,12 @@ namespace Card5
         GameObject _dragPreview;
         RectTransform _dragPreviewRect;
         RectTransform _dragPreviewParentRect;
+        RectTransform _rectTransform;
         Canvas _rootCanvas;
         BattleModel _battleModel;
+        bool _isRevealPending;
+        float _nextRevealDelay;
+        int _revealRequestId;
 
         public int SlotIndex => _slotIndex;
 
@@ -47,9 +57,10 @@ namespace Card5
             if (_slotLabel != null)
                 _slotLabel.text = $"槽 {_slotIndex + 1}";
 
+            _rectTransform = GetComponent<RectTransform>();
             _rootCanvas = GetComponentInParent<Canvas>();
-
             _battleModel = this.GetModel<BattleModel>();
+
             GetDisplayView();
         }
 
@@ -75,21 +86,38 @@ namespace Card5
 
         void OnCardPlayed(CardPlayedEvent e)
         {
-            if (e.SlotIndex != _slotIndex) return;
+            if (e.SlotIndex != _slotIndex)
+                return;
 
             _currentCard = _battleModel.PlaySlots[_slotIndex];
+            float revealDelay = _nextRevealDelay;
+            _nextRevealDelay = 0f;
+
+            if (revealDelay > 0f)
+            {
+                _isRevealPending = true;
+                int requestId = ++_revealRequestId;
+                RefreshUI();
+                RevealCardAfterDelayAsync(requestId, revealDelay).Forget();
+                return;
+            }
+
+            _isRevealPending = false;
             RefreshUI();
         }
 
         void OnCardRemoved(CardRemovedFromSlotEvent e)
         {
-            if (e.SlotIndex != _slotIndex) return;
+            if (e.SlotIndex != _slotIndex)
+                return;
+
             ClearSlot();
         }
 
         void OnSlotsSwapped(SlotsSwappedEvent e)
         {
-            if (e.SlotA != _slotIndex && e.SlotB != _slotIndex) return;
+            if (e.SlotA != _slotIndex && e.SlotB != _slotIndex)
+                return;
 
             _currentCard = _battleModel.PlaySlots[_slotIndex];
             RefreshUI();
@@ -99,7 +127,8 @@ namespace Card5
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            if (_currentCard == null) return;
+            if (_currentCard == null)
+                return;
 
             s_draggingSlotIndex = _slotIndex;
             _dragStartPosition = eventData.position;
@@ -109,13 +138,16 @@ namespace Card5
 
         public void OnDrag(PointerEventData eventData)
         {
-            if (s_draggingSlotIndex != _slotIndex) return;
+            if (s_draggingSlotIndex != _slotIndex)
+                return;
+
             UpdateDragPreviewPosition(eventData);
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            if (s_draggingSlotIndex != _slotIndex) return;
+            if (s_draggingSlotIndex != _slotIndex)
+                return;
 
             int fromSlot = s_draggingSlotIndex;
             s_draggingSlotIndex = -1;
@@ -133,7 +165,7 @@ namespace Card5
 
             bool didDrop = false;
 
-            foreach (var result in results)
+            foreach (RaycastResult result in results)
             {
                 if (result.gameObject.GetComponent<HandDropZone>() != null)
                 {
@@ -142,7 +174,7 @@ namespace Card5
                     break;
                 }
 
-                var otherSlot = result.gameObject.GetComponent<CardSlotView>();
+                CardSlotView otherSlot = result.gameObject.GetComponent<CardSlotView>();
                 if (otherSlot != null && otherSlot.SlotIndex != fromSlot)
                 {
                     this.SendCommand(new SwapSlotsCommand(fromSlot, otherSlot.SlotIndex));
@@ -155,9 +187,22 @@ namespace Card5
                 RefreshUI();
         }
 
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (eventData.button != PointerEventData.InputButton.Right)
+                return;
+            if (_currentCard == null)
+                return;
+            if (s_draggingSlotIndex >= 0)
+                return;
+
+            this.SendCommand(new ReturnCardToHandCommand(_slotIndex));
+        }
+
         void CreateDragPreview(PointerEventData eventData)
         {
-            if (_rootCanvas == null || _currentCard == null) return;
+            if (_rootCanvas == null || _currentCard == null)
+                return;
 
             _dragPreview = new GameObject("SlotDragPreview");
             RectTransform dragLayer = UILayerManager.GetLayer(_rootCanvas, UILayer.Drag);
@@ -166,14 +211,16 @@ namespace Card5
             _dragPreview.transform.SetParent(previewParent, false);
 
             _dragPreviewRect = _dragPreview.AddComponent<RectTransform>();
-            _dragPreviewRect.sizeDelta = new Vector2(120f, 160f);
+            _dragPreviewRect.sizeDelta = _dragPreviewSize;
+            _dragPreviewRect.localScale = Vector3.one * _dragPreviewScale;
 
             var image = _dragPreview.AddComponent<Image>();
             image.sprite = _currentCard.Artwork;
+            image.color = _dragPreviewColor;
             image.raycastTarget = false;
 
             var canvasGroup = _dragPreview.AddComponent<CanvasGroup>();
-            canvasGroup.alpha = 0.9f;
+            canvasGroup.alpha = _dragPreviewAlpha;
             canvasGroup.blocksRaycasts = false;
 
             UpdateDragPreviewPosition(eventData);
@@ -182,7 +229,8 @@ namespace Card5
 
         void UpdateDragPreviewPosition(PointerEventData eventData)
         {
-            if (_dragPreviewParentRect == null) return;
+            if (_dragPreviewParentRect == null)
+                return;
 
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _dragPreviewParentRect,
@@ -193,36 +241,59 @@ namespace Card5
 
         void LateUpdate()
         {
-            if (s_draggingSlotIndex != _slotIndex || _dragPreviewRect == null) return;
+            if (s_draggingSlotIndex != _slotIndex || _dragPreviewRect == null)
+                return;
 
             _dragPreviewRect.localPosition = _dragPreviewTargetLocalPosition;
         }
 
         void DestroyDragPreview()
         {
-            if (_dragPreview != null)
-            {
-                Destroy(_dragPreview);
-                _dragPreview = null;
-                _dragPreviewRect = null;
-                _dragPreviewParentRect = null;
-            }
+            if (_dragPreview == null)
+                return;
+
+            Destroy(_dragPreview);
+            _dragPreview = null;
+            _dragPreviewRect = null;
+            _dragPreviewParentRect = null;
         }
 
         public void ClearSlot()
         {
+            CancelPendingReveal();
             _currentCard = null;
             RefreshUI();
+        }
+
+        public void DelayNextReveal(float delay)
+        {
+            _nextRevealDelay = Mathf.Max(0f, delay);
+        }
+
+        public Vector3 GetCardAnchorWorldPosition()
+        {
+            RectTransform displayRect = _displayView != null ? _displayView.transform as RectTransform : null;
+            if (displayRect != null)
+                return displayRect.TransformPoint(displayRect.rect.center);
+
+            if (_rectTransform == null)
+                _rectTransform = GetComponent<RectTransform>();
+
+            return _rectTransform != null
+                ? _rectTransform.TransformPoint(_rectTransform.rect.center)
+                : transform.position;
         }
 
         void RefreshUI()
         {
             bool isDraggingThisSlot = s_draggingSlotIndex == _slotIndex;
-            bool filled = _currentCard != null && !isDraggingThisSlot;
+            bool filled = _currentCard != null && !isDraggingThisSlot && !_isRevealPending;
             bool invalidPosition = filled && !_currentCard.CanActivateAtSlot(_slotIndex);
 
-            if (_emptyIndicator != null) _emptyIndicator.SetActive(!filled);
-            if (_filledIndicator != null) _filledIndicator.SetActive(filled);
+            if (_emptyIndicator != null)
+                _emptyIndicator.SetActive(!filled);
+            if (_filledIndicator != null)
+                _filledIndicator.SetActive(filled);
 
             if (_slotBackground != null)
                 _slotBackground.color = GetSlotBackgroundColor(filled, invalidPosition);
@@ -234,16 +305,39 @@ namespace Card5
                 displayView.Clear();
         }
 
+        void CancelPendingReveal()
+        {
+            _isRevealPending = false;
+            _nextRevealDelay = 0f;
+            _revealRequestId++;
+        }
+
+        async UniTaskVoid RevealCardAfterDelayAsync(int requestId, float delay)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(delay));
+
+            if (requestId != _revealRequestId)
+                return;
+            if (_currentCard == null)
+                return;
+
+            _isRevealPending = false;
+            RefreshUI();
+        }
+
         Color GetSlotBackgroundColor(bool filled, bool invalidPosition)
         {
-            if (!filled) return _emptySlotColor;
+            if (!filled)
+                return _emptySlotColor;
+
             return invalidPosition ? _invalidPositionColor : _validPositionColor;
         }
 
-        /// <summary>供外部按钮绑定：点击将本槽卡牌放回手牌</summary>
         public void OnClickReturnCard()
         {
-            if (_currentCard == null) return;
+            if (_currentCard == null)
+                return;
+
             this.SendCommand(new ReturnCardToHandCommand(_slotIndex));
         }
 

@@ -212,6 +212,7 @@ namespace Card5
         public bool TryReturnCardFromSlot(int slotIndex)
         {
             if (_battleModel.IsBattleOver) return false;
+            if (slotIndex < 0 || slotIndex >= BattleModel.SlotCount) return false;
             CardData card = _battleModel.PlaySlots[slotIndex];
             if (card == null) return false;
 
@@ -219,7 +220,13 @@ namespace Card5
             _battleModel.CurrentEnergy.Value += card.EnergyCost;
             _deckModel.Hand.Add(card);
 
-            this.SendEvent(new CardAddedToHandEvent { HandIndex = _deckModel.Hand.Count - 1 });
+            int handIndex = _deckModel.Hand.Count - 1;
+            this.SendEvent(new CardReturnedToHandEvent
+            {
+                CardId = card.CardId,
+                HandIndex = handIndex,
+                SourceSlotIndex = slotIndex
+            });
             this.SendEvent(new CardRemovedFromSlotEvent { SlotIndex = slotIndex });
             this.SendEvent(new EnergyChangedEvent
             {
@@ -247,6 +254,41 @@ namespace Card5
             _battleModel.PlaySlots[toSlot] = cardA;
 
             this.SendEvent(new SlotsSwappedEvent { SlotA = fromSlot, SlotB = toSlot });
+            return true;
+        }
+
+        public bool TrySwapHandWithSlot(CardData handCard, int handIndex, int slotIndex)
+        {
+            if (_battleModel.IsBattleOver) return false;
+            if (handCard == null) return false;
+            if (handIndex < 0 || handIndex >= _deckModel.Hand.Count) return false;
+            if (slotIndex < 0 || slotIndex >= BattleModel.SlotCount) return false;
+            if (_deckModel.Hand[handIndex] != handCard) return false;
+
+            CardData slotCard = _battleModel.PlaySlots[slotIndex];
+            if (slotCard == null) return false;
+
+            int newEnergy = _battleModel.CurrentEnergy.Value + slotCard.EnergyCost - handCard.EnergyCost;
+            if (newEnergy < 0) return false;
+
+            _deckModel.Hand[handIndex] = slotCard;
+            _battleModel.PlaySlots[slotIndex] = handCard;
+            _battleModel.CurrentEnergy.Value = newEnergy;
+
+            this.SendEvent(new HandSlotSwappedEvent
+            {
+                HandCardId = handCard.CardId,
+                SlotCardId = slotCard.CardId,
+                HandIndex = handIndex,
+                SlotIndex = slotIndex
+            });
+            this.SendEvent(new CardPlayedEvent { CardId = handCard.CardId, SlotIndex = slotIndex });
+            this.SendEvent(new EnergyChangedEvent
+            {
+                CurrentEnergy = _battleModel.CurrentEnergy.Value,
+                MaxEnergy = _battleModel.MaxEnergy.Value
+            });
+
             return true;
         }
 
