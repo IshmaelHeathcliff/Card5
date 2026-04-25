@@ -15,6 +15,6 @@ MonoBehaviour:
   _deckName: 
   _cards:
   - Card: {fileID: 11400000, guid: 8a1a231509d2cce4d964971713848d03, type: 2}
-    Count: 10
+    Count: 5
   - Card: {fileID: 11400000, guid: 2221738a65b12b848a66fa6f0258c5c7, type: 2}
-    Count: 6
+    Count: 3
