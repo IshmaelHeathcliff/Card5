@@ -37,9 +37,6 @@ MonoBehaviour:
     - Name: _damage
       Entry: 3
       Data: 3
-    - Name: _target
-      Entry: 3
-      Data: 0
     - Name: 
       Entry: 8
       Data: 
@@ -51,7 +48,7 @@ MonoBehaviour:
       Data: 
   _cardId: great_damage
   _cardName: "\u5973\u796D\u53F8"
-  _description: "\u65BD\u52A0\u57FA\u7840\u5370\u8BB0\u3002"
+  _description: 
   _energyCost: 2
   _tags: 0
   _activationPositions: 10
