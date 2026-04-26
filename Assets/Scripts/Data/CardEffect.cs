@@ -1,4 +1,5 @@
 using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Card5
@@ -6,7 +7,7 @@ namespace Card5
     [Serializable]
     public abstract class CardEffect
     {
-        [SerializeField, TextArea] string _description;
+        [SerializeField, LabelText("补充描述"), TextArea(2, 4)] string _description;
 
         public string Description => _description;
 

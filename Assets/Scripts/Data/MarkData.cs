@@ -8,21 +8,23 @@ namespace Card5
     /// <summary>
     /// 印记配置数据：定义印记名称、描述、持续回合数和触发的效果列表。
     /// </summary>
+    [HideMonoScript]
     [CreateAssetMenu(fileName = "NewMark", menuName = "Card5/Mark")]
     public class MarkData : SerializedScriptableObject
     {
-        [SerializeField, LabelText("印记ID")] string _markId;
-        [SerializeField, LabelText("印记名称")] string _markName;
-        [SerializeField, LabelText("描述"), TextArea] string _description;
-        [SerializeField, LabelText("图标")] Sprite _icon;
+        [BoxGroup("基础信息文本"), SerializeField, LabelText("印记ID")] string _markId;
+        [BoxGroup("基础信息文本"), SerializeField, LabelText("印记名称")] string _markName;
+        [BoxGroup("基础信息文本"), SerializeField, LabelText("描述"), TextArea(3, 6)] string _description;
+        [BoxGroup("基础信息视觉"), SerializeField, LabelText("图标"), PreviewField(90, ObjectFieldAlignment.Center)] Sprite _icon;
 
-        [SerializeField, LabelText("持续回合数"), Tooltip("持续回合数，-1 表示永久")]
+        [BoxGroup("规则"), SerializeField, LabelText("持续回合数"), Tooltip("持续回合数，-1 表示永久"), MinValue(-1)]
         int _duration = 3;
 
-        [SerializeField, LabelText("触发时机"), Tooltip("印记效果触发时机")]
+        [BoxGroup("规则"), SerializeField, LabelText("触发时机"), Tooltip("印记效果触发时机")]
         MarkTrigger _trigger = MarkTrigger.AfterCardEffects;
 
-        [OdinSerialize, LabelText("印记效果"), ListDrawerSettings(ShowFoldout = true, DefaultExpandedState = true), PolymorphicDrawerSettings(ShowBaseType = false)]
+        [BoxGroup("效果配置")]
+        [OdinSerialize, LabelText("印记效果"), ListDrawerSettings(ShowFoldout = true, DefaultExpandedState = true, DraggableItems = true), PolymorphicDrawerSettings(ShowBaseType = false)]
         List<CardEffect> _effects = new List<CardEffect>();
 
         public string MarkId => _markId;
@@ -35,6 +37,12 @@ namespace Card5
 
         public MarkTrigger Trigger => _trigger;
         public IReadOnlyList<CardEffect> Effects => _effects;
+
+        [BoxGroup("规则"), ShowInInspector, ReadOnly, LabelText("持续时间说明")]
+        string DurationDescription => _duration < 0 ? "永久" : $"{_duration} 回合";
+
+        [BoxGroup("规则"), ShowInInspector, ReadOnly, MultiLineProperty(4), LabelText("完整描述")]
+        string InspectorDescription => GetDescription();
 
         void OnValidate()
         {
