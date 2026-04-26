@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3aef7f1b0ea5558408ad3b45b6f33c78, type: 3}
-  m_Name: GreatDamageCard
+  m_Name: "\u5973\u796D\u53F8"
   m_EditorClassIdentifier: Assembly-CSharp::Card5.CardData
   serializationData:
     SerializedFormat: 2
@@ -48,7 +48,7 @@ MonoBehaviour:
       Data: 
   _cardId: great_damage
   _cardName: "\u5973\u796D\u53F8"
-  _description: 
+  _description: "\u9020\u62103\u70B9\u4F24\u5BB3"
   _energyCost: 2
   _tags: 0
   _activationPositions: 10

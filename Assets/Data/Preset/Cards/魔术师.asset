@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3aef7f1b0ea5558408ad3b45b6f33c78, type: 3}
-  m_Name: EvenSlotAddCard
+  m_Name: "\u9B54\u672F\u5E08"
   m_EditorClassIdentifier: Assembly-CSharp::Card5.CardData
   serializationData:
     SerializedFormat: 2
@@ -30,24 +30,12 @@ MonoBehaviour:
       Data: 1
     - Name: 
       Entry: 7
-      Data: 1|Card5.BoostSlotCardEffect, Assembly-CSharp
+      Data: 1|Card5.DamageCardEffect, Assembly-CSharp
     - Name: _description
       Entry: 6
       Data: 
-    - Name: _targetSlots
+    - Name: _damage
       Entry: 3
-      Data: 10
-    - Name: _boostMode
-      Entry: 3
-      Data: 0
-    - Name: _flatAmount
-      Entry: 3
-      Data: 2
-    - Name: _percentAmount
-      Entry: 4
-      Data: 50
-    - Name: _multiplier
-      Entry: 4
       Data: 2
     - Name: 
       Entry: 8
@@ -58,10 +46,10 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-  _cardId: even_slot_add
-  _cardName: "\u7687\u5E1D"
-  _description: "\u5076\u6570\u69FD\u4F4D\u4F24\u5BB3+2"
-  _energyCost: 2
+  _cardId: advanced_damage
+  _cardName: "\u9B54\u672F\u5E08"
+  _description: "\u9020\u62102\u70B9\u4F24\u5BB3"
+  _energyCost: 1
   _tags: 0
   _activationPositions: 21
-  _artwork: {fileID: 1723567750138976891, guid: c45975effe1c58f4fb9ad69ac196b618, type: 3}
+  _artwork: {fileID: -2524091797026239206, guid: 04bade7f4b51d0f4bbadc9ac39867d59, type: 3}
