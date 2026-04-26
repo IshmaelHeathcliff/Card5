@@ -525,7 +525,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: EndTurn
+  m_text: "\u51FA\u724C"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5ce86a5941ac4ab4fa372a7823180277, type: 2}
   m_sharedMaterial: {fileID: 8719198604984635941, guid: 5ce86a5941ac4ab4fa372a7823180277, type: 2}
@@ -1385,9 +1385,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Energy
-
-'
+  m_text: "\u80FD\u91CF: 8"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5ce86a5941ac4ab4fa372a7823180277, type: 2}
   m_sharedMaterial: {fileID: 8719198604984635941, guid: 5ce86a5941ac4ab4fa372a7823180277, type: 2}
@@ -3874,7 +3872,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Enemy
+  m_text: "\u602A\u7269"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5ce86a5941ac4ab4fa372a7823180277, type: 2}
   m_sharedMaterial: {fileID: 8719198604984635941, guid: 5ce86a5941ac4ab4fa372a7823180277, type: 2}
@@ -4534,7 +4532,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Redraw
+  m_text: "\u91CD\u62BD"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5ce86a5941ac4ab4fa372a7823180277, type: 2}
   m_sharedMaterial: {fileID: 8719198604984635941, guid: 5ce86a5941ac4ab4fa372a7823180277, type: 2}
