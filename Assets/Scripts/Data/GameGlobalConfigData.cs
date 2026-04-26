@@ -9,7 +9,6 @@ namespace Card5
         [Title("战斗入口")]
         [SerializeField, LabelText("初始牌组"), Required] DeckPresetData _startingDeck;
         [SerializeField, LabelText("怪物列表")] MonsterListData _monsterList;
-        [SerializeField, LabelText("兼容敌人配置"), Required] EnemyData _enemyData;
         [SerializeField, LabelText("奖励配置")] BattleRewardConfigData _rewardConfig;
 
         [Title("玩家初始数值")]
@@ -20,7 +19,6 @@ namespace Card5
 
         public DeckPresetData StartingDeck => _startingDeck;
         public MonsterListData MonsterList => _monsterList;
-        public EnemyData EnemyData => _enemyData;
         public BattleRewardConfigData RewardConfig => _rewardConfig;
         public int MaxEnergy => _maxEnergy;
         public int TargetFrameRate => _targetFrameRate;

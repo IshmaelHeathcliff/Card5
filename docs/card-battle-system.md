@@ -43,7 +43,7 @@ GameManager.StartBattle()
             └─ 发送 BattleStartedEvent / MonsterStartedEvent / TurnStartedEvent
 ```
 
-`GameGlobalConfigData` 优先使用 `MonsterListData` 作为战斗怪物队列；旧的 `EnemyData` 字段保留为兼容回退。每个怪物配置包含敌人数据与本怪物最大出牌轮数，一轮最多结算 5 张槽位卡。
+`GameGlobalConfigData` 和场景 `GameManager` 都使用 `MonsterListData` 作为战斗怪物队列入口。每个怪物配置包含敌人数据与本怪物最大出牌轮数，一轮最多结算 5 张槽位卡。
 
 ### 出牌流程
 
