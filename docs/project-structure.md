@@ -128,7 +128,7 @@ Assets/Scripts/
 | `MarkData` | Card5/Mark | 印记配置：名称、图标、持续时间（-1=永久）、触发时机、内联效果列表 |
 | `CardLibraryData` | Card5/Card Library | 卡牌奖励牌库：每张牌配置权重和解锁条件，奖励生成时按当前战斗状态筛选 |
 | `BattleRewardConfigData` | Card5/Battle Reward Config | 战斗奖励配置：每次奖励包含多个奖励组，卡牌奖励可引用牌库生成三选一，也兼容旧卡池 |
-| `GameGlobalConfigData` | Card5/Game Global Config | 全局游戏配置：启动牌组、怪物列表、兼容敌人、奖励配置、玩家初始能量、目标帧率 |
+| `GameGlobalConfigData` | Card5/Game Global Config | 全局游戏配置：启动牌组、怪物列表、奖励配置、玩家初始能量、目标帧率 |
 
 ---
 
@@ -137,10 +137,11 @@ Assets/Scripts/
 入口：Unity 菜单 `Card5/配置中心`。
 
 - `全局配置`：加载或创建 `Assets/Data/Preset/GameGlobalConfig.asset`，可从当前场景 `GameManager` 同步默认值，也可把全局配置应用回当前场景。
-- `新建配置`：基于 Odin 下拉选择任意项目内 `ScriptableObject` 类型并创建 `.asset`。
 - `配置概览`：统计 `Assets/Data` 下现有配置数量和类型分布。
-- `全部配置/按目录` 与 `全部配置/按类型`：自动扫描并展示现有 `ScriptableObject` 配置，兼容当前所有数据资产。
-- `表格视图`：按具体 `ScriptableObject` 类型生成批量编辑页，支持同类配置表格浏览、展开内联编辑、Project 多选全部、批量保存。
+- `全部配置`：只扫描并展示 `CreateAssetMenu(menuName = "Card5/...")` 的项目配置类型，优先显示中文别名。
+  - 类型页使用 Odin 原生分组展示概览、新建配置、现有配置列表。
+  - 资源节点直接打开真实 `ScriptableObject` 资产，保证可直接修改配置。
+  - 每个类型页内直接提供该类型的新建入口，并默认落到当前类型已有资源所在目录。
 
 ---
 
