@@ -141,20 +141,18 @@ namespace Card5
         public string GetFullDescription()
         {
             var builder = new StringBuilder();
-            if (Tags != CardTag.None)
-                builder.AppendLine($"标签：{GetTagDescription()}");
 
             if (!string.IsNullOrWhiteSpace(_description))
                 builder.AppendLine(_description.Trim());
 
-            foreach (CardEffect effect in _inlineEffects)
-            {
-                if (effect == null) continue;
-
-                string effectDescription = effect.GetDescription();
-                if (!string.IsNullOrWhiteSpace(effectDescription))
-                    builder.AppendLine(effectDescription);
-            }
+            // foreach (CardEffect effect in _inlineEffects)
+            // {
+            //     if (effect == null) continue;
+            //
+            //     string effectDescription = effect.GetDescription();
+            //     if (!string.IsNullOrWhiteSpace(effectDescription))
+            //         builder.AppendLine(effectDescription);
+            // }
 
             return builder.ToString().TrimEnd();
         }
