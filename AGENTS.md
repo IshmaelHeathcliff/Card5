@@ -28,9 +28,10 @@
 - 使用 `UniTask` 处理异步操作，尽量使用异步操作代替协程、 `Update` 等
 - 使用Unity的 `Addressables` 进行资源管理
 - 使用 Unity 的新输入系统 InputSystem
-- 在开发中使用 `Odin Inspector` 构建方便使用的Editor UI
+- 在开发中尽量使用 `Odin` 构建方便使用的Editor工具
 - 使用 `SerializedScriptableObject` 或 `ScriptableObject` 作为主要的数据配置类
     - 数据配置类中各种字段、枚举等标注中文
+    - 使用 Odin 原生功能
 - 使用 `PrimeTween` 进行动画和补间操作
 
 ### Unity UI
