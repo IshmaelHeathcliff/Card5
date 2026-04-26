@@ -115,11 +115,11 @@ namespace Card5
         {
             CardActivationPosition positions = ActivationPositions;
             if ((positions & CardActivationPosition.Any) == CardActivationPosition.Any)
-                return "任意位置";
+                return "任意";
             if (positions == CardActivationPosition.OddPositions)
-                return "奇数位";
+                return "奇数";
             if (positions == CardActivationPosition.EvenPositions)
-                return "偶数位";
+                return "偶数";
 
             var builder = new StringBuilder();
             for (int i = 0; i < 5; i++)
@@ -128,11 +128,11 @@ namespace Card5
                 if ((positions & position) == 0) continue;
 
                 if (builder.Length > 0)
-                    builder.Append("、");
+                    builder.Append(",");
                 builder.Append(i + 1);
             }
 
-            return builder.Length > 0 ? $"{builder}号位" : "任意位置";
+            return builder.Length > 0 ? $"{builder}" : "任意位置";
         }
 
         public string GetFullDescription()
@@ -140,7 +140,6 @@ namespace Card5
             var builder = new StringBuilder();
             if (Tags != CardTag.None)
                 builder.AppendLine($"标签：{GetTagDescription()}");
-            builder.AppendLine($"生效位置：{GetActivationPositionDescription()}");
 
             if (!string.IsNullOrWhiteSpace(_description))
                 builder.AppendLine(_description.Trim());

@@ -50,7 +50,7 @@ GameManager.StartBattle()
 ```
 HandViewController  监听 HandRefreshedEvent
   └─ 实例化（或从对象池取出）CardViewController
-       └─ CardDisplayView 统一刷新名称、费用、描述和图片
+       └─ CardDisplayView 统一刷新顶部生效位置、类型、名称、费用、描述和图片
 
 玩家拖拽卡牌到 CardSlotView
   └─ PlayCardCommand(cardData, slotIndex)
@@ -84,8 +84,8 @@ HandViewController  监听 HandRefreshedEvent
 `CardData` 的效果直接内联配置在卡牌资产中，基于 Odin 多态序列化选择具体 `CardEffect` 类型，不再创建独立效果资产。
 `BoostSlotCardEffect` 可以提高指定槽位本轮后续主卡牌效果数值，支持固定增加、百分比增加和倍率提升；当前通过 `BattleContext.DealDamage()` 生效。
 `BattleUIController` 监听 `MonsterPlayRoundCountChangedEvent`，在战斗 UI 中显示当前怪物剩余出牌轮数。
-手牌、奖励选项、牌堆弹窗和出牌槽都通过 `CardDisplayView` 显示卡牌基础信息；各容器只负责自身交互和额外状态，例如槽位背景的有效/无效颜色。
-手牌与槽位之间的飞行动画会临时切到 `CardDisplayMode.Compact`，直接隐藏名称、费用和描述节点，只保留卡面主体；动画结束后恢复正常手牌显示。
+手牌、奖励选项、牌堆弹窗和出牌槽都通过 `CardDisplayView` 显示统一卡牌信息；顶部信息区显示生效位置和类型，描述区不再重复生效位置，名称、费用、描述按显示模式切换；各容器只负责自身交互和额外状态，例如槽位背景的有效/无效颜色。
+手牌与槽位之间的飞行动画会临时切到 `CardDisplayMode.Compact`，直接隐藏顶部信息、名称、费用和描述节点，只保留卡面主体；动画结束后恢复正常手牌显示。
 UI 层级由 `UILayerManager` 统一管理：拖动中的卡牌和槽位预览进入 `DragLayer`，奖励与牌堆弹窗进入 `PopupLayer`，胜利/失败结果进入 `SystemLayer`。单张手牌不再使用独立 `Canvas` 抢占排序，避免手牌遮挡奖励等更高优先级 UI。
 弹窗类 UI 由 `UIPopupManager` 常驻监听业务事件并动态加载。奖励弹窗与牌堆列表弹窗通过 `AssetReferenceGameObject` 引用 Addressables 预制体并实例化，结果确认面板运行时创建；战斗主 HUD、手牌区和出牌槽仍保留在场景中。
 

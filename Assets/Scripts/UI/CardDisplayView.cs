@@ -13,10 +13,15 @@ namespace Card5
 
     public class CardDisplayView : MonoBehaviour
     {
+        [SerializeField] TextMeshProUGUI _activationPositionText;
+        [SerializeField] TextMeshProUGUI _typeText;
         [SerializeField] TextMeshProUGUI _nameText;
         [SerializeField] TextMeshProUGUI _costText;
         [SerializeField] TextMeshProUGUI _descriptionText;
         [SerializeField] Image _artworkImage;
+        [SerializeField] Transform _topInfo;
+        [SerializeField] Transform _activationPosition;
+        [SerializeField] Transform _type;
         [SerializeField] Transform _name;
         [SerializeField] Transform _cost;
         [SerializeField] Transform _description;
@@ -29,13 +34,23 @@ namespace Card5
                 return;
             }
 
+            bool showTopInfo = mode != CardDisplayMode.Compact;
             bool showName = mode != CardDisplayMode.Compact;
             bool showCost = mode == CardDisplayMode.Full;
             bool showDescription = mode == CardDisplayMode.Full;
 
+            SetNodeActive(_topInfo, showTopInfo);
+            SetNodeActive(_activationPosition, showTopInfo);
+            SetNodeActive(_type, showTopInfo);
             SetNodeActive(_name, showName);
             SetNodeActive(_cost, showCost);
             SetNodeActive(_description, showDescription);
+
+            if (_activationPositionText != null)
+                _activationPositionText.text = showTopInfo ? card.ActivationPositionDescription : string.Empty;
+
+            if (_typeText != null)
+                _typeText.text = showTopInfo ? card.TagDescription : string.Empty;
 
             if (_nameText != null)
                 _nameText.text = showName ? card.CardName : string.Empty;
@@ -56,10 +71,17 @@ namespace Card5
 
         public void Clear()
         {
+            SetNodeActive(_topInfo, false);
+            SetNodeActive(_activationPosition, false);
+            SetNodeActive(_type, false);
             SetNodeActive(_name, false);
             SetNodeActive(_cost, false);
             SetNodeActive(_description, false);
 
+            if (_activationPositionText != null)
+                _activationPositionText.text = string.Empty;
+            if (_typeText != null)
+                _typeText.text = string.Empty;
             if (_nameText != null)
                 _nameText.text = string.Empty;
             if (_costText != null)
