@@ -40,10 +40,14 @@ Assets/Scripts/
 │   │       ├── StartBattleCommand.cs
 │   │       ├── DrawCardCommand.cs
 │   │       ├── PlayCardCommand.cs
+│   │       ├── SwapHandWithSlotCommand.cs
 │   │       ├── ReturnCardToHandCommand.cs
 │   │       ├── SwapSlotsCommand.cs
 │   │       ├── EndTurnCommand.cs
 │   │       ├── RedrawCardsCommand.cs
+│   │       ├── AddCardToDeckCommand.cs
+│   │       ├── RemoveCardFromDeckCommand.cs
+│   │       ├── SelectBattleRewardCommand.cs
 │   │       └── RestartBattleCommand.cs
 │   ├── Marks/                   # 印记系统
 │   │   ├── MarkModel.cs         # 印记状态数据

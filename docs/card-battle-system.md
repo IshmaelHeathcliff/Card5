@@ -269,6 +269,7 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 | `StartBattleCommand` | void | 初始化并启动战斗 |
 | `DrawCardCommand` | void | 抽一张牌 |
 | `PlayCardCommand` | bool | 将手牌放入指定槽位 |
+| `SwapHandWithSlotCommand` | bool | 将手牌与指定槽位中的卡牌直接交换 |
 | `ReturnCardToHandCommand` | bool | 从槽位撤回手牌 |
 | `SwapSlotsCommand` | bool | 交换/移动两个槽位的卡牌 |
 | `EndTurnCommand` | void | 结束回合并触发结算 |
@@ -285,7 +286,7 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 | 事件 | 触发时机 |
 |------|---------|
 | `BattleStartedEvent` | 战斗初始化完成 |
-| `BattleEndedEvent` | 战斗结束（含 IsVictory） |
+| `BattleEndedEvent` | 战斗结束（含 `PlayerWon`） |
 | `MonsterStartedEvent` | 当前怪物开始，包含怪物序号、总数与出牌轮数限制 |
 | `MonsterPlayRoundCountChangedEvent` | 当前怪物已出牌轮数变化 |
 | `TurnStartedEvent` | 新回合开始 |
@@ -294,8 +295,10 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 | `HandRefreshedEvent` | 手牌整体刷新（HandViewController 监听此事件重建 View） |
 | `CardAddedToHandEvent` | 单张牌加入手牌 |
 | `CardRemovedFromHandEvent` | 单张牌离开手牌 |
+| `CardReturnedToHandEvent` | 槽位中的卡牌返回手牌 |
 | `CardPlayedEvent` | 卡牌放入槽位 |
 | `CardRemovedFromSlotEvent` | 卡牌从槽位移除 |
+| `HandSlotSwappedEvent` | 手牌与槽位中的卡牌交换完成 |
 | `SlotsSwappedEvent` | 两个槽位内容交换 |
 | `SlotEffectsResolvedEvent` | 本回合所有槽位效果结算完毕 |
 | `DamageDealtEvent` | 对敌人造成伤害 |
