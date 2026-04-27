@@ -539,14 +539,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: CardDisplay
       objectReference: {fileID: 0}
-    - target: {fileID: 8000000000000000028, guid: 6ded5775a973df1439a7120e3da93b2d, type: 3}
-      propertyPath: m_text
-      value: "\u5360\u535C"
-      objectReference: {fileID: 0}
-    - target: {fileID: 8000000000000000028, guid: 6ded5775a973df1439a7120e3da93b2d, type: 3}
-      propertyPath: m_fontSize
-      value: 17.25
-      objectReference: {fileID: 0}
     - target: {fileID: 8658597259205140460, guid: 6ded5775a973df1439a7120e3da93b2d, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

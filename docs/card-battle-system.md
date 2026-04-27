@@ -159,7 +159,7 @@ BattleSystem.EndTurn()
 
 `BattleRewardConfigData` 支持一次奖励配置多个奖励组；每个奖励组都是多选一。当前已实现 `Card` 类型，默认用于卡牌三选一；`Mark` 类型仅保留枚举扩展位，后续再接入印记奖励逻辑。
 
-`CardData` 支持多选卡牌标签，当前标签包括「占卜」「奥术」。标签用于词条生效检索、流派分类和后续奖励筛选，可通过 `HasTag()`、`HasAnyTag()`、`HasAllTags()` 查询。
+`CardData` 使用单选卡牌类型，默认类型为「通用」，当前类型包括「通用」「占卜」「奥术」。类型用于词条生效检索、流派分类和后续奖励筛选，可通过 `Type` 和 `IsType()` 查询。
 
 `CardLibraryData` 是卡牌奖励牌库。牌库条目包含：
 

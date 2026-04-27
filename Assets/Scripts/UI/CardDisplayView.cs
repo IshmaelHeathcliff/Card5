@@ -50,7 +50,7 @@ namespace Card5
                 _activationPositionText.text = showTopInfo ? card.ActivationPositionDescription : string.Empty;
 
             if (_typeText != null)
-                _typeText.text = showTopInfo ? card.TagDescription : string.Empty;
+                _typeText.text = showTopInfo ? card.TypeDescription : string.Empty;
 
             if (_nameText != null)
                 _nameText.text = showName ? card.CardName : string.Empty;

@@ -4,6 +4,7 @@ using System.Text;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Card5
 {
@@ -30,15 +31,14 @@ namespace Card5
         Any = Position1 | Position2 | Position3 | Position4 | Position5
     }
 
-    [Flags]
-    public enum CardTag
+    public enum CardType
     {
-        [InspectorName("无")]
-        None = 0,
+        [InspectorName("通用")]
+        Common = 0,
         [InspectorName("占卜")]
-        Divination = 1 << 0,
+        Divination = 1,
         [InspectorName("奥术")]
-        Arcane = 1 << 1
+        Arcane = 2
     }
 
     [HideMonoScript]
@@ -49,7 +49,7 @@ namespace Card5
         [BoxGroup("基础信息文本"), SerializeField, LabelText("卡牌名称")] string _cardName;
         [BoxGroup("基础信息文本"), SerializeField, LabelText("描述"), TextArea(3, 6)] string _description;
         [BoxGroup("基础信息文本"), SerializeField, LabelText("能量消耗"), MinValue(0)] int _energyCost;
-        [BoxGroup("基础信息配置"), SerializeField, LabelText("卡牌标签"), EnumToggleButtons] CardTag _tags = CardTag.None;
+        [BoxGroup("基础信息配置"), FormerlySerializedAs("_tags"), SerializeField, LabelText("卡牌类型"), EnumToggleButtons] CardType _cardType = CardType.Common;
         [BoxGroup("基础信息配置"), SerializeField, LabelText("生效位置"), EnumToggleButtons] CardActivationPosition _activationPositions = CardActivationPosition.Any;
         [BoxGroup("基础信息视觉"), SerializeField, LabelText("卡面图片"), PreviewField(100, ObjectFieldAlignment.Center)] Sprite _artwork;
         [BoxGroup("效果配置")]
@@ -60,9 +60,9 @@ namespace Card5
         public string CardName => _cardName;
         public string Description => _description;
         public int EnergyCost => _energyCost;
-        public CardTag Tags => NormalizeTags(_tags);
-        [BoxGroup("基础信息说明"), ShowInInspector, ReadOnly, LabelText("标签说明")]
-        public string TagDescription => GetTagDescription();
+        public CardType Type => NormalizeCardType(_cardType);
+        [BoxGroup("基础信息说明"), ShowInInspector, ReadOnly, LabelText("类型说明")]
+        public string TypeDescription => GetTypeDescription();
         public CardActivationPosition ActivationPositions => NormalizeActivationPositions(_activationPositions);
         [BoxGroup("基础信息说明"), ShowInInspector, ReadOnly, LabelText("生效位置说明")]
         public string ActivationPositionDescription => GetActivationPositionDescription();
@@ -72,36 +72,20 @@ namespace Card5
         [BoxGroup("基础信息说明"), ShowInInspector, ReadOnly, MultiLineProperty(5), LabelText("完整描述")]
         string InspectorFullDescription => GetFullDescription();
 
-        public bool HasTag(CardTag tag)
+        public bool IsType(CardType type)
         {
-            CardTag normalizedTag = NormalizeTags(tag);
-            if (normalizedTag == CardTag.None) return Tags == CardTag.None;
-            return (Tags & normalizedTag) == normalizedTag;
+            return Type == NormalizeCardType(type);
         }
 
-        public bool HasAnyTag(CardTag tags)
+        public string GetTypeDescription()
         {
-            CardTag normalizedTags = NormalizeTags(tags);
-            if (normalizedTags == CardTag.None) return Tags == CardTag.None;
-            return (Tags & normalizedTags) != 0;
-        }
-
-        public bool HasAllTags(CardTag tags)
-        {
-            CardTag normalizedTags = NormalizeTags(tags);
-            if (normalizedTags == CardTag.None) return true;
-            return (Tags & normalizedTags) == normalizedTags;
-        }
-
-        public string GetTagDescription()
-        {
-            CardTag tags = Tags;
-            if (tags == CardTag.None) return "无";
-
-            var builder = new StringBuilder();
-            AppendTagName(builder, tags, CardTag.Divination, "占卜");
-            AppendTagName(builder, tags, CardTag.Arcane, "奥术");
-            return builder.ToString();
+            return Type switch
+            {
+                CardType.Common     => "通用",
+                CardType.Divination => "占卜",
+                CardType.Arcane     => "奥术",
+                _                   => "通用"
+            };
         }
 
         public bool CanActivateAtSlot(int slotIndex)
@@ -181,7 +165,7 @@ namespace Card5
                 _cardId = name;
             if (_activationPositions == CardActivationPosition.None)
                 _activationPositions = CardActivationPosition.Any;
-            _tags = NormalizeTags(_tags);
+            _cardType = NormalizeCardType(_cardType);
         }
 
         static CardActivationPosition NormalizeActivationPositions(CardActivationPosition positions)
@@ -190,18 +174,9 @@ namespace Card5
             return normalized == CardActivationPosition.None ? CardActivationPosition.Any : normalized;
         }
 
-        static CardTag NormalizeTags(CardTag tags)
+        static CardType NormalizeCardType(CardType cardType)
         {
-            return tags & (CardTag.Divination | CardTag.Arcane);
-        }
-
-        static void AppendTagName(StringBuilder builder, CardTag tags, CardTag tag, string tagName)
-        {
-            if ((tags & tag) == 0) return;
-
-            if (builder.Length > 0)
-                builder.Append("、");
-            builder.Append(tagName);
+            return cardType is CardType.Common or CardType.Divination or CardType.Arcane ? cardType : CardType.Common;
         }
     }
 }

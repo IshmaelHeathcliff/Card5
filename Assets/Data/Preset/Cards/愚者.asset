@@ -50,6 +50,6 @@ MonoBehaviour:
   _cardName: "\u611A\u8005"
   _description: "\u9020\u62101\u70B9\u4F24\u5BB3"
   _energyCost: 0
-  _tags: 0
+  _cardType: 0
   _activationPositions: 31
   _artwork: {fileID: 2802820480549492295, guid: d6da951c8b6f22e468204db5a39053d9, type: 3}
