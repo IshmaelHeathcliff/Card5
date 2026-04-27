@@ -35,12 +35,10 @@ namespace Card5
     {
         [InspectorName("无")]
         None = 0,
-        [InspectorName("仪式")]
-        Ritual = 1 << 0,
-        [InspectorName("法术")]
-        Spell = 1 << 1,
-        [InspectorName("战意")]
-        BattleWill = 1 << 2
+        [InspectorName("占卜")]
+        Divination = 1 << 0,
+        [InspectorName("奥术")]
+        Arcane = 1 << 1
     }
 
     [HideMonoScript]
@@ -101,9 +99,8 @@ namespace Card5
             if (tags == CardTag.None) return "无";
 
             var builder = new StringBuilder();
-            AppendTagName(builder, tags, CardTag.Ritual, "仪式");
-            AppendTagName(builder, tags, CardTag.Spell, "法术");
-            AppendTagName(builder, tags, CardTag.BattleWill, "战意");
+            AppendTagName(builder, tags, CardTag.Divination, "占卜");
+            AppendTagName(builder, tags, CardTag.Arcane, "奥术");
             return builder.ToString();
         }
 
@@ -195,7 +192,7 @@ namespace Card5
 
         static CardTag NormalizeTags(CardTag tags)
         {
-            return tags & (CardTag.Ritual | CardTag.Spell | CardTag.BattleWill);
+            return tags & (CardTag.Divination | CardTag.Arcane);
         }
 
         static void AppendTagName(StringBuilder builder, CardTag tags, CardTag tag, string tagName)
