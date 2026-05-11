@@ -36,6 +36,11 @@ namespace Card5
             this.RegisterEvent<BattleEndedEvent>(OnBattleEnded).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<RedrawCountChangedEvent>(OnRedrawCountChanged).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<BattleRewardOfferedEvent>(OnBattleRewardOffered).UnRegisterWhenGameObjectDestroyed(gameObject);
+            this.RegisterEvent<CardPlayedEvent>(OnSlotStateChanged).UnRegisterWhenGameObjectDestroyed(gameObject);
+            this.RegisterEvent<CardRemovedFromSlotEvent>(OnSlotStateChanged).UnRegisterWhenGameObjectDestroyed(gameObject);
+            this.RegisterEvent<SlotsSwappedEvent>(OnSlotStateChanged).UnRegisterWhenGameObjectDestroyed(gameObject);
+            this.RegisterEvent<HandSlotSwappedEvent>(OnSlotStateChanged).UnRegisterWhenGameObjectDestroyed(gameObject);
+            this.RegisterEvent<SlotEffectsResolvedEvent>(OnSlotStateChanged).UnRegisterWhenGameObjectDestroyed(gameObject);
         }
 
         void Start()
@@ -59,8 +64,8 @@ namespace Card5
 
         void OnBattleStarted(BattleStartedEvent e)
         {
-            if (_endTurnButton != null) _endTurnButton.interactable = true;
-            if (_redrawButton != null) _redrawButton.interactable = true;
+            UpdateEndTurnButtonState();
+            UpdateRedrawButtonState();
             UIPopupManager.Instance?.HideAll();
         }
 
@@ -68,6 +73,8 @@ namespace Card5
         {
             if (_energyText != null)
                 _energyText.text = $"能量: {e.CurrentEnergy} / {e.MaxEnergy}";
+
+            UpdateRedrawButtonState();
         }
 
         void OnTurnStarted(TurnStartedEvent e)
@@ -75,7 +82,8 @@ namespace Card5
             if (_turnText != null)
                 _turnText.text = $"第 {e.TurnNumber} 回合";
 
-            if (_endTurnButton != null) _endTurnButton.interactable = true;
+            UpdateEndTurnButtonState();
+            UpdateRedrawButtonState();
         }
 
         void OnMonsterPlayRoundCountChanged(MonsterPlayRoundCountChangedEvent e)
@@ -102,18 +110,33 @@ namespace Card5
             if (_redrawCountText != null)
                 _redrawCountText.text = $"重抽: {e.Remaining}/{e.Max}";
 
-            if (_redrawButton != null)
-                _redrawButton.interactable = e.Remaining > 0;
+            UpdateRedrawButtonState();
         }
+
+        void OnSlotStateChanged(CardPlayedEvent e) => UpdateEndTurnButtonState();
+
+        void OnSlotStateChanged(CardRemovedFromSlotEvent e) => UpdateEndTurnButtonState();
+
+        void OnSlotStateChanged(SlotsSwappedEvent e) => UpdateEndTurnButtonState();
+
+        void OnSlotStateChanged(HandSlotSwappedEvent e) => UpdateEndTurnButtonState();
+
+        void OnSlotStateChanged(SlotEffectsResolvedEvent e) => UpdateEndTurnButtonState();
 
         void OnEndTurnClicked()
         {
+            if (_endTurnButton != null && !_endTurnButton.interactable)
+                return;
+
             if (_endTurnButton != null) _endTurnButton.interactable = false;
             this.SendCommand<EndTurnCommand>();
         }
 
         void OnRedrawClicked()
         {
+            if (_redrawButton != null && !_redrawButton.interactable)
+                return;
+
             if (_handViewController != null)
                 _handViewController.EnterRedrawMode();
         }
@@ -143,6 +166,24 @@ namespace Card5
             _monsterPlayRoundsText.color = _turnText.color;
             _monsterPlayRoundsText.raycastTarget = false;
             _monsterPlayRoundsText.text = "剩余出牌: -";
+        }
+
+        void UpdateEndTurnButtonState()
+        {
+            if (_endTurnButton == null)
+                return;
+
+            BattleSystem battleSystem = this.GetSystem<BattleSystem>();
+            _endTurnButton.interactable = battleSystem != null && battleSystem.CanEndTurn();
+        }
+
+        void UpdateRedrawButtonState()
+        {
+            if (_redrawButton == null)
+                return;
+
+            BattleSystem battleSystem = this.GetSystem<BattleSystem>();
+            _redrawButton.interactable = battleSystem != null && battleSystem.CanRedraw();
         }
 
     }

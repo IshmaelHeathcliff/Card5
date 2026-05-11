@@ -7,9 +7,11 @@ namespace Card5
     public class BattleModel : AbstractModel
     {
         public const int SlotCount = 5;
+        public const int MaxRedrawSelectionCount = 5;
 
         public BindableProperty<int> CurrentEnergy { get; } = new BindableProperty<int>();
         public BindableProperty<int> MaxEnergy { get; } = new BindableProperty<int>(3);
+        public int BaseMaxEnergy { get; private set; }
 
         public BindableProperty<int> TurnNumber { get; } = new BindableProperty<int>(0);
 
@@ -36,6 +38,7 @@ namespace Card5
 
         public void InitBattle(int maxEnergy)
         {
+            BaseMaxEnergy = maxEnergy;
             MaxEnergy.Value = maxEnergy;
             CurrentEnergy.Value = maxEnergy;
             TurnNumber.Value = 0;
@@ -73,6 +76,17 @@ namespace Card5
         {
             for (int i = 0; i < SlotCount; i++)
                 PlaySlots[i] = null;
+        }
+
+        public bool AreAllSlotsFilled()
+        {
+            for (int i = 0; i < SlotCount; i++)
+            {
+                if (PlaySlots[i] == null)
+                    return false;
+            }
+
+            return true;
         }
 
         public bool IsSlotEmpty(int slotIndex) => PlaySlots[slotIndex] == null;

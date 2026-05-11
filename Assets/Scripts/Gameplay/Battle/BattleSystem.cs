@@ -46,7 +46,7 @@ namespace Card5
             DeckPresetData deckPreset,
             EnemyData enemyData,
             BattleRewardConfigData rewardConfig,
-            int maxEnergy = 3)
+            int maxEnergy = 13)
         {
             StartBattle(deckPreset, null, enemyData, rewardConfig, maxEnergy);
         }
@@ -56,7 +56,7 @@ namespace Card5
             MonsterListData monsterList,
             EnemyData enemyData,
             BattleRewardConfigData rewardConfig,
-            int maxEnergy = 3)
+            int maxEnergy = 13)
         {
             _lastDeckPreset = deckPreset;
             _lastMonsterList = monsterList;
@@ -282,11 +282,27 @@ namespace Card5
             return true;
         }
 
+        public bool CanEndTurn()
+        {
+            if (_battleModel.IsBattleOver) return false;
+            if (_rewardModel.HasPendingReward) return false;
+
+            return _battleModel.AreAllSlotsFilled();
+        }
+
+        public bool CanRedraw()
+        {
+            if (_battleModel.IsBattleOver) return false;
+            if (_rewardModel.HasPendingReward) return false;
+            if (_battleModel.RedrawsRemaining <= 0) return false;
+
+            return _battleModel.MaxEnergy.Value > 0;
+        }
+
         /// <summary>结束当前回合，结算所有槽位效果，触发敌人行动，开始新回合</summary>
         public void EndTurn()
         {
-            if (_battleModel.IsBattleOver) return;
-            if (_rewardModel.HasPendingReward) return;
+            if (!CanEndTurn()) return;
 
             this.SendEvent(new TurnEndedEvent { TurnNumber = _battleModel.TurnNumber.Value });
 
@@ -478,17 +494,24 @@ namespace Card5
         /// <summary>丢弃指定手牌索引并重新抽取，每回合限定次数</summary>
         public bool TryRedrawCards(List<int> handIndices)
         {
-            if (_battleModel.IsBattleOver) return false;
-            if (_battleModel.RedrawsRemaining <= 0) return false;
+            if (!CanRedraw()) return false;
             if (handIndices == null || handIndices.Count == 0) return false;
+            if (handIndices.Count > BattleModel.MaxRedrawSelectionCount) return false;
 
             _battleModel.RedrawsRemaining--;
+            _battleModel.MaxEnergy.Value = Mathf.Max(0, _battleModel.MaxEnergy.Value - 1);
+            _battleModel.CurrentEnergy.Value = Mathf.Min(_battleModel.CurrentEnergy.Value, _battleModel.MaxEnergy.Value);
             _cardSystem.RedrawCards(handIndices);
 
             this.SendEvent(new RedrawCountChangedEvent
             {
                 Remaining = _battleModel.RedrawsRemaining,
                 Max = _battleModel.RedrawsPerTurn
+            });
+            this.SendEvent(new EnergyChangedEvent
+            {
+                CurrentEnergy = _battleModel.CurrentEnergy.Value,
+                MaxEnergy = _battleModel.MaxEnergy.Value
             });
 
             return true;
@@ -497,6 +520,7 @@ namespace Card5
         void StartTurn()
         {
             _battleModel.TurnNumber.Value++;
+            _battleModel.MaxEnergy.Value = _battleModel.BaseMaxEnergy;
             _battleModel.CurrentEnergy.Value = _battleModel.MaxEnergy.Value;
             _battleModel.RedrawsRemaining = _battleModel.RedrawsPerTurn;
 

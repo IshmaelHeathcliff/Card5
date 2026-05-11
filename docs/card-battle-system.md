@@ -44,6 +44,7 @@ GameManager.StartBattle()
 ```
 
 `GameGlobalConfigData` 和场景 `GameManager` 都使用 `MonsterListData` 作为战斗怪物队列入口。每个怪物配置包含敌人数据与本怪物最大出牌轮数，一轮最多结算 5 张槽位卡。
+当前战斗默认每回合最大能量为 13。
 
 ### 出牌流程
 
@@ -63,6 +64,7 @@ HandViewController  监听 HandRefreshedEvent
 玩家点击「结束回合」
   └─ EndTurnCommand
        └─ BattleSystem.EndTurn()
+            ├─ 验证：5 个槽位必须全部放满，否则不允许结束回合
             ├─ BattleSystem.ResolveSlots()  // 按槽位顺序结算
             │    ├─ MarkSystem.ExecuteSlotMarks(BeforeCardEffects)
             │    ├─ CardEffect.Execute(BattleContext)    // 卡牌内联效果
@@ -80,6 +82,7 @@ HandViewController  监听 HandRefreshedEvent
 ```
 
 当前出牌轮数按每次结束回合后的槽位结算计数。若一张卡击败当前怪物，本轮后续槽位卡牌不再继续结算，并统一进入弃牌堆。
+玩家必须先放满 5 个出牌槽，才可以点击「结束回合」并结算本轮出牌；任意空槽都会阻止本轮出牌结算。
 `CardData` 可配置 1-5 号位的任意生效组合，并在 Odin Inspector 中提供「任意位置」「奇数位」「偶数位」快捷按钮。卡牌放在未配置的槽位时仍会被结算并进入弃牌堆，但不会触发该卡效果、卡牌印记或槽位印记；槽位背景会按状态显示为灰色空槽、绿色有效、红色无效。
 `CardData` 的效果直接内联配置在卡牌资产中，基于 Odin 多态序列化选择具体 `CardEffect` 类型，不再创建独立效果资产。
 `BoostSlotCardEffect` 可以提高指定槽位本轮后续主卡牌效果数值，支持固定增加、百分比增加和倍率提升；当前通过 `BattleContext.DealDamage()` 生效。
@@ -131,11 +134,15 @@ BattleSystem.EndTurn()
 玩家点击「重抽」
   └─ RedrawCardsCommand(selectedCards)
        └─ BattleSystem.TryRedrawCards()
-            ├─ 验证 RedrawsRemaining > 0
+            ├─ 验证：最多选择 5 张，RedrawsRemaining > 0，且本回合最大能量 > 0
             ├─ CardSystem.RedrawCards()    // 选中手牌→弃牌堆，重新抽同等数量
             ├─ RedrawsRemaining -1
-            └─ 发送 RedrawCountChangedEvent
+            ├─ 本回合 MaxEnergy -1，并将 CurrentEnergy 限制到新的上限内
+            └─ 发送 RedrawCountChangedEvent / EnergyChangedEvent
 ```
+
+重抽消耗的是“本回合最大能量”，不是整局永久最大能量；进入下一回合时，`StartTurn()` 会先把最大能量重置回战斗初始值，再恢复本回合能量。
+重抽界面当前最多只能选择 5 张手牌，系统层也会拒绝超过 5 张的重抽请求。
 
 ### 战斗奖励流程
 

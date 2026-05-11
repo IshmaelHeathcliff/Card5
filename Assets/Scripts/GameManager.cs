@@ -17,7 +17,7 @@ namespace Card5
         [SerializeField] MonsterListData _monsterList;
         [SerializeField] BattleRewardConfigData _rewardConfig;
 
-        [SerializeField] int _maxEnergy = 3;
+        [SerializeField] int _maxEnergy = 13;
 
         [SerializeField] int _targetFrameRate = 60;
 

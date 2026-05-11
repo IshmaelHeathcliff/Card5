@@ -13,7 +13,7 @@ namespace Card5
             MonsterListData monsterList,
             EnemyData enemyData,
             BattleRewardConfigData rewardConfig,
-            int maxEnergy = 3)
+            int maxEnergy = 13)
         {
             _deckPreset = deckPreset;
             _monsterList = monsterList;
@@ -26,12 +26,12 @@ namespace Card5
             DeckPresetData deckPreset,
             EnemyData enemyData,
             BattleRewardConfigData rewardConfig,
-            int maxEnergy = 3)
+            int maxEnergy = 13)
             : this(deckPreset, null, enemyData, rewardConfig, maxEnergy)
         {
         }
 
-        public StartBattleCommand(DeckPresetData deckPreset, EnemyData enemyData, int maxEnergy = 3)
+        public StartBattleCommand(DeckPresetData deckPreset, EnemyData enemyData, int maxEnergy = 13)
             : this(deckPreset, enemyData, null, maxEnergy)
         {
         }

@@ -238,6 +238,9 @@ namespace Card5
                     indices.Add(idx);
             }
 
+            if (indices.Count > BattleModel.MaxRedrawSelectionCount)
+                return;
+
             this.SendCommand(new RedrawCardsCommand(indices));
             ExitRedrawMode();
         }
@@ -254,6 +257,9 @@ namespace Card5
             }
             else
             {
+                if (_redrawSelected.Count >= BattleModel.MaxRedrawSelectionCount)
+                    return;
+
                 _redrawSelected.Add(cardView);
                 cardView.SetRedrawSelected(true);
             }

@@ -11,7 +11,7 @@ namespace Card5
         [BoxGroup("战斗入口"), SerializeField, LabelText("怪物列表"), Required, InlineEditor(InlineEditorObjectFieldModes.Boxed)] MonsterListData _monsterList;
         [BoxGroup("战斗入口"), SerializeField, LabelText("奖励配置"), Required, InlineEditor(InlineEditorObjectFieldModes.Boxed)] BattleRewardConfigData _rewardConfig;
 
-        [BoxGroup("玩家初始数值"), SerializeField, LabelText("最大能量"), MinValue(0)] int _maxEnergy = 3;
+        [BoxGroup("玩家初始数值"), SerializeField, LabelText("最大能量"), MinValue(0)] int _maxEnergy = 13;
 
         [BoxGroup("运行设置"), SerializeField, LabelText("目标帧率"), MinValue(-1)] int _targetFrameRate = 60;
 
