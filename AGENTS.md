@@ -3,8 +3,12 @@
 ## 基础
 
 - 始终使用中文回答。
-- 回答保持简洁、准确。
 - 实现功能前先做计划
+- 编码前思考。不要假设。不要隐藏困惑，困惑时停下来，适时提出异议。
+- 简洁优先。用最少的代码解决问题，不要过度推测。
+- 精准修改。只碰必须碰的。只清理自己造成的混乱。
+- 目标驱动执行。定义成功标准，循环验证直到达成。
+- 优先使用已有工具来完成功能，减少自行造轮子
 
 ## 文档维护
 
@@ -17,7 +21,7 @@
 
 ## 基础工具
 
-- 使用 [QFramework.cs](mdc:Assets/Scripts/Core/QFramework.cs) 作为基础架构
+- 使用 [QFramework.cs](Assets/Scripts/Core/QFramework.cs) 作为基础架构
     - 将模块分为 `Model` 、 `System` 、 `Controller` 、 `Utility`
     - 大多数 `Monobehaviour` 都应该实现 `IController` 来接入QFramework
     - 在 Controller 中使用 Command 对 `Model` 进行操作
@@ -25,10 +29,10 @@
     - 在 Controller 中注册 Event 来实现事件回调
     - Controller 中只能注册 Event，不能发送 Event
     - 在 System、Model、Command中完成操作时发送 Event 通知 Controller
-- 使用 `UniTask` 处理异步操作，尽量使用异步操作代替协程、 `Update` 等
+- 使用 `UniTask` 处理异步操作，优先使用异步操作代替协程、 `Update` 等
 - 使用Unity的 `Addressables` 进行资源管理
 - 使用 Unity 的新输入系统 InputSystem
-- 在开发中尽量使用 `Odin` 构建方便使用的Editor工具
+- 在开发中优先使用 `Odin` 构建方便使用的Editor工具
 - 使用 `SerializedScriptableObject` 或 `ScriptableObject` 作为主要的数据配置类
     - 数据配置类中各种字段、枚举等标注中文
     - 使用 Odin 原生功能
