@@ -34,10 +34,11 @@ namespace Card5
                 return;
             }
 
-            bool showTopInfo = mode != CardDisplayMode.Compact;
-            bool showName = mode != CardDisplayMode.Compact;
-            bool showCost = mode == CardDisplayMode.Full;
-            bool showDescription = mode == CardDisplayMode.Full;
+            // 当前所有卡牌显示统一按完整模式渲染，保留 mode 参数仅兼容现有调用链。
+            bool showTopInfo = true;
+            bool showName = true;
+            bool showCost = true;
+            bool showDescription = true;
 
             SetNodeActive(_topInfo, showTopInfo);
             SetNodeActive(_activationPosition, showTopInfo);

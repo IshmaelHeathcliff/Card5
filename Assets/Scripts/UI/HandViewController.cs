@@ -35,19 +35,42 @@ namespace Card5
         [SerializeField, Range(0f, 20f)] float _fanAngle = 6f;
         [SerializeField, MinValue(0f)] float _slotGhostScale = 0.62f;
 
+        [Title("牌堆动画")]
+        [SerializeField, MinValue(0f)] float _pileGhostDuration = 0.22f;
+        [SerializeField, MinValue(0f)] float _shuffleGhostDuration = 0.24f;
+        [SerializeField, MinValue(0f)] float _pileGhostScale = 0.58f;
+        [SerializeField, Range(1, 5)] int _shufflePreviewCount = 3;
+        [SerializeField, MinValue(0f)] float _shufflePreviewStagger = 0.04f;
+
         readonly List<CardViewController> _cardViews = new List<CardViewController>();
+        readonly Queue<PendingDrawRequest> _pendingDrawRequests = new Queue<PendingDrawRequest>();
         readonly HashSet<CardViewController> _redrawSelected = new HashSet<CardViewController>();
         readonly Dictionary<int, CardSlotView> _slotViews = new Dictionary<int, CardSlotView>();
 
         bool _isRedrawMode;
+        bool _isProcessingPendingDraws;
+        bool _hasPendingReturnedCardDrop;
         CardViewController _hoveredCard;
         CardViewController _draggingCard;
+        CardViewController _pendingPlayedCardView;
         int _dragPreviewIndex = -1;
+        int _pendingReturnedCardInsertIndex;
+        int _drawVisualSequenceVersion;
+        float _drawVisualBlockedUntil;
+        float _scheduledDrawAnimationUntil;
 
         DeckModel _deckModel;
         BattleModel _battleModel;
         Canvas _rootCanvas;
         RectTransform _handContainerRect;
+        Vector3 _pendingReturnedCardWorldPosition;
+
+        struct PendingDrawRequest
+        {
+            public CardData Card;
+            public int HandIndex;
+            public float AvailableAt;
+        }
 
         public IArchitecture GetArchitecture() => GameArchitecture.Interface;
 
@@ -104,9 +127,11 @@ namespace Card5
         void OnEnable()
         {
             this.RegisterEvent<HandRefreshedEvent>(OnHandRefreshed).UnRegisterWhenGameObjectDestroyed(gameObject);
+            this.RegisterEvent<HandDiscardedEvent>(OnHandDiscarded).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<CardRemovedFromHandEvent>(OnCardRemovedFromHand).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<CardAddedToHandEvent>(OnCardAddedToHand).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<CardReturnedToHandEvent>(OnCardReturnedToHand).UnRegisterWhenGameObjectDestroyed(gameObject);
+            this.RegisterEvent<DiscardPileShuffledIntoDrawEvent>(OnDiscardPileShuffledIntoDraw).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<HandSlotSwappedEvent>(OnHandSlotSwapped).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<TurnStartedEvent>(OnTurnStarted).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<BattleStartedEvent>(OnBattleStarted).UnRegisterWhenGameObjectDestroyed(gameObject);
@@ -114,8 +139,11 @@ namespace Card5
 
         void OnBattleStarted(BattleStartedEvent e)
         {
+            ClearPendingReturnedCardDrop();
+            ClearPendingDrawRequests();
             _hoveredCard = null;
             _draggingCard = null;
+            _pendingPlayedCardView = null;
             _dragPreviewIndex = -1;
         }
 
@@ -136,12 +164,23 @@ namespace Card5
                 return;
 
             CardViewController view = _cardViews[e.HandIndex];
+            bool isPlayRemoval = view == _pendingPlayedCardView;
             if (_hoveredCard == view)
                 _hoveredCard = null;
             if (_draggingCard == view)
             {
                 _draggingCard = null;
                 _dragPreviewIndex = -1;
+            }
+
+            if (!isPlayRemoval)
+            {
+                RegisterConcurrentDrawVisualBlock(_pileGhostDuration);
+                PlayGhostToDiscard(view.CardData, view.RectTransform.position).Forget();
+            }
+            else
+            {
+                _pendingPlayedCardView = null;
             }
 
             UnsubscribeCard(view);
@@ -155,9 +194,29 @@ namespace Card5
             if (e.HandIndex < 0 || e.HandIndex > _deckModel.Hand.Count - 1)
                 return;
 
-            CardData card = _deckModel.Hand[e.HandIndex];
-            SpawnCardView(card, e.HandIndex, null);
-            RefreshHandLayout(true);
+            float availableAt = Mathf.Max(Time.unscaledTime, _drawVisualBlockedUntil);
+            _pendingDrawRequests.Enqueue(new PendingDrawRequest
+            {
+                Card = _deckModel.Hand[e.HandIndex],
+                HandIndex = e.HandIndex,
+                AvailableAt = availableAt
+            });
+            _scheduledDrawAnimationUntil = Mathf.Max(_scheduledDrawAnimationUntil, availableAt + _cardMoveDuration);
+            ProcessPendingDrawsAsync().Forget();
+        }
+
+        void OnHandDiscarded(HandDiscardedEvent e)
+        {
+            if (_cardViews.Count > 0)
+                RegisterConcurrentDrawVisualBlock(_pileGhostDuration);
+
+            foreach (CardViewController view in _cardViews)
+            {
+                if (view == null || view.CardData == null)
+                    continue;
+
+                PlayGhostToDiscard(view.CardData, view.RectTransform.position).Forget();
+            }
         }
 
         void OnCardReturnedToHand(CardReturnedToHandEvent e)
@@ -166,16 +225,26 @@ namespace Card5
                 return;
 
             CardData card = _deckModel.Hand[e.HandIndex];
-            Vector3? startWorldPosition = TryGetSlotWorldPosition(e.SourceSlotIndex, out Vector3 worldPosition)
-                ? worldPosition
-                : null;
+            int insertIndex = e.HandIndex;
+            Vector3? startWorldPosition;
 
-            CardDisplayMode displayMode = startWorldPosition.HasValue ? CardDisplayMode.Compact : CardDisplayMode.Full;
-            CardViewController view = SpawnCardView(card, e.HandIndex, startWorldPosition, displayMode);
+            if (_hasPendingReturnedCardDrop)
+            {
+                startWorldPosition = _pendingReturnedCardWorldPosition;
+                _deckModel.Hand.RemoveAt(e.HandIndex);
+                insertIndex = Mathf.Clamp(_pendingReturnedCardInsertIndex, 0, _deckModel.Hand.Count);
+                _deckModel.Hand.Insert(insertIndex, card);
+                ClearPendingReturnedCardDrop();
+            }
+            else
+            {
+                startWorldPosition = TryGetSlotWorldPosition(e.SourceSlotIndex, out Vector3 worldPosition)
+                    ? worldPosition
+                    : null;
+            }
+
+            SpawnCardView(card, insertIndex, startWorldPosition);
             RefreshHandLayout(true);
-
-            if (view != null && startWorldPosition.HasValue)
-                RestoreFullDisplayAfterMoveAsync(view, card).Forget();
         }
 
         void OnHandSlotSwapped(HandSlotSwappedEvent e)
@@ -185,13 +254,32 @@ namespace Card5
 
             CardViewController view = _cardViews[e.HandIndex];
             CardData card = _deckModel.Hand[e.HandIndex];
-            view.Setup(card, CardDisplayMode.Compact);
+            view.Setup(card);
 
             if (TryGetSlotWorldPosition(e.SlotIndex, out Vector3 slotWorldPosition))
                 view.transform.position = slotWorldPosition;
 
             RefreshHandLayout(true);
-            RestoreFullDisplayAfterMoveAsync(view, card).Forget();
+        }
+
+        void OnDiscardPileShuffledIntoDraw(DiscardPileShuffledIntoDrawEvent e)
+        {
+            if (e.Cards == null || e.Cards.Count == 0)
+                return;
+
+            int drawVisualSequenceVersion = _drawVisualSequenceVersion;
+            float startDelay = RegisterSequentialDrawVisualBlock(GetShuffleAnimationDuration(e.Cards.Count));
+            PlayShuffleToDrawAsync(e.Cards, startDelay, drawVisualSequenceVersion).Forget();
+            ProcessPendingDrawsAsync().Forget();
+        }
+
+        public void RegisterConcurrentDrawVisualBlock(float duration)
+        {
+            if (duration <= 0f)
+                return;
+
+            _drawVisualBlockedUntil = Mathf.Max(_drawVisualBlockedUntil, Time.unscaledTime + duration);
+            _scheduledDrawAnimationUntil = Mathf.Max(_scheduledDrawAnimationUntil, _drawVisualBlockedUntil);
         }
 
         public void EnterRedrawMode()
@@ -220,6 +308,29 @@ namespace Card5
 
             if (_redrawPanel != null)
                 _redrawPanel.SetActive(false);
+        }
+
+        public void PrepareReturnedCardDrop(Vector3 worldPosition)
+        {
+            _pendingReturnedCardWorldPosition = worldPosition;
+            _pendingReturnedCardInsertIndex = ComputeInsertIndexFromWorldPosition(worldPosition);
+            _hasPendingReturnedCardDrop = true;
+        }
+
+        public void ClearPendingReturnedCardDrop()
+        {
+            _hasPendingReturnedCardDrop = false;
+            _pendingReturnedCardInsertIndex = 0;
+            _pendingReturnedCardWorldPosition = Vector3.zero;
+        }
+
+        void ClearPendingDrawRequests()
+        {
+            _pendingDrawRequests.Clear();
+            _drawVisualSequenceVersion++;
+            _drawVisualBlockedUntil = 0f;
+            _scheduledDrawAnimationUntil = 0f;
+            _isProcessingPendingDraws = false;
         }
 
         void ConfirmRedraw()
@@ -282,9 +393,11 @@ namespace Card5
             if (_slotViews.TryGetValue(slotIndex, out CardSlotView slotView) && slotView != null)
                 slotView.DelayNextReveal(_ghostMoveDuration);
 
+            _pendingPlayedCardView = cardView;
             bool success = this.SendCommand(new PlayCardCommand(cardView.CardData, slotIndex, handIndex));
             if (!success)
             {
+                _pendingPlayedCardView = null;
                 if (slotView != null)
                     slotView.DelayNextReveal(0f);
                 return;
@@ -376,6 +489,7 @@ namespace Card5
 
             _draggingCard = null;
             _dragPreviewIndex = -1;
+            _pendingPlayedCardView = cardView;
 
             if (hasSlotCard)
                 success = this.SendCommand(new SwapHandWithSlotCommand(cardView.CardData, handIndex, slotIndex));
@@ -384,6 +498,7 @@ namespace Card5
 
             if (!success)
             {
+                _pendingPlayedCardView = null;
                 cardView.ReturnToHand();
                 RefreshHandLayout(true);
                 return;
@@ -432,6 +547,74 @@ namespace Card5
 
             view.transform.SetSiblingIndex(_cardViews.Count - 1);
             return view;
+        }
+
+        float RegisterSequentialDrawVisualBlock(float duration)
+        {
+            if (duration <= 0f)
+                return 0f;
+
+            float now = Time.unscaledTime;
+            float startTime = Mathf.Max(now, Mathf.Max(_drawVisualBlockedUntil, _scheduledDrawAnimationUntil));
+            _drawVisualBlockedUntil = startTime + duration;
+            _scheduledDrawAnimationUntil = Mathf.Max(_scheduledDrawAnimationUntil, _drawVisualBlockedUntil);
+            return Mathf.Max(0f, startTime - now);
+        }
+
+        float GetShuffleAnimationDuration(int cardCount)
+        {
+            int previewCount = Mathf.Min(_shufflePreviewCount, cardCount);
+            if (previewCount <= 0)
+                return 0f;
+
+            return _shuffleGhostDuration + _shufflePreviewStagger * (previewCount - 1);
+        }
+
+        async UniTaskVoid ProcessPendingDrawsAsync()
+        {
+            if (_isProcessingPendingDraws)
+                return;
+
+            _isProcessingPendingDraws = true;
+            int drawVisualSequenceVersion = _drawVisualSequenceVersion;
+
+            try
+            {
+                while (_pendingDrawRequests.Count > 0)
+                {
+                    PendingDrawRequest request = _pendingDrawRequests.Peek();
+                    await WaitForDrawRequestAsync(request.AvailableAt);
+                    if (drawVisualSequenceVersion != _drawVisualSequenceVersion)
+                        return;
+
+                    request = _pendingDrawRequests.Dequeue();
+                    Vector3? startWorldPosition = TryGetDrawPileWorldPosition(out Vector3 drawPileWorldPosition)
+                        ? drawPileWorldPosition
+                        : null;
+
+                    SpawnCardView(request.Card, request.HandIndex, startWorldPosition);
+                    RefreshHandLayout(true);
+                }
+            }
+            finally
+            {
+                _isProcessingPendingDraws = false;
+
+                if (_pendingDrawRequests.Count > 0)
+                    ProcessPendingDrawsAsync().Forget();
+            }
+        }
+
+        async UniTask WaitForDrawRequestAsync(float availableAt)
+        {
+            while (true)
+            {
+                float remaining = availableAt - Time.unscaledTime;
+                if (remaining <= 0f)
+                    return;
+
+                await UniTask.Delay(TimeSpan.FromSeconds(remaining));
+            }
         }
 
         void SubscribeCard(CardViewController view)
@@ -566,6 +749,36 @@ namespace Card5
             return Mathf.Clamp(insertIndex, 0, _cardViews.Count - 1);
         }
 
+        int ComputeInsertIndexFromWorldPosition(Vector3 worldPosition)
+        {
+            if (_handContainerRect == null)
+                _handContainerRect = _handContainer as RectTransform;
+
+            if (_handContainerRect == null)
+                return _cardViews.Count;
+
+            Camera eventCamera = _rootCanvas != null ? _rootCanvas.worldCamera : null;
+            Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(eventCamera, worldPosition);
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    _handContainerRect,
+                    screenPoint,
+                    eventCamera,
+                    out Vector2 localPoint))
+            {
+                return _cardViews.Count;
+            }
+
+            int insertIndex = 0;
+            for (int i = 0; i < _cardViews.Count; i++)
+            {
+                CardViewController view = _cardViews[i];
+                if (localPoint.x >= view.RectTransform.localPosition.x)
+                    insertIndex++;
+            }
+
+            return Mathf.Clamp(insertIndex, 0, _cardViews.Count);
+        }
+
         float ComputeSpacing(int cardCount)
         {
             if (cardCount <= 1)
@@ -627,7 +840,7 @@ namespace Card5
             if (ghost == null)
                 return;
 
-            ghost.Setup(card, CardDisplayMode.Compact);
+            ghost.Setup(card);
             ghost.SetInteractionEnabled(false);
             ghost.transform.position = sourceWorldPosition;
             ghost.transform.SetAsLastSibling();
@@ -646,16 +859,78 @@ namespace Card5
             ReturnToPool(ghost);
         }
 
-        async UniTaskVoid RestoreFullDisplayAfterMoveAsync(CardViewController view, CardData card)
+        async UniTaskVoid PlayGhostToDiscard(CardData card, Vector3 sourceWorldPosition)
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(_cardMoveDuration));
-
-            if (view == null || !view.gameObject.activeInHierarchy)
+            if (card == null)
                 return;
-            if (view.CardData != card)
+            if (!TryGetDiscardPileWorldPosition(out Vector3 targetWorldPosition))
                 return;
 
-            view.SetDisplayMode(CardDisplayMode.Full);
+            await PlayGhostBetweenWorldPositions(card, sourceWorldPosition, targetWorldPosition, _pileGhostDuration);
+        }
+
+        async UniTaskVoid PlayShuffleToDrawAsync(IReadOnlyList<CardData> cards, float startDelay, int drawVisualSequenceVersion)
+        {
+            if (!TryGetDiscardPileWorldPosition(out Vector3 sourceWorldPosition))
+                return;
+            if (!TryGetDrawPileWorldPosition(out Vector3 targetWorldPosition))
+                return;
+
+            if (startDelay > 0f)
+                await UniTask.Delay(TimeSpan.FromSeconds(startDelay));
+            if (drawVisualSequenceVersion != _drawVisualSequenceVersion)
+                return;
+
+            int previewCount = Mathf.Min(_shufflePreviewCount, cards.Count);
+            for (int i = 0; i < previewCount; i++)
+            {
+                if (drawVisualSequenceVersion != _drawVisualSequenceVersion)
+                    return;
+
+                CardData card = cards[i];
+                if (card != null)
+                    PlayGhostBetweenWorldPositions(card, sourceWorldPosition, targetWorldPosition, _shuffleGhostDuration).Forget();
+
+                if (i < previewCount - 1)
+                    await UniTask.Delay(TimeSpan.FromSeconds(_shufflePreviewStagger));
+            }
+        }
+
+        async UniTask PlayGhostBetweenWorldPositions(
+            CardData card,
+            Vector3 sourceWorldPosition,
+            Vector3 targetWorldPosition,
+            float duration)
+        {
+            CardViewPool pool = CardViewPool.Instance;
+            if (pool == null || !pool.IsReady)
+                return;
+
+            RectTransform dragLayer = GetDragLayer();
+            if (dragLayer == null)
+                return;
+
+            CardViewController ghost = pool.Rent(dragLayer);
+            if (ghost == null)
+                return;
+
+            ghost.Setup(card);
+            ghost.SetInteractionEnabled(false);
+            ghost.transform.position = sourceWorldPosition;
+            ghost.transform.SetAsLastSibling();
+
+            Vector3 targetLocalPosition = dragLayer.InverseTransformPoint(targetWorldPosition);
+            ghost.AnimateToLocalPose(
+                targetLocalPosition,
+                Vector3.one * _pileGhostScale,
+                0f,
+                false,
+                duration);
+
+            await UniTask.Delay(TimeSpan.FromSeconds(duration));
+
+            ghost.SetInteractionEnabled(true);
+            ReturnToPool(ghost);
         }
 
         RectTransform GetDragLayer()
@@ -688,6 +963,30 @@ namespace Card5
             if (_slotViews.TryGetValue(slotIndex, out CardSlotView slotView) && slotView != null)
             {
                 worldPosition = slotView.GetCardAnchorWorldPosition();
+                return true;
+            }
+
+            worldPosition = Vector3.zero;
+            return false;
+        }
+
+        bool TryGetDrawPileWorldPosition(out Vector3 worldPosition)
+        {
+            if (DeckPileView.DrawPileInstance != null)
+            {
+                worldPosition = DeckPileView.DrawPileInstance.GetAnchorWorldPosition();
+                return true;
+            }
+
+            worldPosition = Vector3.zero;
+            return false;
+        }
+
+        bool TryGetDiscardPileWorldPosition(out Vector3 worldPosition)
+        {
+            if (DeckPileView.DiscardPileInstance != null)
+            {
+                worldPosition = DeckPileView.DiscardPileInstance.GetAnchorWorldPosition();
                 return true;
             }
 

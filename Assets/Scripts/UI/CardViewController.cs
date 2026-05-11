@@ -102,6 +102,8 @@ namespace Card5
 
         public void OnBeginDrag(PointerEventData eventData)
         {
+            if (eventData.button != PointerEventData.InputButton.Left)
+                return;
             if (!_isInteractionEnabled)
                 return;
 
@@ -122,6 +124,8 @@ namespace Card5
 
         public void OnDrag(PointerEventData eventData)
         {
+            if (eventData.button != PointerEventData.InputButton.Left)
+                return;
             if (!_isDragging)
                 return;
 
@@ -131,6 +135,8 @@ namespace Card5
 
         public void OnEndDrag(PointerEventData eventData)
         {
+            if (eventData.button != PointerEventData.InputButton.Left)
+                return;
             if (!_isInteractionEnabled)
                 return;
 

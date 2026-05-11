@@ -49,6 +49,10 @@ namespace Card5.Gameplay.Events
         public List<string> CardIds;
     }
 
+    public struct HandDiscardedEvent
+    {
+    }
+
     /// <summary>单张手牌被移出（打出或弃掉）时发送，HandIndex 为移除前在手中的索引</summary>
     public struct CardRemovedFromHandEvent
     {
@@ -134,6 +138,12 @@ namespace Card5.Gameplay.Events
     /// <summary>弃牌堆数量变化时发送</summary>
     public struct DiscardPileChangedEvent
     {
+        public int Count;
+    }
+
+    public struct DiscardPileShuffledIntoDrawEvent
+    {
+        public IReadOnlyList<CardData> Cards;
         public int Count;
     }
 

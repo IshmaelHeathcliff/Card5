@@ -23,8 +23,14 @@ namespace Card5
                 if (deckModel.DiscardPile.Count == 0)
                     return false;
 
+                var shuffledCards = new List<CardData>(deckModel.DiscardPile);
                 deckModel.ReshuffleDiscardIntoDraw();
                 Shuffle(deckModel.DrawPile);
+                this.SendEvent(new DiscardPileShuffledIntoDrawEvent
+                {
+                    Cards = shuffledCards,
+                    Count = shuffledCards.Count
+                });
                 this.SendEvent(new DiscardPileChangedEvent { Count = 0 });
             }
 
@@ -55,6 +61,7 @@ namespace Card5
             var deckModel = this.GetModel<DeckModel>();
             deckModel.MoveHandToDiscard();
 
+            this.SendEvent(new HandDiscardedEvent());
             this.SendEvent(new HandRefreshedEvent { CardIds = new List<string>() });
             this.SendEvent(new DiscardPileChangedEvent { Count = deckModel.DiscardPile.Count });
         }

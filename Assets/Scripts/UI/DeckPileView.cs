@@ -21,6 +21,9 @@ namespace Card5
         [SerializeField, LabelText("显示名称")]
         string _pileName = "牌堆";
 
+        public static DeckPileView DrawPileInstance { get; private set; }
+        public static DeckPileView DiscardPileInstance { get; private set; }
+
         public IArchitecture GetArchitecture() => GameArchitecture.Interface;
 
         void Start()
@@ -30,6 +33,11 @@ namespace Card5
 
         void OnEnable()
         {
+            if (_isDrawPile)
+                DrawPileInstance = this;
+            else
+                DiscardPileInstance = this;
+
             if (_isDrawPile)
                 this.RegisterEvent<DrawPileChangedEvent>(e => SetCount(e.Count))
                     .UnRegisterWhenGameObjectDestroyed(gameObject);
@@ -43,7 +51,21 @@ namespace Card5
 
         void OnDestroy()
         {
+            if (DrawPileInstance == this)
+                DrawPileInstance = null;
+            if (DiscardPileInstance == this)
+                DiscardPileInstance = null;
+
             _button?.onClick.RemoveListener(OnClick);
+        }
+
+        public Vector3 GetAnchorWorldPosition()
+        {
+            RectTransform rectTransform = transform as RectTransform;
+            if (rectTransform != null)
+                return rectTransform.TransformPoint(rectTransform.rect.center);
+
+            return transform.position;
         }
 
         void OnBattleStarted(BattleStartedEvent e)

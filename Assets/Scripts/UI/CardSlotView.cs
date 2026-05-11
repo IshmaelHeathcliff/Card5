@@ -31,6 +31,9 @@ namespace Card5
         [SerializeField, LabelText("预览缩放")] float _dragPreviewScale;
         [SerializeField, LabelText("预览透明度"), Range(0f, 1f)] float _dragPreviewAlpha = 0.9f;
         [SerializeField, LabelText("预览颜色")] Color _dragPreviewColor = Color.white;
+        [SerializeField, LabelText("交换动画时长"), MinValue(0f)] float _swapAnimationDuration = 0.18f;
+        [SerializeField, LabelText("弃牌动画时长"), MinValue(0f)] float _discardAnimationDuration = 0.22f;
+        [SerializeField, LabelText("飞行动画缩放"), MinValue(0f)] float _ghostAnimationScale = 0.58f;
 
         [ShowInInspector, ReadOnly] CardData _currentCard;
 
@@ -38,12 +41,14 @@ namespace Card5
 
         Vector2 _dragStartPosition;
         Vector2 _dragPreviewTargetLocalPosition;
+        CardViewController _dragPreviewView;
         GameObject _dragPreview;
         RectTransform _dragPreviewRect;
         RectTransform _dragPreviewParentRect;
         RectTransform _rectTransform;
         Canvas _rootCanvas;
         BattleModel _battleModel;
+        HandViewController _handViewController;
         bool _isRevealPending;
         float _nextRevealDelay;
         int _revealRequestId;
@@ -119,14 +124,43 @@ namespace Card5
             if (e.SlotA != _slotIndex && e.SlotB != _slotIndex)
                 return;
 
-            _currentCard = _battleModel.PlaySlots[_slotIndex];
+            bool isSourceSlot = e.SlotA == _slotIndex;
+            int otherSlotIndex = isSourceSlot ? e.SlotB : e.SlotA;
+            CardData incomingCard = _battleModel.PlaySlots[_slotIndex];
+
+            _currentCard = incomingCard;
+            _nextRevealDelay = 0f;
+
+            if (isSourceSlot && incomingCard != null && TryGetSlotWorldPosition(otherSlotIndex, out Vector3 sourceWorldPosition))
+            {
+                _isRevealPending = true;
+                PlayGhostToWorldPosition(incomingCard, sourceWorldPosition, GetCardAnchorWorldPosition(), _swapAnimationDuration).Forget();
+
+                int requestId = ++_revealRequestId;
+                RefreshUI();
+                RevealCardAfterDelayAsync(requestId, _swapAnimationDuration).Forget();
+                return;
+            }
+
+            _isRevealPending = false;
             RefreshUI();
         }
 
-        void OnSlotsResolved(SlotEffectsResolvedEvent e) => ClearSlot();
+        void OnSlotsResolved(SlotEffectsResolvedEvent e)
+        {
+            if (_currentCard != null)
+            {
+                GetHandViewController()?.RegisterConcurrentDrawVisualBlock(_discardAnimationDuration);
+                PlayGhostToDiscard(_currentCard, GetCardAnchorWorldPosition()).Forget();
+            }
+
+            ClearSlot();
+        }
 
         public void OnBeginDrag(PointerEventData eventData)
         {
+            if (eventData.button != PointerEventData.InputButton.Left)
+                return;
             if (_currentCard == null)
                 return;
 
@@ -138,6 +172,8 @@ namespace Card5
 
         public void OnDrag(PointerEventData eventData)
         {
+            if (eventData.button != PointerEventData.InputButton.Left)
+                return;
             if (s_draggingSlotIndex != _slotIndex)
                 return;
 
@@ -146,9 +182,12 @@ namespace Card5
 
         public void OnEndDrag(PointerEventData eventData)
         {
+            if (eventData.button != PointerEventData.InputButton.Left)
+                return;
             if (s_draggingSlotIndex != _slotIndex)
                 return;
 
+            Vector3 dragPreviewWorldPosition = _dragPreviewRect != null ? _dragPreviewRect.position : transform.position;
             int fromSlot = s_draggingSlotIndex;
             s_draggingSlotIndex = -1;
             DestroyDragPreview();
@@ -169,7 +208,11 @@ namespace Card5
             {
                 if (result.gameObject.GetComponent<HandDropZone>() != null)
                 {
-                    this.SendCommand(new ReturnCardToHandCommand(fromSlot));
+                    HandViewController handViewController = GetHandViewController();
+                    handViewController?.PrepareReturnedCardDrop(dragPreviewWorldPosition);
+                    bool success = this.SendCommand(new ReturnCardToHandCommand(fromSlot));
+                    if (!success)
+                        handViewController?.ClearPendingReturnedCardDrop();
                     didDrop = true;
                     break;
                 }
@@ -204,10 +247,55 @@ namespace Card5
             if (_rootCanvas == null || _currentCard == null)
                 return;
 
-            _dragPreview = new GameObject("SlotDragPreview");
             RectTransform dragLayer = UILayerManager.GetLayer(_rootCanvas, UILayer.Drag);
             Transform previewParent = dragLayer != null ? dragLayer : _rootCanvas.transform;
             _dragPreviewParentRect = previewParent as RectTransform;
+            if (!TryCreateCardViewPreview(previewParent))
+                CreateImagePreview(previewParent);
+
+            UpdateDragPreviewPosition(eventData);
+            if (_dragPreviewRect != null)
+                _dragPreviewRect.localPosition = _dragPreviewTargetLocalPosition;
+        }
+
+        bool TryCreateCardViewPreview(Transform previewParent)
+        {
+            CardViewPool pool = CardViewPool.Instance;
+            if (pool == null || !pool.IsReady)
+                return false;
+
+            _dragPreviewView = pool.Rent(previewParent);
+            if (_dragPreviewView == null)
+                return false;
+
+            _dragPreviewView.Setup(_currentCard);
+            _dragPreviewView.SetInteractionEnabled(false);
+            _dragPreviewRect = _dragPreviewView.RectTransform;
+
+            if (_dragPreviewRect == null)
+            {
+                CardViewPool.Instance?.Return(_dragPreviewView);
+                _dragPreviewView = null;
+                return false;
+            }
+
+            if (_dragPreviewSize != Vector2.zero)
+                _dragPreviewRect.sizeDelta = _dragPreviewSize;
+            _dragPreviewRect.localScale = Vector3.one * _dragPreviewScale;
+
+            CanvasGroup canvasGroup = _dragPreviewView.GetComponent<CanvasGroup>();
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = _dragPreviewAlpha;
+                canvasGroup.blocksRaycasts = false;
+            }
+
+            return true;
+        }
+
+        void CreateImagePreview(Transform previewParent)
+        {
+            _dragPreview = new GameObject("SlotDragPreview");
             _dragPreview.transform.SetParent(previewParent, false);
 
             _dragPreviewRect = _dragPreview.AddComponent<RectTransform>();
@@ -222,9 +310,6 @@ namespace Card5
             var canvasGroup = _dragPreview.AddComponent<CanvasGroup>();
             canvasGroup.alpha = _dragPreviewAlpha;
             canvasGroup.blocksRaycasts = false;
-
-            UpdateDragPreviewPosition(eventData);
-            _dragPreviewRect.localPosition = _dragPreviewTargetLocalPosition;
         }
 
         void UpdateDragPreviewPosition(PointerEventData eventData)
@@ -249,8 +334,26 @@ namespace Card5
 
         void DestroyDragPreview()
         {
+            if (_dragPreviewView != null)
+            {
+                CanvasGroup canvasGroup = _dragPreviewView.GetComponent<CanvasGroup>();
+                if (canvasGroup != null)
+                {
+                    canvasGroup.alpha = 1f;
+                    canvasGroup.blocksRaycasts = true;
+                }
+
+                _dragPreviewView.SetInteractionEnabled(true);
+                CardViewPool.Instance?.Return(_dragPreviewView);
+                _dragPreviewView = null;
+            }
+
             if (_dragPreview == null)
+            {
+                _dragPreviewRect = null;
+                _dragPreviewParentRect = null;
                 return;
+            }
 
             Destroy(_dragPreview);
             _dragPreview = null;
@@ -284,6 +387,79 @@ namespace Card5
                 : transform.position;
         }
 
+        async UniTaskVoid PlayGhostToDiscard(CardData card, Vector3 sourceWorldPosition)
+        {
+            if (DeckPileView.DiscardPileInstance == null)
+                return;
+
+            await PlayGhostToWorldPosition(
+                card,
+                sourceWorldPosition,
+                DeckPileView.DiscardPileInstance.GetAnchorWorldPosition(),
+                _discardAnimationDuration);
+        }
+
+        async UniTask PlayGhostToWorldPosition(
+            CardData card,
+            Vector3 sourceWorldPosition,
+            Vector3 targetWorldPosition,
+            float duration)
+        {
+            CardViewPool pool = CardViewPool.Instance;
+            if (pool == null || !pool.IsReady)
+                return;
+
+            RectTransform dragLayer = UILayerManager.GetLayer(_rootCanvas, UILayer.Drag);
+            if (dragLayer == null)
+                return;
+
+            CardViewController ghost = pool.Rent(dragLayer);
+            if (ghost == null)
+                return;
+
+            ghost.Setup(card);
+            ghost.SetInteractionEnabled(false);
+            ghost.transform.position = sourceWorldPosition;
+            ghost.transform.SetAsLastSibling();
+
+            Vector3 targetLocalPosition = dragLayer.InverseTransformPoint(targetWorldPosition);
+            ghost.AnimateToLocalPose(
+                targetLocalPosition,
+                Vector3.one * _ghostAnimationScale,
+                0f,
+                false,
+                duration);
+
+            await UniTask.Delay(TimeSpan.FromSeconds(duration));
+
+            ghost.SetInteractionEnabled(true);
+            CardViewPool.Instance?.Return(ghost);
+        }
+
+        HandViewController GetHandViewController()
+        {
+            if (_handViewController == null)
+                _handViewController = FindAnyObjectByType<HandViewController>();
+
+            return _handViewController;
+        }
+
+        bool TryGetSlotWorldPosition(int slotIndex, out Vector3 worldPosition)
+        {
+            CardSlotView[] slotViews = FindObjectsByType<CardSlotView>();
+            foreach (CardSlotView slotView in slotViews)
+            {
+                if (slotView == null || slotView.SlotIndex != slotIndex)
+                    continue;
+
+                worldPosition = slotView.GetCardAnchorWorldPosition();
+                return true;
+            }
+
+            worldPosition = Vector3.zero;
+            return false;
+        }
+
         void RefreshUI()
         {
             bool isDraggingThisSlot = s_draggingSlotIndex == _slotIndex;
@@ -300,7 +476,7 @@ namespace Card5
 
             CardDisplayView displayView = GetDisplayView();
             if (filled)
-                displayView.Setup(_currentCard, CardDisplayMode.Slot);
+                displayView.Setup(_currentCard);
             else
                 displayView.Clear();
         }
