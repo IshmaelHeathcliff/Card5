@@ -45,13 +45,23 @@ namespace Card5
     [CreateAssetMenu(fileName = "NewCard", menuName = "Card5/Card")]
     public class CardData : SerializedScriptableObject
     {
-        [BoxGroup("基础信息文本"), SerializeField, LabelText("卡牌ID")] string _cardId;
-        [BoxGroup("基础信息文本"), SerializeField, LabelText("卡牌名称")] string _cardName;
-        [BoxGroup("基础信息文本"), SerializeField, LabelText("描述"), TextArea(3, 6)] string _description;
-        [BoxGroup("基础信息文本"), SerializeField, LabelText("能量消耗"), MinValue(0)] int _energyCost;
+        [HorizontalGroup("基础信息首行", 0.68f)]
+        [VerticalGroup("基础信息首行/文本列")]
+        [BoxGroup("基础信息首行/文本列/基础信息文本"), SerializeField, LabelText("卡牌ID")] string _cardId;
+        [HorizontalGroup("基础信息首行")]
+        [VerticalGroup("基础信息首行/文本列")]
+        [BoxGroup("基础信息首行/文本列/基础信息文本"), SerializeField, LabelText("卡牌名称")] string _cardName;
+        [HorizontalGroup("基础信息首行")]
+        [VerticalGroup("基础信息首行/文本列")]
+        [BoxGroup("基础信息首行/文本列/基础信息文本"), SerializeField, LabelText("描述"), TextArea(3, 6)] string _description;
+        [HorizontalGroup("基础信息首行")]
+        [VerticalGroup("基础信息首行/文本列")]
+        [BoxGroup("基础信息首行/文本列/基础信息文本"), SerializeField, LabelText("能量消耗"), MinValue(0)] int _energyCost;
         [BoxGroup("基础信息配置"), FormerlySerializedAs("_tags"), SerializeField, LabelText("卡牌类型"), EnumToggleButtons] CardType _cardType = CardType.Common;
         [BoxGroup("基础信息配置"), SerializeField, LabelText("生效位置"), EnumToggleButtons] CardActivationPosition _activationPositions = CardActivationPosition.Any;
-        [BoxGroup("基础信息视觉"), SerializeField, LabelText("卡面图片"), PreviewField(100, ObjectFieldAlignment.Center)] Sprite _artwork;
+        [HorizontalGroup("基础信息首行", 0.32f)]
+        [VerticalGroup("基础信息首行/视觉列")]
+        [BoxGroup("基础信息首行/视觉列/基础信息视觉"), SerializeField, LabelText("卡面图片"), PreviewField(180, ObjectFieldAlignment.Center)] Sprite _artwork;
         [BoxGroup("效果配置")]
         [OdinSerialize, LabelText("卡牌效果"), ListDrawerSettings(ShowFoldout = true, DefaultExpandedState = true, DraggableItems = true), PolymorphicDrawerSettings(ShowBaseType = false)]
         List<CardEffect> _inlineEffects = new List<CardEffect>();
