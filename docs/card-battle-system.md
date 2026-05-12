@@ -71,6 +71,9 @@ HandViewController  监听 HandRefreshedEvent
             │    ├─ MarkSystem.ExecuteSlotMarks(AfterCardEffects)
             │    └─ 一轮最多结算 5 张槽位卡；卡牌只在配置的生效位置执行效果
             ├─ 若怪物被击败，生成奖励并暂停后续流程
+            │    ├─ CardSystem.DiscardHand() // 先将剩余手牌全部弃掉
+            │    ├─ CardSystem.DiscardDrawPile() // 再将抽牌堆剩余卡牌全部送入弃牌堆
+            │    └─ BattleRewardSystem.TryOfferTurnReward() // 等全部弃牌动画后弹出奖励
             ├─ SelectBattleRewardCommand // 玩家完成所有奖励组选择后进入下一只怪物或胜利
             ├─ 若出牌轮数达到上限但怪物未被击败，战斗失败
             ├─ CardSystem.DiscardHand()     // 手牌全部弃掉
@@ -81,7 +84,7 @@ HandViewController  监听 HandRefreshedEvent
             └─ 发送 TurnEndedEvent / TurnStartedEvent
 ```
 
-当前出牌轮数按每次结束回合后的槽位结算计数。若一张卡击败当前怪物，本轮后续槽位卡牌不再继续结算，并统一进入弃牌堆。
+当前出牌轮数按每次结束回合后的槽位结算计数。若一张卡击败当前怪物，本轮后续槽位卡牌不再继续结算，并统一进入弃牌堆；若因此触发战斗奖励，剩余手牌和抽牌堆中的卡牌也会先一起送入弃牌堆，等槽位、手牌和抽牌堆的弃牌动画结束后再弹出奖励。
 玩家必须先放满 5 个出牌槽，才可以点击「结束回合」并结算本轮出牌；任意空槽都会阻止本轮出牌结算。
 `CardData` 可配置 1-5 号位的任意生效组合，并在 Odin Inspector 中提供「任意位置」「奇数位」「偶数位」快捷按钮。卡牌放在未配置的槽位时仍会被结算并进入弃牌堆，但不会触发该卡效果、卡牌印记或槽位印记；槽位背景会按状态显示为灰色空槽、绿色有效、红色无效。
 `CardData` 的效果直接内联配置在卡牌资产中，基于 Odin 多态序列化选择具体 `CardEffect` 类型，不再创建独立效果资产。
@@ -91,7 +94,7 @@ HandViewController  监听 HandRefreshedEvent
 手牌与槽位之间的飞行动画现在也保持 `CardDisplayMode.Full`，飞行中的临时卡牌、回手中的卡牌、槽位中的卡牌，以及从槽位拖到其他槽位或手牌区时的跟手预览都统一显示完整信息。
 回合结束或重抽后，如果先发生弃牌，再触发补抽，手牌显示会等待弃牌动画播完后再开始抽牌；若当前抽牌堆还能抽出一部分卡牌，则这部分卡会先完成抽牌动画，只有在数量不够时才会播放洗牌预览动画，再补抽剩余卡牌。
 UI 层级由 `UILayerManager` 统一管理：拖动中的卡牌和槽位预览进入 `DragLayer`，奖励与牌堆弹窗进入 `PopupLayer`，胜利/失败结果进入 `SystemLayer`。单张手牌不再使用独立 `Canvas` 抢占排序，避免手牌遮挡奖励等更高优先级 UI。
-弹窗类 UI 由 `UIPopupManager` 常驻监听业务事件并动态加载。奖励弹窗与牌堆列表弹窗通过 `AssetReferenceGameObject` 引用 Addressables 预制体并实例化，结果确认面板运行时创建；战斗主 HUD、手牌区和出牌槽仍保留在场景中。
+弹窗类 UI 由 `UIPopupManager` 常驻监听业务事件并动态加载。奖励弹窗与牌堆列表弹窗通过 `AssetReferenceGameObject` 引用 Addressables 预制体并实例化，结果确认面板运行时创建；战斗主 HUD、手牌区和出牌槽仍保留在场景中。只要当前有抽牌堆/弃牌堆相关动画在播放，抽牌堆与弃牌堆按钮都会暂时拒绝打开牌堆列表弹窗。
 
 ### 怪物推进与失败流程
 
@@ -104,7 +107,7 @@ UI 层级由 `UILayerManager` 统一管理：拖动中的卡牌和槽位预览�
 BattleSystem.EndTurn()
   └─ 若当前怪物已击败
        ├─ BattleRewardSystem.TryOfferTurnReward()
-       ├─ 奖励领取完成后丢弃手牌并清理槽位
+       ├─ 触发奖励前先清空槽位、手牌与抽牌堆到弃牌堆
        ├─ 若 MonsterListData 还有下一只怪物，StartMonster() 并开始下一回合
        └─ 若没有下一只怪物，发送 BattleEndedEvent(PlayerWon = true)
 
@@ -151,11 +154,13 @@ BattleSystem.EndTurn()
 BattleSystem.EndTurn()
   └─ ResolveSlots()
        └─ 若当前怪物被击败，调用 BattleRewardSystem.TryOfferTurnReward()
+            ├─ CardSystem.DiscardHand() // 先把剩余手牌送入弃牌堆
+            ├─ CardSystem.DiscardDrawPile() // 再把抽牌堆剩余卡牌送入弃牌堆
             ├─ 根据 BattleRewardConfigData 生成本次奖励组
             ├─ 当前卡牌奖励组优先从 CardLibraryData 牌库中按解锁条件筛选
             ├─ 从已解锁卡牌中按权重无放回随机抽 3 张
             ├─ 若奖励组未配置牌库，则兼容旧的配置卡池随机
-            └─ 发送 BattleRewardOfferedEvent，战斗流程暂停
+            └─ 发送 BattleRewardOfferedEvent，等待槽位、手牌与抽牌堆弃牌动画结束后弹出奖励
 
 玩家选择奖励选项
   └─ SelectBattleRewardCommand(offerId, optionId)
@@ -333,11 +338,12 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 - 手牌拖拽只响应左键，并会实时计算插入预览位置，其余卡牌通过 `PrimeTween` 做避让动画。
 - 手牌拖到已占用槽位时，通过 `SwapHandWithSlotCommand` 直接与槽位中的卡牌交换。
 - 从槽位拖回手牌区时，返回的卡牌会按鼠标落点插入手牌，不再先播放“从槽位飞到手牌末尾”的动画。
-- 两个槽位交换卡牌时，被拖拽到目标槽位的卡会直接落位显示；原本占据目标槽位的那张卡才会播放飞回另一槽位的动画，并在动画结束后显示到源槽位。
+- 两个槽位交换卡牌时，会先让目标槽位原有的卡飞回源槽位；等这段动画结束后，再同时显示源槽位的新卡和被拖拽到目标槽位的卡。
 - 右键交互更新：右键不会触发拖拽；手牌右键会尝试放入最左侧空槽位，并在飞行动画结束后才显示到槽位；槽位右键会将该槽位中的卡牌撤回手牌。
 - 非拖拽触发的出牌使用临时卡牌视图做飞行动画，避免直接瞬移。
 - 抽牌时，新手牌会从抽牌堆位置飞入手牌区；手牌弃牌、重抽弃牌和槽位结算弃牌都会播放飞向弃牌堆的动画。
 - 回合结束和重抽后的补抽会等待当前弃牌动画结束后再开始；如果抽牌堆还有剩余卡牌，会先把这部分卡从抽牌堆飞入手牌，等这段抽牌动画完成后，才在数量不足时播放弃牌堆回抽牌堆的洗牌预览动画，并继续补完剩余抽牌。
+- 只要抽牌、弃牌或洗牌相关 tween 还在播放，抽牌堆和弃牌堆都不能点开列表弹窗，避免动画过程中查看到中间态牌堆内容。
 
 ### 本次新增命令与事件
 

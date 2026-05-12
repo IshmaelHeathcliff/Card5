@@ -311,6 +311,8 @@ namespace Card5
             if (_battleModel.IsBattleOver) return;
             if (_battleModel.IsCurrentMonsterDefeated)
             {
+                _cardSystem.DiscardHand();
+                _cardSystem.DiscardDrawPile();
                 if (_rewardSystem.TryOfferTurnReward()) return;
                 ContinueAfterMonsterReward();
                 return;
@@ -344,8 +346,6 @@ namespace Card5
 
         void ContinueAfterMonsterReward()
         {
-            _cardSystem.DiscardHand();
-
             int nextMonsterIndex = _battleModel.CurrentMonsterIndex + 1;
             MonsterStageConfig nextMonster = GetMonsterConfig(nextMonsterIndex);
 

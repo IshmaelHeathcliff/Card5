@@ -88,6 +88,9 @@ namespace Card5
                 return;
             }
 
+            if (UIPopupManager.IsCardListPopupBlocked())
+                return;
+
             var deck = this.GetModel<DeckModel>();
             var cards = _isDrawPile
                 ? (System.Collections.Generic.IReadOnlyList<CardData>)deck.DrawPile

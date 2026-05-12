@@ -47,6 +47,12 @@ namespace Card5
             Hand.Clear();
         }
 
+        public void MoveDrawPileToDiscard()
+        {
+            DiscardPile.AddRange(DrawPile);
+            DrawPile.Clear();
+        }
+
         /// <summary>将卡牌加入持久牌库和弃牌堆（下次洗牌时混入抽牌堆）</summary>
         public void AddCard(CardData card)
         {

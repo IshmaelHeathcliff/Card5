@@ -132,6 +132,7 @@ namespace Card5
             this.RegisterEvent<CardAddedToHandEvent>(OnCardAddedToHand).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<CardReturnedToHandEvent>(OnCardReturnedToHand).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<DiscardPileShuffledIntoDrawEvent>(OnDiscardPileShuffledIntoDraw).UnRegisterWhenGameObjectDestroyed(gameObject);
+            this.RegisterEvent<DrawPileDiscardedEvent>(OnDrawPileDiscarded).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<HandSlotSwappedEvent>(OnHandSlotSwapped).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<TurnStartedEvent>(OnTurnStarted).UnRegisterWhenGameObjectDestroyed(gameObject);
             this.RegisterEvent<BattleStartedEvent>(OnBattleStarted).UnRegisterWhenGameObjectDestroyed(gameObject);
@@ -195,6 +196,7 @@ namespace Card5
                 return;
 
             float availableAt = Mathf.Max(Time.unscaledTime, _drawVisualBlockedUntil);
+            UIPopupManager.RegisterCardListPopupBlockUntil(availableAt + _cardMoveDuration);
             _pendingDrawRequests.Enqueue(new PendingDrawRequest
             {
                 Card = _deckModel.Hand[e.HandIndex],
@@ -273,6 +275,16 @@ namespace Card5
             ProcessPendingDrawsAsync().Forget();
         }
 
+        void OnDrawPileDiscarded(DrawPileDiscardedEvent e)
+        {
+            if (e.Cards == null || e.Cards.Count == 0)
+                return;
+
+            float duration = GetPilePreviewAnimationDuration(e.Cards.Count, _pileGhostDuration);
+            RegisterConcurrentDrawVisualBlock(duration);
+            PlayDrawPileToDiscardAsync(e.Cards, _drawVisualSequenceVersion).Forget();
+        }
+
         public void RegisterConcurrentDrawVisualBlock(float duration)
         {
             if (duration <= 0f)
@@ -280,6 +292,8 @@ namespace Card5
 
             _drawVisualBlockedUntil = Mathf.Max(_drawVisualBlockedUntil, Time.unscaledTime + duration);
             _scheduledDrawAnimationUntil = Mathf.Max(_scheduledDrawAnimationUntil, _drawVisualBlockedUntil);
+            UIPopupManager.RegisterRewardPopupBlock(duration);
+            UIPopupManager.RegisterCardListPopupBlock(duration);
         }
 
         public void EnterRedrawMode()
@@ -558,16 +572,22 @@ namespace Card5
             float startTime = Mathf.Max(now, Mathf.Max(_drawVisualBlockedUntil, _scheduledDrawAnimationUntil));
             _drawVisualBlockedUntil = startTime + duration;
             _scheduledDrawAnimationUntil = Mathf.Max(_scheduledDrawAnimationUntil, _drawVisualBlockedUntil);
+            UIPopupManager.RegisterCardListPopupBlockUntil(_drawVisualBlockedUntil);
             return Mathf.Max(0f, startTime - now);
         }
 
         float GetShuffleAnimationDuration(int cardCount)
         {
+            return GetPilePreviewAnimationDuration(cardCount, _shuffleGhostDuration);
+        }
+
+        float GetPilePreviewAnimationDuration(int cardCount, float moveDuration)
+        {
             int previewCount = Mathf.Min(_shufflePreviewCount, cardCount);
             if (previewCount <= 0)
                 return 0f;
 
-            return _shuffleGhostDuration + _shufflePreviewStagger * (previewCount - 1);
+            return moveDuration + _shufflePreviewStagger * (previewCount - 1);
         }
 
         async UniTaskVoid ProcessPendingDrawsAsync()
@@ -890,6 +910,28 @@ namespace Card5
                 CardData card = cards[i];
                 if (card != null)
                     PlayGhostBetweenWorldPositions(card, sourceWorldPosition, targetWorldPosition, _shuffleGhostDuration).Forget();
+
+                if (i < previewCount - 1)
+                    await UniTask.Delay(TimeSpan.FromSeconds(_shufflePreviewStagger));
+            }
+        }
+
+        async UniTaskVoid PlayDrawPileToDiscardAsync(IReadOnlyList<CardData> cards, int drawVisualSequenceVersion)
+        {
+            if (!TryGetDrawPileWorldPosition(out Vector3 sourceWorldPosition))
+                return;
+            if (!TryGetDiscardPileWorldPosition(out Vector3 targetWorldPosition))
+                return;
+
+            int previewCount = Mathf.Min(_shufflePreviewCount, cards.Count);
+            for (int i = 0; i < previewCount; i++)
+            {
+                if (drawVisualSequenceVersion != _drawVisualSequenceVersion)
+                    return;
+
+                CardData card = cards[i];
+                if (card != null)
+                    PlayGhostBetweenWorldPositions(card, sourceWorldPosition, targetWorldPosition, _pileGhostDuration).Forget();
 
                 if (i < previewCount - 1)
                     await UniTask.Delay(TimeSpan.FromSeconds(_shufflePreviewStagger));

@@ -32,6 +32,9 @@ namespace Card5
         bool _isBattleRewardPopupLoading;
         bool _isCardListPopupLoading;
 
+        static float s_rewardPopupBlockedUntil;
+        static float s_cardListPopupBlockedUntil;
+
         public static UIPopupManager Instance { get; private set; }
 
         public IArchitecture GetArchitecture() => GameArchitecture.Interface;
@@ -88,6 +91,8 @@ namespace Card5
 
         public void HideAll()
         {
+            s_rewardPopupBlockedUntil = 0f;
+            s_cardListPopupBlockedUntil = 0f;
             HideBattleRewardPopup();
 
             if (_cardListPopup != null)
@@ -95,6 +100,35 @@ namespace Card5
 
             if (_resultPanel != null)
                 _resultPanel.SetActive(false);
+        }
+
+        public static void RegisterRewardPopupBlock(float duration)
+        {
+            if (duration <= 0f)
+                return;
+
+            s_rewardPopupBlockedUntil = Mathf.Max(s_rewardPopupBlockedUntil, Time.unscaledTime + duration);
+        }
+
+        public static void RegisterCardListPopupBlock(float duration)
+        {
+            if (duration <= 0f)
+                return;
+
+            RegisterCardListPopupBlockUntil(Time.unscaledTime + duration);
+        }
+
+        public static void RegisterCardListPopupBlockUntil(float blockedUntil)
+        {
+            if (blockedUntil <= Time.unscaledTime)
+                return;
+
+            s_cardListPopupBlockedUntil = Mathf.Max(s_cardListPopupBlockedUntil, blockedUntil);
+        }
+
+        public static bool IsCardListPopupBlocked()
+        {
+            return s_cardListPopupBlockedUntil > Time.unscaledTime;
         }
 
         void OnBattleRewardOffered(BattleRewardOfferedEvent e)
@@ -125,7 +159,20 @@ namespace Card5
             BattleRewardPopupView popup = await GetBattleRewardPopupAsync();
             if (popup == null) return;
 
+            await WaitForRewardPopupBlockAsync();
             popup.Show(offers);
+        }
+
+        async UniTask WaitForRewardPopupBlockAsync()
+        {
+            while (true)
+            {
+                float remaining = s_rewardPopupBlockedUntil - Time.unscaledTime;
+                if (remaining <= 0f)
+                    return;
+
+                await UniTask.Delay(System.TimeSpan.FromSeconds(remaining));
+            }
         }
 
         async UniTask<BattleRewardPopupView> GetBattleRewardPopupAsync()

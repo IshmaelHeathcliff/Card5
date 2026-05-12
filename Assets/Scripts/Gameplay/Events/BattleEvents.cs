@@ -147,6 +147,12 @@ namespace Card5.Gameplay.Events
         public int Count;
     }
 
+    public struct DrawPileDiscardedEvent
+    {
+        public IReadOnlyList<CardData> Cards;
+        public int Count;
+    }
+
     /// <summary>新卡牌加入牌库（写入弃牌堆并同步 FullDeck）时发送</summary>
     public struct CardAddedToDeckEvent
     {

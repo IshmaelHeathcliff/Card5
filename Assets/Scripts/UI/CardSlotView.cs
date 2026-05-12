@@ -125,8 +125,10 @@ namespace Card5
                 return;
 
             bool isSourceSlot = e.SlotA == _slotIndex;
+            bool isTargetSlot = e.SlotB == _slotIndex;
             int otherSlotIndex = isSourceSlot ? e.SlotB : e.SlotA;
             CardData incomingCard = _battleModel.PlaySlots[_slotIndex];
+            CardData sourceSlotIncomingCard = _battleModel.PlaySlots[e.SlotA];
 
             _currentCard = incomingCard;
             _nextRevealDelay = 0f;
@@ -142,6 +144,16 @@ namespace Card5
                 return;
             }
 
+            if (isTargetSlot && sourceSlotIncomingCard != null && incomingCard != null)
+            {
+                _isRevealPending = true;
+
+                int requestId = ++_revealRequestId;
+                RefreshUI();
+                RevealCardAfterDelayAsync(requestId, _swapAnimationDuration).Forget();
+                return;
+            }
+
             _isRevealPending = false;
             RefreshUI();
         }
@@ -150,6 +162,7 @@ namespace Card5
         {
             if (_currentCard != null)
             {
+                UIPopupManager.RegisterRewardPopupBlock(_discardAnimationDuration);
                 GetHandViewController()?.RegisterConcurrentDrawVisualBlock(_discardAnimationDuration);
                 PlayGhostToDiscard(_currentCard, GetCardAnchorWorldPosition()).Forget();
             }

@@ -389,12 +389,12 @@ MonoBehaviour:
   _validPositionColor: {r: 0.2, g: 0.85, b: 0.35, a: 1}
   _invalidPositionColor: {r: 1, g: 0.2, b: 0.2, a: 1}
   _dragPreviewSize: {x: 197, y: 342}
-  _dragPreviewScale: 0.7
+  _dragPreviewScale: 0.8
   _dragPreviewAlpha: 0.9
   _dragPreviewColor: {r: 1, g: 1, b: 1, a: 1}
-  _swapAnimationDuration: 0.2
+  _swapAnimationDuration: 0.1
   _discardAnimationDuration: 0.22
-  _ghostAnimationScale: 0.5
+  _ghostAnimationScale: 0.6
 --- !u!222 &447943298994069499
 CanvasRenderer:
   m_ObjectHideFlags: 0

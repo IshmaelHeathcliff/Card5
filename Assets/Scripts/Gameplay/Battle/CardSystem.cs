@@ -66,6 +66,24 @@ namespace Card5
             this.SendEvent(new DiscardPileChangedEvent { Count = deckModel.DiscardPile.Count });
         }
 
+        public void DiscardDrawPile()
+        {
+            var deckModel = this.GetModel<DeckModel>();
+            if (deckModel.DrawPile.Count == 0)
+                return;
+
+            var discardedCards = new List<CardData>(deckModel.DrawPile);
+            deckModel.MoveDrawPileToDiscard();
+
+            this.SendEvent(new DrawPileDiscardedEvent
+            {
+                Cards = discardedCards,
+                Count = discardedCards.Count
+            });
+            this.SendEvent(new DrawPileChangedEvent { Count = deckModel.DrawPile.Count });
+            this.SendEvent(new DiscardPileChangedEvent { Count = deckModel.DiscardPile.Count });
+        }
+
         /// <summary>将指定手牌移至弃牌堆</summary>
         public void DiscardCard(CardData card)
         {
