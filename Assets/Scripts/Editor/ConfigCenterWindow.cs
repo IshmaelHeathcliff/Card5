@@ -23,7 +23,6 @@ namespace Card5.Editor
             [typeof(DeckPresetData)] = "牌组预设",
             [typeof(EnemyData)] = "敌人配置",
             [typeof(MonsterListData)] = "怪物列表",
-            [typeof(MarkData)] = "印记配置",
             [typeof(CardLibraryData)] = "卡牌牌库",
             [typeof(BattleRewardConfigData)] = "战斗奖励配置",
             [typeof(GameGlobalConfigData)] = "全局游戏配置"

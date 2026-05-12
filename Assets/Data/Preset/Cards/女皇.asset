@@ -31,6 +31,9 @@ MonoBehaviour:
     - Name: 
       Entry: 7
       Data: 1|Card5.BoostSlotCardEffect, Assembly-CSharp
+    - Name: _timing
+      Entry: 3
+      Data: 2
     - Name: _description
       Entry: 6
       Data: 

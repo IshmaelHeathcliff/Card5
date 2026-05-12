@@ -27,6 +27,11 @@ namespace Card5
         bool UsesPercentAmount => _boostMode == CardEffectBoostMode.AddPercent;
         bool UsesMultiplier => _boostMode == CardEffectBoostMode.Multiply;
 
+        public BoostSlotCardEffect()
+            : base(CardEffectTiming.PlayStart)
+        {
+        }
+
         public override void Execute(BattleContext context)
         {
             if (context == null || context.BattleSystem == null) return;
@@ -45,7 +50,7 @@ namespace Card5
 
         public override string GetDescription()
         {
-            return $"使{GetTargetSlotDescription()}本轮后续卡牌效果{GetBoostDescription()}";
+            return $"使{GetTargetSlotDescription()}本轮出牌阶段卡牌效果{GetBoostDescription()}";
         }
 
         float GetBoostValue()

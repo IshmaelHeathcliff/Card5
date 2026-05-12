@@ -15,7 +15,6 @@ namespace Card5
         BattleModel _battleModel;
         DeckModel _deckModel;
         CardSystem _cardSystem;
-        MarkSystem _markSystem;
         BattleRewardSystem _rewardSystem;
         BattleRewardModel _rewardModel;
         DeckPresetData _lastDeckPreset;
@@ -30,7 +29,6 @@ namespace Card5
             _battleModel = this.GetModel<BattleModel>();
             _deckModel = this.GetModel<DeckModel>();
             _cardSystem = this.GetSystem<CardSystem>();
-            _markSystem = this.GetSystem<MarkSystem>();
             _rewardSystem = this.GetSystem<BattleRewardSystem>();
             _rewardModel = this.GetModel<BattleRewardModel>();
         }
@@ -98,9 +96,9 @@ namespace Card5
 
         void ResetPlayerState(List<CardData> deckCards, int maxEnergy, BattleRewardConfigData rewardConfig)
         {
+            CancelAllPlacementEffects();
             _deckModel.InitDeck(deckCards);
             _battleModel.InitBattle(maxEnergy);
-            _markSystem.ClearAllMarks();
             _rewardSystem.SetRewardConfig(rewardConfig);
 
             this.SendEvent(new HandRefreshedEvent { CardIds = new List<string>() });
@@ -167,6 +165,7 @@ namespace Card5
         public bool TryPlayCard(CardData card, int slotIndex, int handIndex = -1)
         {
             if (_battleModel.IsBattleOver) return false;
+            if (card == null) return false;
             if (slotIndex < 0 || slotIndex >= BattleModel.SlotCount) return false;
             if (!_battleModel.IsSlotEmpty(slotIndex)) return false;
             if (_battleModel.CurrentEnergy.Value < card.EnergyCost) return false;
@@ -186,14 +185,11 @@ namespace Card5
 
             _battleModel.PlaySlots[slotIndex] = card;
             _battleModel.CurrentEnergy.Value -= card.EnergyCost;
+            ApplyPlacementEffects(slotIndex);
 
             this.SendEvent(new CardRemovedFromHandEvent { HandIndex = handIndex });
             this.SendEvent(new CardPlayedEvent { CardId = card.CardId, SlotIndex = slotIndex });
-            this.SendEvent(new EnergyChangedEvent
-            {
-                CurrentEnergy = _battleModel.CurrentEnergy.Value,
-                MaxEnergy = _battleModel.MaxEnergy.Value
-            });
+            NotifyEnergyChanged();
 
             return true;
         }
@@ -206,6 +202,7 @@ namespace Card5
             CardData card = _battleModel.PlaySlots[slotIndex];
             if (card == null) return false;
 
+            CancelPlacementEffects(slotIndex);
             _battleModel.PlaySlots[slotIndex] = null;
             _battleModel.CurrentEnergy.Value += card.EnergyCost;
             _deckModel.Hand.Add(card);
@@ -218,11 +215,7 @@ namespace Card5
                 SourceSlotIndex = slotIndex
             });
             this.SendEvent(new CardRemovedFromSlotEvent { SlotIndex = slotIndex });
-            this.SendEvent(new EnergyChangedEvent
-            {
-                CurrentEnergy = _battleModel.CurrentEnergy.Value,
-                MaxEnergy = _battleModel.MaxEnergy.Value
-            });
+            NotifyEnergyChanged();
 
             return true;
         }
@@ -240,10 +233,15 @@ namespace Card5
 
             CardData cardB = _battleModel.PlaySlots[toSlot];
 
+            CancelPlacementEffects(fromSlot);
+            CancelPlacementEffects(toSlot);
             _battleModel.PlaySlots[fromSlot] = cardB;
             _battleModel.PlaySlots[toSlot] = cardA;
+            ApplyPlacementEffects(fromSlot);
+            ApplyPlacementEffects(toSlot);
 
             this.SendEvent(new SlotsSwappedEvent { SlotA = fromSlot, SlotB = toSlot });
+            NotifyEnergyChanged();
             return true;
         }
 
@@ -261,9 +259,11 @@ namespace Card5
             int newEnergy = _battleModel.CurrentEnergy.Value + slotCard.EnergyCost - handCard.EnergyCost;
             if (newEnergy < 0) return false;
 
+            CancelPlacementEffects(slotIndex);
             _deckModel.Hand[handIndex] = slotCard;
             _battleModel.PlaySlots[slotIndex] = handCard;
             _battleModel.CurrentEnergy.Value = newEnergy;
+            ApplyPlacementEffects(slotIndex);
 
             this.SendEvent(new HandSlotSwappedEvent
             {
@@ -273,11 +273,7 @@ namespace Card5
                 SlotIndex = slotIndex
             });
             this.SendEvent(new CardPlayedEvent { CardId = handCard.CardId, SlotIndex = slotIndex });
-            this.SendEvent(new EnergyChangedEvent
-            {
-                CurrentEnergy = _battleModel.CurrentEnergy.Value,
-                MaxEnergy = _battleModel.MaxEnergy.Value
-            });
+            NotifyEnergyChanged();
 
             return true;
         }
@@ -364,6 +360,7 @@ namespace Card5
         {
             bool resolvedAnyCard = false;
             _slotCardEffectBoosts.Clear();
+            var slotResolutions = new List<SlotResolution>();
 
             for (int i = 0; i < BattleModel.SlotCount; i++)
             {
@@ -371,53 +368,20 @@ namespace Card5
                 if (card == null) continue;
 
                 resolvedAnyCard = true;
-
-                var context = new BattleContext(
-                    _battleModel,
-                    _deckModel,
-                    _enemyController,
-                    this,
-                    _markSystem,
-                    i,
-                    card,
-                    _battleModel.GetLeftNeighbor(i),
-                    _battleModel.GetRightNeighbor(i)
-                );
-
-                if (!card.CanActivateAtSlot(i))
-                {
-                    DiscardSlotCard(i);
-                    continue;
-                }
-
-                _markSystem.ExecuteSlotMarks(i, MarkTrigger.BeforeCardEffects, context);
-                _markSystem.ExecuteCardMarks(card, MarkTrigger.BeforeCardEffects, context);
-
-                if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
-                {
-                    context.SetUseCardEffectBoost(true);
-                    foreach (CardEffect effect in card.Effects)
-                    {
-                        if (effect == null) continue;
-
-                        effect.Execute(context);
-                        if (_battleModel.IsBattleOver) break;
-                        if (_battleModel.IsCurrentMonsterDefeated) break;
-                    }
-                    context.SetUseCardEffectBoost(false);
-                }
-
-                if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
-                {
-                    _markSystem.ExecuteSlotMarks(i, MarkTrigger.AfterCardEffects, context);
-                    _markSystem.ExecuteCardMarks(card, MarkTrigger.AfterCardEffects, context);
-                }
-
-                DiscardSlotCard(i);
-
-                if (_battleModel.IsBattleOver) break;
-                if (_battleModel.IsCurrentMonsterDefeated) break;
+                slotResolutions.Add(new SlotResolution(i, card, CreateContext(i, card), card.CanActivateAtSlot(i)));
             }
+
+            if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
+                ExecuteCardEffectsByTiming(slotResolutions, CardEffectTiming.PlayStart, false);
+
+            if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
+                ExecuteCardEffectsByTiming(slotResolutions, CardEffectTiming.Play, true);
+
+            if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
+                ExecuteCardEffectsByTiming(slotResolutions, CardEffectTiming.PlayEnd, false);
+
+            foreach (SlotResolution slotResolution in slotResolutions)
+                DiscardSlotCard(slotResolution.SlotIndex);
 
             DiscardRemainingSlotCards();
             this.SendEvent<SlotEffectsResolvedEvent>();
@@ -425,6 +389,90 @@ namespace Card5
 
             _slotCardEffectBoosts.Clear();
             return resolvedAnyCard;
+        }
+
+        void ExecuteCardEffectsByTiming(
+            IReadOnlyList<SlotResolution> slotResolutions,
+            CardEffectTiming timing,
+            bool useCardEffectBoost)
+        {
+            foreach (SlotResolution slotResolution in slotResolutions)
+            {
+                if (!slotResolution.IsActive) continue;
+                if (_battleModel.IsBattleOver) break;
+                if (_battleModel.IsCurrentMonsterDefeated) break;
+
+                ExecuteCardEffects(slotResolution.Card, slotResolution.Context, timing, useCardEffectBoost);
+            }
+        }
+
+        void ApplyPlacementEffects(int slotIndex)
+        {
+            if (slotIndex < 0 || slotIndex >= BattleModel.SlotCount) return;
+            CardData card = _battleModel.PlaySlots[slotIndex];
+            if (card == null) return;
+            if (!card.CanActivateAtSlot(slotIndex)) return;
+
+            BattleContext context = CreateContext(slotIndex, card);
+            ExecuteCardEffects(card, context, CardEffectTiming.Placement, false);
+        }
+
+        void CancelPlacementEffects(int slotIndex)
+        {
+            if (slotIndex < 0 || slotIndex >= BattleModel.SlotCount) return;
+            CardData card = _battleModel.PlaySlots[slotIndex];
+            if (card == null) return;
+            if (!card.CanActivateAtSlot(slotIndex)) return;
+
+            BattleContext context = CreateContext(slotIndex, card);
+            context.CurrentTiming = CardEffectTiming.Placement;
+            foreach (CardEffect effect in card.Effects)
+            {
+                if (effect == null) continue;
+                if (effect.Timing != CardEffectTiming.Placement) continue;
+
+                effect.Cancel(context);
+            }
+            context.CurrentTiming = CardEffectTiming.Play;
+        }
+
+        void CancelAllPlacementEffects()
+        {
+            for (int i = 0; i < BattleModel.SlotCount; i++)
+                CancelPlacementEffects(i);
+        }
+
+        BattleContext CreateContext(int slotIndex, CardData card)
+        {
+            return new BattleContext(
+                _battleModel,
+                _deckModel,
+                _enemyController,
+                this,
+                slotIndex,
+                card,
+                _battleModel.GetLeftNeighbor(slotIndex),
+                _battleModel.GetRightNeighbor(slotIndex)
+            );
+        }
+
+        void ExecuteCardEffects(CardData card, BattleContext context, CardEffectTiming timing, bool useCardEffectBoost)
+        {
+            if (card == null || context == null) return;
+
+            context.CurrentTiming = timing;
+            context.SetUseCardEffectBoost(useCardEffectBoost);
+            foreach (CardEffect effect in card.Effects)
+            {
+                if (effect == null) continue;
+                if (effect.Timing != timing) continue;
+
+                effect.Execute(context);
+                if (_battleModel.IsBattleOver) break;
+                if (_battleModel.IsCurrentMonsterDefeated) break;
+            }
+            context.SetUseCardEffectBoost(false);
+            context.CurrentTiming = CardEffectTiming.Play;
         }
 
         public void AddCardEffectBoost(int slotIndex, CardEffectBoost boost)
@@ -467,6 +515,7 @@ namespace Card5
         {
             CardData card = _battleModel.PlaySlots[slotIndex];
             if (card == null) return;
+            CancelPlacementEffects(slotIndex);
             _deckModel.DiscardPile.Add(card);
             _battleModel.PlaySlots[slotIndex] = null;
         }
@@ -487,6 +536,7 @@ namespace Card5
         {
             if (_battleModel.IsBattleOver) return;
             _battleModel.IsBattleOver = true;
+            CancelAllPlacementEffects();
             _battleModel.ClearSlots();
             this.SendEvent(new BattleEndedEvent { PlayerWon = false });
         }
@@ -523,8 +573,6 @@ namespace Card5
             _battleModel.MaxEnergy.Value = _battleModel.BaseMaxEnergy;
             _battleModel.CurrentEnergy.Value = _battleModel.MaxEnergy.Value;
             _battleModel.RedrawsRemaining = _battleModel.RedrawsPerTurn;
-
-            _markSystem.TickMarks();
 
             _cardSystem.DrawCards(DrawPerTurn);
 
@@ -564,6 +612,15 @@ namespace Card5
             }
         }
 
+        void NotifyEnergyChanged()
+        {
+            this.SendEvent(new EnergyChangedEvent
+            {
+                CurrentEnergy = _battleModel.CurrentEnergy.Value,
+                MaxEnergy = _battleModel.MaxEnergy.Value
+            });
+        }
+
         readonly struct SlotCardEffectBoost
         {
             public SlotCardEffectBoost(int slotIndex, CardEffectBoost boost)
@@ -574,6 +631,22 @@ namespace Card5
 
             public int SlotIndex { get; }
             public CardEffectBoost Boost { get; }
+        }
+
+        readonly struct SlotResolution
+        {
+            public SlotResolution(int slotIndex, CardData card, BattleContext context, bool isActive)
+            {
+                SlotIndex = slotIndex;
+                Card = card;
+                Context = context;
+                IsActive = isActive;
+            }
+
+            public int SlotIndex { get; }
+            public CardData Card { get; }
+            public BattleContext Context { get; }
+            public bool IsActive { get; }
         }
     }
 }

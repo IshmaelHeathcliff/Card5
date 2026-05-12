@@ -14,10 +14,8 @@ alwaysApply: false
 | 游戏启动入口 | `Assets/Scripts/GameManager.cs` |
 | 战斗 Model | `Assets/Scripts/Gameplay/Battle/BattleModel.cs` |
 | 牌组 Model | `Assets/Scripts/Gameplay/Battle/DeckModel.cs` |
-| 印记 Model | `Assets/Scripts/Gameplay/Marks/MarkModel.cs` |
 | 战斗 System | `Assets/Scripts/Gameplay/Battle/BattleSystem.cs` |
 | 卡牌 System | `Assets/Scripts/Gameplay/Battle/CardSystem.cs` |
-| 印记 System | `Assets/Scripts/Gameplay/Marks/MarkSystem.cs` |
 | 卡牌显示组件 | `Assets/Scripts/UI/CardDisplayView.cs` |
 | UI 层级管理 | `Assets/Scripts/UI/UILayerManager.cs` |
 | 弹窗动态加载 | `Assets/Scripts/UI/UIPopupManager.cs` |
@@ -66,9 +64,9 @@ HandViewController  监听 HandRefreshedEvent
        └─ BattleSystem.EndTurn()
             ├─ 验证：5 个槽位必须全部放满，否则不允许结束回合
             ├─ BattleSystem.ResolveSlots()  // 按槽位顺序结算
-            │    ├─ MarkSystem.ExecuteSlotMarks(BeforeCardEffects)
-            │    ├─ CardEffect.Execute(BattleContext)    // 卡牌内联效果
-            │    ├─ MarkSystem.ExecuteSlotMarks(AfterCardEffects)
+            │    ├─ CardEffect(出牌开始阶段) // 先处理全部有效槽位
+            │    ├─ CardEffect(出牌阶段) // 再按槽位顺序结算全部有效槽位
+            │    ├─ CardEffect(出牌结束阶段) // 最后再按槽位顺序结算全部有效槽位
             │    └─ 一轮最多结算 5 张槽位卡；卡牌只在配置的生效位置执行效果
             ├─ 若怪物被击败，生成奖励并暂停后续流程
             │    ├─ CardSystem.DiscardHand() // 先将剩余手牌全部弃掉
@@ -79,16 +77,17 @@ HandViewController  监听 HandRefreshedEvent
             ├─ CardSystem.DiscardHand()     // 手牌全部弃掉
             ├─ EnemyTurn()
             ├─ 回合数 +1，恢复能量
-            ├─ MarkSystem.TickMarks()       // 新回合开始时推进印记持续时间
             ├─ CardSystem.DrawCards(8)      // 新回合抽 8 张
             └─ 发送 TurnEndedEvent / TurnStartedEvent
 ```
 
 当前出牌轮数按每次结束回合后的槽位结算计数。若一张卡击败当前怪物，本轮后续槽位卡牌不再继续结算，并统一进入弃牌堆；若因此触发战斗奖励，剩余手牌和抽牌堆中的卡牌也会先一起送入弃牌堆，等槽位、手牌和抽牌堆的弃牌动画结束后再弹出奖励。
 玩家必须先放满 5 个出牌槽，才可以点击「结束回合」并结算本轮出牌；任意空槽都会阻止本轮出牌结算。
-`CardData` 可配置 1-5 号位的任意生效组合，并在 Odin Inspector 中提供「任意位置」「奇数位」「偶数位」快捷按钮。卡牌放在未配置的槽位时仍会被结算并进入弃牌堆，但不会触发该卡效果、卡牌印记或槽位印记；槽位背景会按状态显示为灰色空槽、绿色有效、红色无效。
+`CardData` 可配置 1-5 号位的任意生效组合，并在 Odin Inspector 中提供「任意位置」「奇数位」「偶数位」快捷按钮。卡牌放在未配置的槽位时仍会被结算并进入弃牌堆，但不会触发该卡效果；槽位背景会按状态显示为灰色空槽、绿色有效、红色无效。
 `CardData` 的效果直接内联配置在卡牌资产中，基于 Odin 多态序列化选择具体 `CardEffect` 类型，不再创建独立效果资产。
-`BoostSlotCardEffect` 可以提高指定槽位本轮后续主卡牌效果数值，支持固定增加、百分比增加和倍率提升；当前通过 `BattleContext.DealDamage()` 生效。
+`CardEffect` 可配置生效时机：放牌阶段、出牌开始阶段、出牌阶段、出牌结束阶段。放牌阶段效果在卡牌放入有效槽位后立即执行；卡牌撤回、换槽、与手牌交换或清槽时会取消，换到新槽位后重新按新槽位生效。
+出牌结算会先对全部有效槽位执行出牌开始阶段，再按槽位顺序执行全部出牌阶段效果，最后再按槽位顺序执行全部出牌结束阶段效果。
+`BoostSlotCardEffect` 默认在出牌开始阶段提高指定槽位本轮主卡牌效果数值，支持固定增加、百分比增加和倍率提升；因为出牌开始阶段会先于全部出牌阶段统一执行，所以增伤卡放在 5 号槽也能影响本轮目标槽位。当前增伤通过 `BattleContext.DealDamage()` 生效。
 `BattleUIController` 监听 `MonsterPlayRoundCountChangedEvent`，在战斗 UI 中显示当前怪物剩余出牌轮数。
 手牌、奖励选项、牌堆弹窗和出牌槽都通过 `CardDisplayView` 显示统一卡牌信息；顶部信息区显示生效位置和类型，描述区不再重复生效位置，名称、费用、描述按显示模式切换；各容器只负责自身交互和额外状态，例如槽位背景的有效/无效颜色。
 手牌与槽位之间的飞行动画现在也保持 `CardDisplayMode.Full`，飞行中的临时卡牌、回手中的卡牌、槽位中的卡牌，以及从槽位拖到其他槽位或手牌区时的跟手预览都统一显示完整信息。
@@ -118,7 +117,7 @@ BattleSystem.EndTurn()
 ```
 
 战斗胜利或失败后，`BattleUIController` 显示结果确认 UI。玩家点击确认会发送 `RestartBattleCommand`，使用本次战斗的牌组、怪物列表、奖励配置和数值重新开始战斗。
-重开会先重置玩家战斗状态：手牌与手牌 UI、抽牌堆、弃牌堆、出牌槽、能量、重抽次数、奖励待选、印记和怪物出牌轮数都会回到初始状态，再开始新一局。
+重开会先重置玩家战斗状态：手牌与手牌 UI、抽牌堆、弃牌堆、出牌槽、能量、重抽次数、奖励待选和怪物出牌轮数都会回到初始状态，再开始新一局。
 
 ### 撤牌 / 换牌
 
@@ -170,7 +169,7 @@ BattleSystem.EndTurn()
             └─ 全部奖励组完成后发送 BattleRewardCompletedEvent，并进入下一只怪物/战斗胜利
 ```
 
-`BattleRewardConfigData` 支持一次奖励配置多个奖励组；每个奖励组都是多选一。当前已实现 `Card` 类型，默认用于卡牌三选一；`Mark` 类型仅保留枚举扩展位，后续再接入印记奖励逻辑。
+`BattleRewardConfigData` 支持一次奖励配置多个奖励组；每个奖励组都是多选一。当前奖励类型只实现 `Card`，默认用于卡牌三选一。
 
 `CardData` 使用单选卡牌类型，默认类型为「通用」，当前类型包括「通用」「占卜」「奥术」。类型用于词条生效检索、流派分类和后续奖励筛选，可通过 `Type` 和 `IsType()` 查询。
 
@@ -206,6 +205,7 @@ BattleSystem.EndTurn()
 ## 新增卡牌效果
 
 继承 `CardEffect`，实现 `Execute(BattleContext ctx)`。效果不再创建独立 `ScriptableObject` 资产，而是在 `CardData` 的「卡牌效果」列表中直接选择和配置。
+卡牌配置中会直接显示具体生效时机，不再显示“使用默认时机”。新增效果默认显示为 `Play`（出牌阶段）；如果某个效果更适合其他初始时机，可在构造函数中调用 `base(CardEffectTiming.Xxx)` 设置。放牌阶段效果如果会修改可变战斗状态，需要同时重写 `Cancel(BattleContext ctx)` 做反向取消。
 
 ```csharp
 using System;
@@ -222,38 +222,21 @@ public class XxxCardEffect : CardEffect
         // context.DeckModel            — 牌组状态（抽牌堆、弃牌堆）
         // context.Enemy                — 敌人（TakeDamage）
         // context.BattleSystem         — 调用战斗系统方法
-        // context.MarkSystem           — 施加印记
         // context.LeftNeighbor         — 左邻槽卡牌（可为 null）
         // context.RightNeighbor        — 右邻槽卡牌（可为 null）
         // context.SlotIndex            — 当前槽位索引（0-4）
         // context.CurrentCard          — 当前卡牌数据
+        // context.CurrentTiming        — 当前效果生效时机
+        // context.DamageDealtThisCard  — 本张卡当前累计造成伤害
         // context.DealDamage(amount)   — 便捷伤害方法（含事件）
+    }
+
+    public override void Cancel(BattleContext context)
+    {
+        // 仅放牌阶段等需要撤销的效果实现
     }
 }
 ```
-
----
-
-## 印记系统
-
-### 两种印记目标
-
-| 类型 | 说明 | 施加方法 |
-|------|------|---------|
-| 槽位印记 | 绑定到槽位编号，与槽无关于卡牌 | `MarkSystem.ApplyMarkToSlot(slotIndex, markData)` |
-| 卡牌印记 | 绑定到具体 `CardData` 实例 | `MarkSystem.ApplyMarkToCard(cardData, markData)` |
-
-### 触发时机（`MarkTrigger` 枚举）
-
-| 值 | 时机 |
-|----|------|
-| `BeforeCardEffects` | 卡牌效果执行前 |
-| `AfterCardEffects` | 卡牌效果执行后 |
-
-### 持续时间
-
-- `Duration > 0`：剩余回合数，每次 `TickMarks()` 时 -1，归零后自动移除
-- `Duration == -1`：永久印记，不会自动移除
 
 ---
 
@@ -321,8 +304,6 @@ enemyController.SetBehavior(new MyEnemyBehavior());
 | `RedrawCountChangedEvent` | 剩余重抽次数变化 |
 | `DrawPileChangedEvent` | 抽牌堆数量变化 |
 | `DiscardPileChangedEvent` | 弃牌堆数量变化 |
-| `MarkAppliedEvent` | 印记施加 |
-| `MarkRemovedEvent` | 印记移除 |
 | `CardAddedToDeckEvent` | 新卡牌加入牌库（弃牌堆 + FullDeck） |
 | `CardRemovedFromDeckEvent` | 卡牌从牌库移除 |
 | `BattleRewardOfferedEvent` | 击败怪物后的战斗奖励生成，等待玩家选择 |

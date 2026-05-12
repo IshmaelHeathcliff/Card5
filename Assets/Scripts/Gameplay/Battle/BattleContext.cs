@@ -10,7 +10,6 @@ namespace Card5
         public DeckModel DeckModel { get; }
         public EnemyController Enemy { get; }
         public BattleSystem BattleSystem { get; }
-        public MarkSystem MarkSystem { get; }
 
         /// <summary>当前出牌所在的槽位索引（0-4）</summary>
         public int SlotIndex { get; }
@@ -24,6 +23,15 @@ namespace Card5
         /// <summary>当前正在结算的牌数据</summary>
         public CardData CurrentCard { get; }
 
+        /// <summary>当前正在执行的卡牌效果时机</summary>
+        public CardEffectTiming CurrentTiming { get; internal set; }
+
+        /// <summary>本张卡在出牌阶段累计造成的伤害，用于出牌结束阶段效果判断</summary>
+        public int DamageDealtThisCard { get; private set; }
+
+        /// <summary>本张卡是否在出牌阶段击败了当前怪物</summary>
+        public bool DefeatedEnemyThisCard { get; private set; }
+
         bool _useCardEffectBoost;
 
         public BattleContext(
@@ -31,7 +39,6 @@ namespace Card5
             DeckModel deckModel,
             EnemyController enemy,
             BattleSystem battleSystem,
-            MarkSystem markSystem,
             int slotIndex,
             CardData currentCard,
             CardData leftNeighbor,
@@ -41,7 +48,6 @@ namespace Card5
             DeckModel = deckModel;
             Enemy = enemy;
             BattleSystem = battleSystem;
-            MarkSystem = markSystem;
             SlotIndex = slotIndex;
             CurrentCard = currentCard;
             LeftNeighbor = leftNeighbor;
@@ -52,7 +58,12 @@ namespace Card5
         public void DealDamage(int amount)
         {
             amount = GetModifiedEffectAmount(amount);
+            if (Enemy == null || amount <= 0) return;
+
             Enemy.TakeDamage(amount);
+            DamageDealtThisCard += amount;
+            if (BattleModel != null && BattleModel.IsCurrentMonsterDefeated)
+                DefeatedEnemyThisCard = true;
         }
 
         internal void SetUseCardEffectBoost(bool useCardEffectBoost)
