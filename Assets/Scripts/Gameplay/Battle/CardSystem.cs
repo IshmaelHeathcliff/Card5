@@ -62,7 +62,7 @@ namespace Card5
             deckModel.MoveHandToDiscard();
 
             this.SendEvent(new HandDiscardedEvent());
-            this.SendEvent(new HandRefreshedEvent { CardIds = new List<string>() });
+            this.SendEvent(new HandRefreshedEvent { CardIds = new List<int>() });
             this.SendEvent(new DiscardPileChangedEvent { Count = deckModel.DiscardPile.Count });
         }
 

@@ -65,7 +65,7 @@ namespace Card5
                 OfferId = offerId,
                 OptionId = optionId,
                 RewardType = option.RewardType,
-                CardId = option.Card != null ? option.Card.CardId : string.Empty,
+                CardId = option.Card != null ? option.Card.CardId : -1,
                 RemainingOffers = _rewardModel.PendingOffers
             });
 

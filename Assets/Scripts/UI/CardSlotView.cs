@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Card5
@@ -24,8 +25,8 @@ namespace Card5
 
         [SerializeField, MinValue(5)] float _dragThreshold = 10f;
         [SerializeField] Color _emptySlotColor = new Color(0.45f, 0.45f, 0.45f, 1f);
-        [SerializeField] Color _validPositionColor = new Color(0.2f, 0.85f, 0.35f, 1f);
-        [SerializeField] Color _invalidPositionColor = new Color(1f, 0.2f, 0.2f, 1f);
+        [FormerlySerializedAs("_validPositionColor")]
+        [SerializeField] Color _filledSlotColor = new Color(0.2f, 0.85f, 0.35f, 1f);
         [Title("拖拽预览")]
         [SerializeField, LabelText("预览尺寸")] Vector2 _dragPreviewSize;
         [SerializeField, LabelText("预览缩放")] float _dragPreviewScale;
@@ -477,7 +478,6 @@ namespace Card5
         {
             bool isDraggingThisSlot = s_draggingSlotIndex == _slotIndex;
             bool filled = _currentCard != null && !isDraggingThisSlot && !_isRevealPending;
-            bool invalidPosition = filled && !_currentCard.CanActivateAtSlot(_slotIndex);
 
             if (_emptyIndicator != null)
                 _emptyIndicator.SetActive(!filled);
@@ -485,7 +485,7 @@ namespace Card5
                 _filledIndicator.SetActive(filled);
 
             if (_slotBackground != null)
-                _slotBackground.color = GetSlotBackgroundColor(filled, invalidPosition);
+                _slotBackground.color = GetSlotBackgroundColor(filled);
 
             CardDisplayView displayView = GetDisplayView();
             if (filled)
@@ -514,12 +514,12 @@ namespace Card5
             RefreshUI();
         }
 
-        Color GetSlotBackgroundColor(bool filled, bool invalidPosition)
+        Color GetSlotBackgroundColor(bool filled)
         {
             if (!filled)
                 return _emptySlotColor;
 
-            return invalidPosition ? _invalidPositionColor : _validPositionColor;
+            return _filledSlotColor;
         }
 
         public void OnClickReturnCard()

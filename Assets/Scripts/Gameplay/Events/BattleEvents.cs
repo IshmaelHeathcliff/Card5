@@ -40,13 +40,13 @@ namespace Card5.Gameplay.Events
 
     public struct CardDrawnEvent
     {
-        public string CardId;
+        public int CardId;
         public int HandIndex;
     }
 
     public struct HandRefreshedEvent
     {
-        public List<string> CardIds;
+        public List<int> CardIds;
     }
 
     public struct HandDiscardedEvent
@@ -67,14 +67,14 @@ namespace Card5.Gameplay.Events
 
     public struct CardReturnedToHandEvent
     {
-        public string CardId;
+        public int CardId;
         public int HandIndex;
         public int SourceSlotIndex;
     }
 
     public struct CardPlayedEvent
     {
-        public string CardId;
+        public int CardId;
         public int SlotIndex;
     }
 
@@ -92,8 +92,8 @@ namespace Card5.Gameplay.Events
 
     public struct HandSlotSwappedEvent
     {
-        public string HandCardId;
-        public string SlotCardId;
+        public int HandCardId;
+        public int SlotCardId;
         public int HandIndex;
         public int SlotIndex;
     }
@@ -156,7 +156,7 @@ namespace Card5.Gameplay.Events
     /// <summary>新卡牌加入牌库（写入弃牌堆并同步 FullDeck）时发送</summary>
     public struct CardAddedToDeckEvent
     {
-        public string CardId;
+        public int CardId;
         public int DrawPileCount;
         public int DiscardPileCount;
     }
@@ -164,7 +164,7 @@ namespace Card5.Gameplay.Events
     /// <summary>卡牌从牌库移除（FullDeck、DrawPile 或 DiscardPile）时发送</summary>
     public struct CardRemovedFromDeckEvent
     {
-        public string CardId;
+        public int CardId;
         public int DrawPileCount;
         public int DiscardPileCount;
     }
@@ -181,7 +181,7 @@ namespace Card5.Gameplay.Events
         public string OfferId;
         public string OptionId;
         public BattleRewardType RewardType;
-        public string CardId;
+        public int CardId;
         public IReadOnlyList<BattleRewardOffer> RemainingOffers;
     }
 

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3aef7f1b0ea5558408ad3b45b6f33c78, type: 3}
-  m_Name: "\u9B54\u672F\u5E08"
+  m_Name: "5\u6559\u7687"
   m_EditorClassIdentifier: Assembly-CSharp::Card5.CardData
   serializationData:
     SerializedFormat: 2
@@ -27,29 +27,16 @@ MonoBehaviour:
         mscorlib
     - Name: 
       Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 1|Card5.DamageCardEffect, Assembly-CSharp
-    - Name: _description
-      Entry: 6
-      Data: 
-    - Name: _damage
-      Entry: 3
-      Data: 2
-    - Name: 
-      Entry: 8
-      Data: 
+      Data: 0
     - Name: 
       Entry: 13
       Data: 
     - Name: 
       Entry: 8
       Data: 
-  _cardId: advanced_damage
-  _cardName: "\u9B54\u672F\u5E08"
-  _description: "\u9020\u62102\u70B9\u4F24\u5BB3"
-  _energyCost: 1
-  _cardType: 0
-  _activationPositions: 21
-  _artwork: {fileID: -2524091797026239206, guid: 04bade7f4b51d0f4bbadc9ac39867d59, type: 3}
+  _cardId: 6
+  _cardName: "\u6559\u7687"
+  _description: "\u6682\u65E0"
+  _energyCost: 2
+  _cardType: 1
+  _artwork: {fileID: -3704846334026700365, guid: d8531d8cbc0872342ac74d83b0f7d5cb, type: 3}

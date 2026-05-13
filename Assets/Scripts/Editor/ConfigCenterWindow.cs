@@ -96,7 +96,7 @@ namespace Card5.Editor
             List<ScriptableObject> allAssets = FindAllConfigAssets();
             Dictionary<Type, List<ScriptableObject>> assetsByType = allAssets
                 .GroupBy(asset => asset.GetType())
-                .ToDictionary(group => group.Key, group => group.OrderBy(asset => asset.name).ToList());
+                .ToDictionary(group => group.Key, group => SortAssetsForType(group.Key, group));
 
             foreach (Type type in GetProjectConfigTypes())
             {
@@ -141,8 +141,29 @@ namespace Card5.Editor
 
             return assets
                 .OrderBy(asset => GetTypeDisplayName(asset.GetType()))
+                .ThenBy(GetAssetSortOrder)
                 .ThenBy(asset => asset.name)
                 .ToList();
+        }
+
+        static List<ScriptableObject> SortAssetsForType(Type type, IEnumerable<ScriptableObject> assets)
+        {
+            if (typeof(CardData).IsAssignableFrom(type))
+            {
+                return assets
+                    .OrderBy(GetAssetSortOrder)
+                    .ThenBy(asset => asset.name)
+                    .ToList();
+            }
+
+            return assets
+                .OrderBy(asset => asset.name)
+                .ToList();
+        }
+
+        static int GetAssetSortOrder(ScriptableObject asset)
+        {
+            return asset is CardData card ? card.CardId : 0;
         }
 
         static List<Type> GetProjectConfigTypes()

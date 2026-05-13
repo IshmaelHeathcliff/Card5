@@ -23,6 +23,7 @@ namespace Card5
         BattleRewardConfigData _lastRewardConfig;
         int _lastMaxEnergy;
         readonly List<SlotCardEffectBoost> _slotCardEffectBoosts = new List<SlotCardEffectBoost>();
+        readonly BattleContext[] _placementContexts = new BattleContext[BattleModel.SlotCount];
 
         protected override void OnInit()
         {
@@ -101,7 +102,7 @@ namespace Card5
             _battleModel.InitBattle(maxEnergy);
             _rewardSystem.SetRewardConfig(rewardConfig);
 
-            this.SendEvent(new HandRefreshedEvent { CardIds = new List<string>() });
+            this.SendEvent(new HandRefreshedEvent { CardIds = new List<int>() });
             this.SendEvent<SlotEffectsResolvedEvent>();
             this.SendEvent(new DrawPileChangedEvent { Count = _deckModel.DrawPile.Count });
             this.SendEvent(new DiscardPileChangedEvent { Count = _deckModel.DiscardPile.Count });
@@ -368,27 +369,34 @@ namespace Card5
                 if (card == null) continue;
 
                 resolvedAnyCard = true;
-                slotResolutions.Add(new SlotResolution(i, card, CreateContext(i, card), card.CanActivateAtSlot(i)));
+                slotResolutions.Add(new SlotResolution(i, card, CreateContext(i, card)));
             }
 
-            if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
-                ExecuteCardEffectsByTiming(slotResolutions, CardEffectTiming.PlayStart, false);
+            try
+            {
+                if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
+                    ExecuteCardEffectsByTiming(slotResolutions, CardEffectTiming.PlayStart, false);
 
-            if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
-                ExecuteCardEffectsByTiming(slotResolutions, CardEffectTiming.Play, true);
+                if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
+                    ExecuteCardEffectsByTiming(slotResolutions, CardEffectTiming.Play, true);
 
-            if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
-                ExecuteCardEffectsByTiming(slotResolutions, CardEffectTiming.PlayEnd, false);
+                if (!_battleModel.IsBattleOver && !_battleModel.IsCurrentMonsterDefeated)
+                    ExecuteCardEffectsByTiming(slotResolutions, CardEffectTiming.PlayEnd, false);
 
-            foreach (SlotResolution slotResolution in slotResolutions)
-                DiscardSlotCard(slotResolution.SlotIndex);
+                foreach (SlotResolution slotResolution in slotResolutions)
+                    DiscardSlotCard(slotResolution.SlotIndex);
 
-            DiscardRemainingSlotCards();
-            this.SendEvent<SlotEffectsResolvedEvent>();
-            this.SendEvent(new DiscardPileChangedEvent { Count = _deckModel.DiscardPile.Count });
+                DiscardRemainingSlotCards();
+                this.SendEvent<SlotEffectsResolvedEvent>();
+                this.SendEvent(new DiscardPileChangedEvent { Count = _deckModel.DiscardPile.Count });
 
-            _slotCardEffectBoosts.Clear();
-            return resolvedAnyCard;
+                return resolvedAnyCard;
+            }
+            finally
+            {
+                DisposeSlotResolutionContexts(slotResolutions);
+                _slotCardEffectBoosts.Clear();
+            }
         }
 
         void ExecuteCardEffectsByTiming(
@@ -398,7 +406,6 @@ namespace Card5
         {
             foreach (SlotResolution slotResolution in slotResolutions)
             {
-                if (!slotResolution.IsActive) continue;
                 if (_battleModel.IsBattleOver) break;
                 if (_battleModel.IsCurrentMonsterDefeated) break;
 
@@ -411,9 +418,10 @@ namespace Card5
             if (slotIndex < 0 || slotIndex >= BattleModel.SlotCount) return;
             CardData card = _battleModel.PlaySlots[slotIndex];
             if (card == null) return;
-            if (!card.CanActivateAtSlot(slotIndex)) return;
 
+            DisposePlacementContext(slotIndex);
             BattleContext context = CreateContext(slotIndex, card);
+            _placementContexts[slotIndex] = context;
             ExecuteCardEffects(card, context, CardEffectTiming.Placement, false);
         }
 
@@ -422,9 +430,9 @@ namespace Card5
             if (slotIndex < 0 || slotIndex >= BattleModel.SlotCount) return;
             CardData card = _battleModel.PlaySlots[slotIndex];
             if (card == null) return;
-            if (!card.CanActivateAtSlot(slotIndex)) return;
 
-            BattleContext context = CreateContext(slotIndex, card);
+            bool hasStoredContext = _placementContexts[slotIndex] != null;
+            BattleContext context = hasStoredContext ? _placementContexts[slotIndex] : CreateContext(slotIndex, card);
             context.CurrentTiming = CardEffectTiming.Placement;
             foreach (CardEffect effect in card.Effects)
             {
@@ -434,6 +442,10 @@ namespace Card5
                 effect.Cancel(context);
             }
             context.CurrentTiming = CardEffectTiming.Play;
+            if (hasStoredContext)
+                DisposePlacementContext(slotIndex);
+            else
+                context.Dispose();
         }
 
         void CancelAllPlacementEffects()
@@ -483,16 +495,35 @@ namespace Card5
 
         public int ModifyCardEffectAmount(int slotIndex, int amount)
         {
+            return ModifyCardDamage(slotIndex, amount);
+        }
+
+        public int ModifyCardDamage(int slotIndex, int amount)
+        {
             if (amount <= 0) return amount;
 
-            float result = amount;
+            var modifier = new DamageModifier(amount);
             foreach (SlotCardEffectBoost slotBoost in _slotCardEffectBoosts)
             {
                 if (slotBoost.SlotIndex != slotIndex) continue;
-                result = slotBoost.Boost.Apply(result);
+                slotBoost.Boost.ApplyTo(ref modifier);
             }
 
-            return Mathf.Max(0, Mathf.RoundToInt(result));
+            return Mathf.Max(0, Mathf.RoundToInt(modifier.Calculate()));
+        }
+
+        void DisposeSlotResolutionContexts(IReadOnlyList<SlotResolution> slotResolutions)
+        {
+            foreach (SlotResolution slotResolution in slotResolutions)
+                slotResolution.Context.Dispose();
+        }
+
+        void DisposePlacementContext(int slotIndex)
+        {
+            if (slotIndex < 0 || slotIndex >= _placementContexts.Length) return;
+
+            _placementContexts[slotIndex]?.Dispose();
+            _placementContexts[slotIndex] = null;
         }
 
         void AddMonsterPlayRoundAndFailIfNeeded()
@@ -635,18 +666,16 @@ namespace Card5
 
         readonly struct SlotResolution
         {
-            public SlotResolution(int slotIndex, CardData card, BattleContext context, bool isActive)
+            public SlotResolution(int slotIndex, CardData card, BattleContext context)
             {
                 SlotIndex = slotIndex;
                 Card = card;
                 Context = context;
-                IsActive = isActive;
             }
 
             public int SlotIndex { get; }
             public CardData Card { get; }
             public BattleContext Context { get; }
-            public bool IsActive { get; }
         }
     }
 }

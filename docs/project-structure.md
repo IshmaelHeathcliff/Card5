@@ -109,10 +109,10 @@ Assets/Scripts/
 
 | 类 | 菜单路径 | 说明 |
 |----|---------|------|
-| `CardData` | Card5/Card | 卡牌配置：名称、费用、图片、标签、生效位置、内联效果列表 |
+| `CardData` | Card5/Card | 卡牌配置：整数 ID、名称、费用、图片、类型、内联效果列表 |
 | `CardEffect`（抽象） | — | 内联效果基类，按放牌、出牌开始、出牌、出牌结束时机执行；通过 `CardData` 内部多态配置 |
 | `DamageCardEffect` | — | 对敌人造成伤害 |
-| `BoostSlotCardEffect` | — | 提高指定槽位后续主卡牌效果数值 |
+| `BoostSlotCardEffect` | — | 提高指定槽位本轮伤害 |
 | `DeckPresetData` | Card5/Deck Preset | 牌组预设，包含卡牌及数量列表 |
 | `EnemyData` | Card5/Enemy | 敌人配置：名称、最大 HP、描述、头像 |
 | `MonsterListData` | Card5/Monster List | 怪物列表配置：按顺序配置每只怪物与最大出牌轮数；一轮最多结算 5 张槽位卡 |
@@ -132,6 +132,7 @@ Assets/Scripts/
   - 类型页使用 Odin 原生分组展示概览、新建配置、现有配置列表。
   - 资源节点直接打开真实 `ScriptableObject` 资产，保证可直接修改配置。
   - 每个类型页内直接提供该类型的新建入口，并默认落到当前类型已有资源所在目录。
+  - 卡牌配置按整数 `CardId` 升序排列，ID 相同再按资源名排序。
 
 ---
 

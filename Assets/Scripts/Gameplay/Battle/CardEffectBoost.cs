@@ -4,12 +4,14 @@ namespace Card5
 {
     public enum CardEffectBoostMode
     {
-        [InspectorName("固定增加")]
+        [InspectorName("基础伤害增加")]
         AddFlat,
-        [InspectorName("百分比增加")]
+        [InspectorName("伤害百分比增减")]
         AddPercent,
-        [InspectorName("倍率提升")]
-        Multiply
+        [InspectorName("伤害总增")]
+        Multiply,
+        [InspectorName("固定值增加")]
+        AddFixed
     }
 
     public readonly struct CardEffectBoost
@@ -23,15 +25,49 @@ namespace Card5
         public CardEffectBoostMode Mode { get; }
         public float Value { get; }
 
-        public float Apply(float amount)
+        public void ApplyTo(ref DamageModifier modifier)
         {
-            return Mode switch
+            modifier.Apply(this);
+        }
+    }
+
+    public struct DamageModifier
+    {
+        public float BaseDamage { get; private set; }
+        public float DamageIncreasePercent { get; private set; }
+        public float TotalMultiplier { get; private set; }
+        public float FixedValue { get; private set; }
+
+        public DamageModifier(float baseDamage)
+        {
+            BaseDamage = baseDamage;
+            DamageIncreasePercent = 0f;
+            TotalMultiplier = 1f;
+            FixedValue = 0f;
+        }
+
+        public void Apply(CardEffectBoost boost)
+        {
+            switch (boost.Mode)
             {
-                CardEffectBoostMode.AddFlat    => amount + Value,
-                CardEffectBoostMode.AddPercent => amount * (1f + Value * 0.01f),
-                CardEffectBoostMode.Multiply   => amount * Value,
-                _                              => amount
-            };
+                case CardEffectBoostMode.AddFlat:
+                    BaseDamage += boost.Value;
+                    break;
+                case CardEffectBoostMode.AddPercent:
+                    DamageIncreasePercent += boost.Value;
+                    break;
+                case CardEffectBoostMode.Multiply:
+                    TotalMultiplier *= boost.Value;
+                    break;
+                case CardEffectBoostMode.AddFixed:
+                    FixedValue += boost.Value;
+                    break;
+            }
+        }
+
+        public float Calculate()
+        {
+            return BaseDamage * (1f + DamageIncreasePercent * 0.01f) * TotalMultiplier + FixedValue;
         }
     }
 }

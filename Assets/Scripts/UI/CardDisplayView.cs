@@ -41,14 +41,14 @@ namespace Card5
             bool showDescription = true;
 
             SetNodeActive(_topInfo, showTopInfo);
-            SetNodeActive(_activationPosition, showTopInfo);
+            SetNodeActive(_activationPosition, false);
             SetNodeActive(_type, showTopInfo);
             SetNodeActive(_name, showName);
             SetNodeActive(_cost, showCost);
             SetNodeActive(_description, showDescription);
 
             if (_activationPositionText != null)
-                _activationPositionText.text = showTopInfo ? card.ActivationPositionDescription : string.Empty;
+                _activationPositionText.text = string.Empty;
 
             if (_typeText != null)
                 _typeText.text = showTopInfo ? card.TypeDescription : string.Empty;

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3aef7f1b0ea5558408ad3b45b6f33c78, type: 3}
-  m_Name: "\u5973\u796D\u53F8"
+  m_Name: "7\u6218\u8F66"
   m_EditorClassIdentifier: Assembly-CSharp::Card5.CardData
   serializationData:
     SerializedFormat: 2
@@ -31,12 +31,24 @@ MonoBehaviour:
     - Name: 
       Entry: 7
       Data: 1|Card5.DamageCardEffect, Assembly-CSharp
+    - Name: _timing
+      Entry: 3
+      Data: 0
     - Name: _description
       Entry: 6
       Data: 
+    - Name: _useRandomRange
+      Entry: 5
+      Data: true
     - Name: _damage
       Entry: 3
-      Data: 3
+      Data: 1
+    - Name: _minDamage
+      Entry: 3
+      Data: 2
+    - Name: _maxDamage
+      Entry: 3
+      Data: 7
     - Name: 
       Entry: 8
       Data: 
@@ -46,10 +58,9 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-  _cardId: great_damage
-  _cardName: "\u5973\u796D\u53F8"
-  _description: "\u9020\u62103\u70B9\u4F24\u5BB3"
+  _cardId: 8
+  _cardName: "\u6218\u8F66"
+  _description: "\u968F\u673A\u9020\u62102~7\u70B9\u4F24\u5BB3"
   _energyCost: 2
-  _cardType: 0
-  _activationPositions: 10
-  _artwork: {fileID: -6072499149093677281, guid: e1bfb8cb322109041836117c64dc4e6c, type: 3}
+  _cardType: 1
+  _artwork: {fileID: -5416563597040770376, guid: 350b5df19bec13c419ec38b946ef182e, type: 3}
