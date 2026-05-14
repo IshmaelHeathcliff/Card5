@@ -27,7 +27,7 @@ MonoBehaviour:
         mscorlib
     - Name: 
       Entry: 12
-      Data: 1
+      Data: 2
     - Name: 
       Entry: 7
       Data: 1|Card5.DamageCardEffect, Assembly-CSharp
@@ -35,8 +35,8 @@ MonoBehaviour:
       Entry: 3
       Data: 0
     - Name: _description
-      Entry: 6
-      Data: 
+      Entry: 1
+      Data: "\u9020\u62103\u70B9\u4F24\u5BB3"
     - Name: _useRandomRange
       Entry: 5
       Data: false
@@ -53,6 +53,73 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: 
+      Entry: 7
+      Data: 2|Card5.TriggeredCardEffect, Assembly-CSharp
+    - Name: _timing
+      Entry: 3
+      Data: 2
+    - Name: _description
+      Entry: 1
+      Data: "\u3010\u6FC0\u53D1\u65F6\u3011\u3010\u6FC0\u53D1\u3011\u4E00\u5F20\u968F\u673A\u5965\u672F\u724C"
+    - Name: _effects
+      Entry: 7
+      Data: 3|System.Collections.Generic.List`1[[Card5.CardEffect, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 4|Card5.TriggerCardEffect, Assembly-CSharp
+    - Name: _timing
+      Entry: 3
+      Data: 0
+    - Name: _description
+      Entry: 1
+      Data: "\u3010\u6FC0\u53D1\u3011\u4E00\u5F20\u968F\u673A\u5965\u672F\u724C"
+    - Name: _targetSelector
+      Entry: 7
+      Data: 5|Card5.CardTargetSelector, Assembly-CSharp
+    - Name: _range
+      Entry: 3
+      Data: 0
+    - Name: _slots
+      Entry: 3
+      Data: 31
+    - Name: _useTypeFilter
+      Entry: 5
+      Data: true
+    - Name: _requiredType
+      Entry: 3
+      Data: 2
+    - Name: _useTagFilter
+      Entry: 5
+      Data: false
+    - Name: _requiredTag
+      Entry: 6
+      Data: 
+    - Name: _quantityMode
+      Entry: 3
+      Data: 1
+    - Name: _randomCount
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
       Entry: 13
       Data: 
     - Name: 
@@ -60,7 +127,8 @@ MonoBehaviour:
       Data: 
   _cardId: 14
   _cardName: "\u6B7B\u795E"
-  _description: "\u6682\u65E0"
+  _description: "\u9020\u62103\u70B9\u4F24\u5BB3\uFF0C\u3010\u6FC0\u53D1\u65F6\u3011\u3010\u6FC0\u53D1\u3011\u4E00\u5F20\u968F\u673A\u5965\u672F\u724C"
   _energyCost: 3
   _cardType: 2
+  _cardTags: []
   _artwork: {fileID: 2410886209174528034, guid: 7ad2b8de46b4cc145ba7568b293cdc19, type: 3}

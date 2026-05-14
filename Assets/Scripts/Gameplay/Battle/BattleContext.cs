@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Card5
 {
@@ -43,6 +44,8 @@ namespace Card5
 
         bool _useCardEffectBoost;
 
+        internal bool UseCardEffectBoost => _useCardEffectBoost;
+
         public BattleContext(
             BattleModel battleModel,
             DeckModel deckModel,
@@ -67,13 +70,21 @@ namespace Card5
         public void DealDamage(int amount)
         {
             ThrowIfDisposed();
+            int baseAmount = amount;
             amount = GetModifiedDamage(amount);
-            if (Enemy == null || amount <= 0) return;
+            if (Enemy == null || amount <= 0)
+            {
+                Debug.Log($"[CardEffect] 伤害跳过 | 卡牌={FormatCard(CurrentCard)} | 槽位={FormatSlot(SlotIndex)} | 基础伤害={baseAmount} | 结算伤害={amount} | 原因={(Enemy == null ? "无敌人" : "伤害不大于0")}");
+                return;
+            }
 
+            int damageBefore = DamageDealtThisCard;
             Enemy.TakeDamage(amount);
             DamageDealtThisCard += amount;
             if (BattleModel != null && BattleModel.IsCurrentMonsterDefeated)
                 DefeatedEnemyThisCard = true;
+
+            Debug.Log($"[CardEffect] 伤害结算 | 卡牌={FormatCard(CurrentCard)} | 槽位={FormatSlot(SlotIndex)} | 基础伤害={baseAmount} | 结算伤害={amount} | 本次前累计={damageBefore} | 本次后累计={DamageDealtThisCard} | 击败怪物={DefeatedEnemyThisCard}");
         }
 
         public void SetValue<T>(string key, T value)
@@ -179,6 +190,19 @@ namespace Card5
         static void ValidateKey(string key)
         {
             if (string.IsNullOrWhiteSpace(key)) throw new ArgumentException("上下文键不能为空。", nameof(key));
+        }
+
+        static string FormatCard(CardData card)
+        {
+            if (card == null) return "空";
+
+            string cardName = string.IsNullOrWhiteSpace(card.CardName) ? card.name : card.CardName;
+            return $"{cardName}(ID:{card.CardId}, 类型:{card.Type})";
+        }
+
+        static string FormatSlot(int slotIndex)
+        {
+            return slotIndex >= 0 ? $"{slotIndex + 1}号位" : "无槽位";
         }
 
         sealed class BattleContextUnRegister : IUnRegister

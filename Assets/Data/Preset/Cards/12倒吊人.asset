@@ -27,7 +27,7 @@ MonoBehaviour:
         mscorlib
     - Name: 
       Entry: 12
-      Data: 1
+      Data: 2
     - Name: 
       Entry: 7
       Data: 1|Card5.DamageCardEffect, Assembly-CSharp
@@ -35,8 +35,48 @@ MonoBehaviour:
       Entry: 3
       Data: 0
     - Name: _description
-      Entry: 6
+      Entry: 1
+      Data: "\u9020\u62103\u70B9\u4F24\u5BB3"
+    - Name: _useRandomRange
+      Entry: 5
+      Data: false
+    - Name: _damage
+      Entry: 3
+      Data: 3
+    - Name: _minDamage
+      Entry: 3
+      Data: 1
+    - Name: _maxDamage
+      Entry: 3
+      Data: 3
+    - Name: 
+      Entry: 8
       Data: 
+    - Name: 
+      Entry: 7
+      Data: 2|Card5.TriggeredCardEffect, Assembly-CSharp
+    - Name: _timing
+      Entry: 3
+      Data: 2
+    - Name: _description
+      Entry: 1
+      Data: "\u3010\u6FC0\u53D1\u65F6\u3011\u9020\u62103\u70B9\u4F24\u5BB3"
+    - Name: _effects
+      Entry: 7
+      Data: 3|System.Collections.Generic.List`1[[Card5.CardEffect, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 4|Card5.DamageCardEffect, Assembly-CSharp
+    - Name: _timing
+      Entry: 3
+      Data: 0
+    - Name: _description
+      Entry: 1
+      Data: "\u9020\u62103\u70B9\u4F24\u5BB3"
     - Name: _useRandomRange
       Entry: 5
       Data: false
@@ -58,9 +98,19 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
   _cardId: 13
   _cardName: "\u5012\u540A\u4EBA"
-  _description: "\u6682\u65E0"
+  _description: "\u9020\u62103\u70B9\u4F24\u5BB3\uFF0C\u3010\u6FC0\u53D1\u65F6\u3011\u9020\u62103\u70B9\u4F24\u5BB3"
   _energyCost: 2
   _cardType: 2
+  _cardTags: []
   _artwork: {fileID: 2504064295231305103, guid: d00b3fc3888d6454585d7aebf369f9d9, type: 3}

@@ -23,6 +23,7 @@ namespace Card5
         BattleRewardConfigData _lastRewardConfig;
         int _lastMaxEnergy;
         readonly List<SlotCardEffectBoost> _slotCardEffectBoosts = new List<SlotCardEffectBoost>();
+        readonly List<RegisteredTriggeredCardEffect> _registeredTriggeredCardEffects = new List<RegisteredTriggeredCardEffect>();
         readonly BattleContext[] _placementContexts = new BattleContext[BattleModel.SlotCount];
 
         protected override void OnInit()
@@ -98,6 +99,7 @@ namespace Card5
         void ResetPlayerState(List<CardData> deckCards, int maxEnergy, BattleRewardConfigData rewardConfig)
         {
             CancelAllPlacementEffects();
+            _registeredTriggeredCardEffects.Clear();
             _deckModel.InitDeck(deckCards);
             _battleModel.InitBattle(maxEnergy);
             _rewardSystem.SetRewardConfig(rewardConfig);
@@ -165,20 +167,14 @@ namespace Card5
         /// <summary>尝试将手牌中的卡放入指定槽位。handIndex 指定手牌索引以区分相同 CardData 的多张牌，若 &lt; 0 则按 CardData 查找第一张。</summary>
         public bool TryPlayCard(CardData card, int slotIndex, int handIndex = -1)
         {
-            if (_battleModel.IsBattleOver) return false;
-            if (card == null) return false;
-            if (slotIndex < 0 || slotIndex >= BattleModel.SlotCount) return false;
-            if (!_battleModel.IsSlotEmpty(slotIndex)) return false;
-            if (_battleModel.CurrentEnergy.Value < card.EnergyCost) return false;
-
-            if (handIndex >= 0)
+            if (!CanPlayCard(card, slotIndex, handIndex, out string failureReason))
             {
-                if (handIndex >= _deckModel.Hand.Count) return false;
-                if (_deckModel.Hand[handIndex] != card) return false;
+                Debug.Log($"[BattleSystem] 出牌失败 | 原因={failureReason} | 卡牌={FormatCard(card)} | 目标槽位={FormatSlot(slotIndex)} | 手牌索引={handIndex} | 当前能量={_battleModel.CurrentEnergy.Value}");
+                return false;
             }
-            else
+
+            if (handIndex < 0)
             {
-                if (!_deckModel.Hand.Contains(card)) return false;
                 handIndex = _deckModel.Hand.IndexOf(card);
             }
 
@@ -192,6 +188,62 @@ namespace Card5
             this.SendEvent(new CardPlayedEvent { CardId = card.CardId, SlotIndex = slotIndex });
             NotifyEnergyChanged();
 
+            return true;
+        }
+
+        bool CanPlayCard(CardData card, int slotIndex, int handIndex, out string failureReason)
+        {
+            if (_battleModel.IsBattleOver)
+            {
+                failureReason = "战斗已结束";
+                return false;
+            }
+
+            if (card == null)
+            {
+                failureReason = "卡牌为空";
+                return false;
+            }
+
+            if (slotIndex < 0 || slotIndex >= BattleModel.SlotCount)
+            {
+                failureReason = "目标槽位无效";
+                return false;
+            }
+
+            if (!_battleModel.IsSlotEmpty(slotIndex))
+            {
+                failureReason = "目标槽位已占用";
+                return false;
+            }
+
+            if (_battleModel.CurrentEnergy.Value < card.EnergyCost)
+            {
+                failureReason = $"能量不足，费用={card.EnergyCost}";
+                return false;
+            }
+
+            if (handIndex >= 0)
+            {
+                if (handIndex >= _deckModel.Hand.Count)
+                {
+                    failureReason = "手牌索引越界";
+                    return false;
+                }
+
+                if (_deckModel.Hand[handIndex] != card)
+                {
+                    failureReason = "手牌索引对应的卡牌不匹配";
+                    return false;
+                }
+            }
+            else if (!_deckModel.Hand.Contains(card))
+            {
+                failureReason = "手牌中不存在该卡牌";
+                return false;
+            }
+
+            failureReason = string.Empty;
             return true;
         }
 
@@ -396,6 +448,7 @@ namespace Card5
             {
                 DisposeSlotResolutionContexts(slotResolutions);
                 _slotCardEffectBoosts.Clear();
+                _registeredTriggeredCardEffects.Clear();
             }
         }
 
@@ -479,7 +532,11 @@ namespace Card5
                 if (effect == null) continue;
                 if (effect.Timing != timing) continue;
 
+                int damageBefore = context.DamageDealtThisCard;
+                Debug.Log($"[CardEffect] 生效开始 | 卡牌={FormatCard(card)} | 槽位={FormatSlot(context.SlotIndex)} | 时机={timing} | 效果={GetEffectName(effect)} | 描述={GetEffectDescription(effect)} | 应用增伤={useCardEffectBoost}");
                 effect.Execute(context);
+                int damageDelta = context.DamageDealtThisCard - damageBefore;
+                Debug.Log($"[CardEffect] 生效结束 | 卡牌={FormatCard(card)} | 槽位={FormatSlot(context.SlotIndex)} | 效果={GetEffectName(effect)} | 本效果伤害={damageDelta} | 本卡累计伤害={context.DamageDealtThisCard} | 击败怪物={context.DefeatedEnemyThisCard}");
                 if (_battleModel.IsBattleOver) break;
                 if (_battleModel.IsCurrentMonsterDefeated) break;
             }
@@ -491,6 +548,46 @@ namespace Card5
         {
             if (slotIndex < 0 || slotIndex >= BattleModel.SlotCount) return;
             _slotCardEffectBoosts.Add(new SlotCardEffectBoost(slotIndex, boost));
+        }
+
+        public void RegisterTriggeredCardEffect(BattleContext context, TriggeredCardEffect effect)
+        {
+            if (context == null || effect == null) return;
+            if (context.IsDisposed) return;
+
+            _registeredTriggeredCardEffects.Add(new RegisteredTriggeredCardEffect(context.SlotIndex, context, effect));
+            Debug.Log($"[CardEffect] 注册被激发效果 | 卡牌={FormatCard(context.CurrentCard)} | 槽位={FormatSlot(context.SlotIndex)} | 效果={GetEffectName(effect)} | 当前注册数={_registeredTriggeredCardEffects.Count}");
+        }
+
+        public int TriggerRegisteredCardEffects(BattleContext triggerContext, CardTargetSelector targetSelector)
+        {
+            if (triggerContext == null || targetSelector == null) return 0;
+
+            List<RegisteredTriggeredCardEffect> candidates = _registeredTriggeredCardEffects
+                .FindAll(effect => effect.CanBeTriggered);
+            List<RegisteredTriggeredCardEffect> selectedTargets = targetSelector.Select(triggerContext, candidates);
+
+            Debug.Log($"[CardEffect] 激发检查 | 激发卡牌={FormatCard(triggerContext.CurrentCard)} | 激发槽位={FormatSlot(triggerContext.SlotIndex)} | 选择器={targetSelector.GetDescription()} | 候选数={candidates.Count} | 选中数={selectedTargets.Count}");
+
+            if (selectedTargets.Count == 0)
+            {
+                Debug.Log($"[CardEffect] 激发结束 | 激发卡牌={FormatCard(triggerContext.CurrentCard)} | 未找到满足条件的被激发效果");
+                return 0;
+            }
+
+            int triggeredCount = 0;
+            foreach (RegisteredTriggeredCardEffect selectedTarget in selectedTargets)
+            {
+                if (_battleModel.IsBattleOver) break;
+                if (_battleModel.IsCurrentMonsterDefeated) break;
+
+                Debug.Log($"[CardEffect] 激发目标 | 激发卡牌={FormatCard(triggerContext.CurrentCard)} | 目标卡牌={FormatCard(selectedTarget.Card)} | 目标槽位={FormatSlot(selectedTarget.SlotIndex)} | 被激发效果={GetEffectName(selectedTarget.Effect)}");
+                selectedTarget.Trigger();
+                triggeredCount++;
+            }
+
+            Debug.Log($"[CardEffect] 激发结束 | 激发卡牌={FormatCard(triggerContext.CurrentCard)} | 实际激发数={triggeredCount}");
+            return triggeredCount;
         }
 
         public int ModifyCardEffectAmount(int slotIndex, int amount)
@@ -567,6 +664,7 @@ namespace Card5
         {
             if (_battleModel.IsBattleOver) return;
             _battleModel.IsBattleOver = true;
+            _registeredTriggeredCardEffects.Clear();
             CancelAllPlacementEffects();
             _battleModel.ClearSlots();
             this.SendEvent(new BattleEndedEvent { PlayerWon = false });
@@ -581,7 +679,10 @@ namespace Card5
 
             _battleModel.RedrawsRemaining--;
             _battleModel.MaxEnergy.Value = Mathf.Max(0, _battleModel.MaxEnergy.Value - 1);
-            _battleModel.CurrentEnergy.Value = Mathf.Min(_battleModel.CurrentEnergy.Value, _battleModel.MaxEnergy.Value);
+            _battleModel.CurrentEnergy.Value = Mathf.Clamp(
+                _battleModel.CurrentEnergy.Value - 1,
+                0,
+                _battleModel.MaxEnergy.Value);
             _cardSystem.RedrawCards(handIndices);
 
             this.SendEvent(new RedrawCountChangedEvent
@@ -652,6 +753,32 @@ namespace Card5
             });
         }
 
+        static string FormatCard(CardData card)
+        {
+            if (card == null) return "空";
+
+            string cardName = string.IsNullOrWhiteSpace(card.CardName) ? card.name : card.CardName;
+            return $"{cardName}(ID:{card.CardId}, 类型:{card.Type})";
+        }
+
+        static string FormatSlot(int slotIndex)
+        {
+            return slotIndex >= 0 ? $"{slotIndex + 1}号位" : "无槽位";
+        }
+
+        static string GetEffectName(CardEffect effect)
+        {
+            return effect != null ? effect.GetType().Name : "空效果";
+        }
+
+        static string GetEffectDescription(CardEffect effect)
+        {
+            if (effect == null) return string.Empty;
+
+            string description = effect.GetDescription();
+            return string.IsNullOrWhiteSpace(description) ? "无描述" : description;
+        }
+
         readonly struct SlotCardEffectBoost
         {
             public SlotCardEffectBoost(int slotIndex, CardEffectBoost boost)
@@ -662,6 +789,27 @@ namespace Card5
 
             public int SlotIndex { get; }
             public CardEffectBoost Boost { get; }
+        }
+
+        readonly struct RegisteredTriggeredCardEffect : ICardTargetCandidate
+        {
+            public RegisteredTriggeredCardEffect(int slotIndex, BattleContext context, TriggeredCardEffect effect)
+            {
+                SlotIndex = slotIndex;
+                Context = context;
+                Effect = effect;
+            }
+
+            public int SlotIndex { get; }
+            public BattleContext Context { get; }
+            public TriggeredCardEffect Effect { get; }
+            public CardData Card => Context != null ? Context.CurrentCard : null;
+            public bool CanBeTriggered => Context != null && !Context.IsDisposed && Effect != null;
+
+            public void Trigger()
+            {
+                Effect.Trigger(Context);
+            }
         }
 
         readonly struct SlotResolution

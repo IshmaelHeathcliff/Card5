@@ -1,20 +1,10 @@
 using System;
-using System.Text;
+using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Card5
 {
-    public enum CardEffectBoostTargetScope
-    {
-        [InspectorName("指定槽位")]
-        SpecificSlots,
-        [InspectorName("自身")]
-        Self,
-        [InspectorName("相邻牌")]
-        Adjacent
-    }
-
     public enum SlotLinearDirection
     {
         [InspectorName("递增")]
@@ -26,11 +16,8 @@ namespace Card5
     [Serializable]
     public class BoostSlotCardEffect : CardEffect
     {
-        [SerializeField, LabelText("作用范围"), EnumToggleButtons]
-        CardEffectBoostTargetScope _targetScope = CardEffectBoostTargetScope.SpecificSlots;
-
-        [SerializeField, LabelText("目标槽位"), EnumToggleButtons, ShowIf(nameof(UsesSpecificSlots))]
-        CardActivationPosition _targetSlots = CardActivationPosition.Any;
+        [SerializeField, LabelText("目标选择"), HideLabel, InlineProperty]
+        CardTargetSelector _targetSelector = new CardTargetSelector();
 
         [SerializeField, LabelText("提升方式")]
         CardEffectBoostMode _boostMode = CardEffectBoostMode.AddFlat;
@@ -59,7 +46,6 @@ namespace Card5
         [SerializeField, LabelText("变化方向"), EnumToggleButtons, ShowIf(nameof(UsesSlotLinearValue))]
         SlotLinearDirection _linearDirection = SlotLinearDirection.Increase;
 
-        bool UsesSpecificSlots => _targetScope == CardEffectBoostTargetScope.SpecificSlots;
         bool UsesFlatAmount => _boostMode == CardEffectBoostMode.AddFlat;
         bool UsesPercentAmount => _boostMode == CardEffectBoostMode.AddPercent;
         bool UsesMultiplier => _boostMode == CardEffectBoostMode.Multiply;
@@ -80,48 +66,32 @@ namespace Card5
             if (context == null || context.BattleSystem == null) return;
 
             CardEffectBoost boost = new CardEffectBoost(_boostMode, GetBoostValue(context.SlotIndex));
-            AddBoostToTargets(context, boost);
+            List<CardSlotTarget> targets = SelectTargets(context);
+            Debug.Log($"[CardEffect] 增伤目标选择 | 来源卡牌={FormatCard(context.CurrentCard)} | 来源槽位={FormatSlot(context.SlotIndex)} | 选择器={_targetSelector.GetDescription()} | 目标数={targets.Count} | 增伤={GetBoostDebugDescription(boost)}");
+
+            foreach (CardSlotTarget target in targets)
+            {
+                Debug.Log($"[CardEffect] 增伤添加 | 来源卡牌={FormatCard(context.CurrentCard)} | 目标卡牌={FormatCard(target.Card)} | 目标槽位={FormatSlot(target.SlotIndex)} | 增伤={GetBoostDebugDescription(boost)}");
+                context.BattleSystem.AddCardEffectBoost(target.SlotIndex, boost);
+            }
         }
 
         public override string GetDescription()
         {
-            return $"使{GetTargetDescription()}本轮出牌阶段伤害{GetBoostDescription()}";
+            return $"使{_targetSelector.GetDescription()}本轮出牌阶段伤害{GetBoostDescription()}";
         }
 
-        void AddBoostToTargets(BattleContext context, CardEffectBoost boost)
+        List<CardSlotTarget> SelectTargets(BattleContext context)
         {
-            switch (_targetScope)
-            {
-                case CardEffectBoostTargetScope.Self:
-                    AddBoostToSlot(context, context.SlotIndex, boost);
-                    break;
-                case CardEffectBoostTargetScope.Adjacent:
-                    AddBoostToSlot(context, context.SlotIndex - 1, boost);
-                    AddBoostToSlot(context, context.SlotIndex + 1, boost);
-                    break;
-                case CardEffectBoostTargetScope.SpecificSlots:
-                    AddBoostToSpecificSlots(context, boost);
-                    break;
-            }
-        }
+            var candidates = new List<CardSlotTarget>(BattleModel.SlotCount);
+            if (context.BattleModel == null) return candidates;
 
-        void AddBoostToSpecificSlots(BattleContext context, CardEffectBoost boost)
-        {
-            CardActivationPosition targetSlots = NormalizeTargetSlots(_targetSlots);
             for (int i = 0; i < BattleModel.SlotCount; i++)
             {
-                CardActivationPosition position = (CardActivationPosition)(1 << i);
-                if ((targetSlots & position) == 0) continue;
-
-                AddBoostToSlot(context, i, boost);
+                candidates.Add(new CardSlotTarget(i, context.BattleModel.PlaySlots[i]));
             }
-        }
 
-        void AddBoostToSlot(BattleContext context, int slotIndex, CardEffectBoost boost)
-        {
-            if (slotIndex < 0 || slotIndex >= BattleModel.SlotCount) return;
-
-            context.BattleSystem.AddCardEffectBoost(slotIndex, boost);
+            return _targetSelector.Select(context, candidates);
         }
 
         float GetBoostValue(int slotIndex)
@@ -174,44 +144,22 @@ namespace Card5
             return _linearDirection == SlotLinearDirection.Increase ? "递增" : "递减";
         }
 
-        string GetTargetDescription()
+        static string GetBoostDebugDescription(CardEffectBoost boost)
         {
-            return _targetScope switch
-            {
-                CardEffectBoostTargetScope.Self     => "自身",
-                CardEffectBoostTargetScope.Adjacent => "相邻牌",
-                _                                   => GetTargetSlotDescription()
-            };
+            return $"{boost.Mode}:{boost.Value:0.##}";
         }
 
-        string GetTargetSlotDescription()
+        static string FormatCard(CardData card)
         {
-            CardActivationPosition targetSlots = NormalizeTargetSlots(_targetSlots);
-            if ((targetSlots & CardActivationPosition.Any) == CardActivationPosition.Any)
-                return "任意槽位";
-            if (targetSlots == CardActivationPosition.OddPositions)
-                return "奇数槽位";
-            if (targetSlots == CardActivationPosition.EvenPositions)
-                return "偶数槽位";
+            if (card == null) return "空";
 
-            var builder = new StringBuilder();
-            for (int i = 0; i < BattleModel.SlotCount; i++)
-            {
-                CardActivationPosition position = (CardActivationPosition)(1 << i);
-                if ((targetSlots & position) == 0) continue;
-
-                if (builder.Length > 0)
-                    builder.Append("、");
-                builder.Append(i + 1);
-            }
-
-            return builder.Length > 0 ? $"{builder}号槽位" : "任意槽位";
+            string cardName = string.IsNullOrWhiteSpace(card.CardName) ? card.name : card.CardName;
+            return $"{cardName}(ID:{card.CardId}, 类型:{card.Type})";
         }
 
-        static CardActivationPosition NormalizeTargetSlots(CardActivationPosition targetSlots)
+        static string FormatSlot(int slotIndex)
         {
-            CardActivationPosition normalized = targetSlots & CardActivationPosition.Any;
-            return normalized == CardActivationPosition.None ? CardActivationPosition.Any : normalized;
+            return slotIndex >= 0 ? $"{slotIndex + 1}号位" : "无槽位";
         }
     }
 }

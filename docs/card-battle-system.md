@@ -22,6 +22,7 @@ alwaysApply: false
 | 怪物列表配置 | `Assets/Scripts/Data/MonsterListData.cs` |
 | 所有事件 | `Assets/Scripts/Gameplay/Events/BattleEvents.cs` |
 | 效果基类 | `Assets/Scripts/Data/CardEffect.cs` |
+| 目标选择器 | `Assets/Scripts/Data/CardTargetSelector.cs` |
 | 具体效果 | `Assets/Scripts/Data/Effects/` |
 | 效果数值提升 | `Assets/Scripts/Gameplay/Battle/CardEffectBoost.cs` |
 
@@ -88,7 +89,10 @@ HandViewController  监听 HandRefreshedEvent
 `CardEffect` 可配置生效时机：放牌阶段、出牌开始阶段、出牌阶段、出牌结束阶段。放牌阶段效果在卡牌放入槽位后立即执行；卡牌撤回、换槽、与手牌交换或清槽时会取消，换到新槽位后重新按新槽位生效。
 出牌结算会先对全部槽位执行出牌开始阶段，再按槽位顺序执行全部出牌阶段效果，最后再按槽位顺序执行全部出牌结束阶段效果。
 `DamageCardEffect` 支持固定伤害，也可以开启随机范围，在配置的下限与上限之间随机取一个基础伤害值后再进入伤害公式。
-`BoostSlotCardEffect` 默认在出牌开始阶段提高本轮伤害，作用范围支持指定槽位、自身和相邻牌，提升方式支持基础伤害增加、伤害百分比增减、伤害总增和固定值增加。增伤数值可按增伤卡所在槽位线性递增或递减；在伤害总增模式下，线性基础数值就是基础倍率。因为出牌开始阶段会先于全部出牌阶段统一执行，所以增伤卡放在 5 号槽也能影响本轮目标槽位。当前增伤通过 `BattleContext.DealDamage()` 生效。
+`CardTargetSelector` 是卡牌目标选择的统一逻辑，支持范围、指定位置、卡牌类型、卡牌标签和数量选择。需要选择卡牌或槽位目标的效果应优先复用它，避免每个效果重复实现一套筛选规则。
+`BoostSlotCardEffect` 默认在出牌开始阶段提高本轮伤害，使用 `CardTargetSelector` 选择作用目标，提升方式支持基础伤害增加、伤害百分比增减、伤害总增和固定值增加。增伤数值可按增伤卡所在槽位线性递增或递减；在伤害总增模式下，线性基础数值就是基础倍率。因为出牌开始阶段会先于全部出牌阶段统一执行，所以增伤卡放在 5 号槽也能影响本轮目标槽位。当前增伤通过 `BattleContext.DealDamage()` 生效。
+`TriggeredCardEffect` 默认在出牌开始阶段注册本轮可被激发的效果，只负责配置被激发时执行的内嵌效果。`TriggerCardEffect` 默认在出牌阶段使用 `CardTargetSelector` 激发已注册的被激发效果，目标选择器会统一处理范围、位置、类型、标签和数量。
+卡牌效果执行会输出 `[CardEffect]` 日志，覆盖普通效果生效开始/结束、伤害结算、增伤目标选择、被激发效果注册、激发候选与命中、被激发内部效果执行等关键节点，便于追踪一次槽位结算中每张卡、每个槽位和每个效果的具体生效情况。
 卡牌伤害按四段公式结算：`基础伤害区间 * 伤害增加区间 * 伤害总增区间 + 固定值区间`。普通伤害百分比增减会在伤害增加区间相加；每个伤害总增都是独立乘区，会在伤害总增区间连续相乘；伤害值添加可以配置到基础伤害区间，也可以配置到最终固定值区间。
 `BattleUIController` 监听 `MonsterPlayRoundCountChangedEvent`，在战斗 UI 中显示当前怪物剩余出牌轮数。
 手牌、奖励选项、牌堆弹窗和出牌槽都通过 `CardDisplayView` 显示统一卡牌信息；顶部信息区显示类型，名称、费用、描述按显示模式切换；各容器只负责自身交互和额外状态，例如槽位背景的空槽/已放置颜色。
@@ -142,11 +146,11 @@ BattleSystem.EndTurn()
             ├─ 验证：最多选择 5 张，RedrawsRemaining > 0，且本回合最大能量 > 0
             ├─ CardSystem.RedrawCards()    // 选中手牌→弃牌堆，重新抽同等数量
             ├─ RedrawsRemaining -1
-            ├─ 本回合 MaxEnergy -1，并将 CurrentEnergy 限制到新的上限内
+            ├─ 本回合 MaxEnergy -1，CurrentEnergy 同步 -1 并限制到新的上限内
             └─ 发送 RedrawCountChangedEvent / EnergyChangedEvent
 ```
 
-重抽消耗的是“本回合最大能量”，不是整局永久最大能量；进入下一回合时，`StartTurn()` 会先把最大能量重置回战斗初始值，再恢复本回合能量。
+重抽消耗的是“本回合最大能量”，不是整局永久最大能量；如果槽位上已有已消耗能量的卡牌，重抽也会同步减少当前剩余能量。进入下一回合时，`StartTurn()` 会先把最大能量重置回战斗初始值，再恢复本回合能量。
 重抽界面当前最多只能选择 5 张手牌，系统层也会拒绝超过 5 张的重抽请求。
 
 ### 战斗奖励流程
@@ -209,6 +213,7 @@ BattleSystem.EndTurn()
 继承 `CardEffect`，实现 `Execute(BattleContext ctx)`。效果不再创建独立 `ScriptableObject` 资产，而是在 `CardData` 的「卡牌效果」列表中直接选择和配置。
 卡牌配置中会直接显示具体生效时机，不再显示“使用默认时机”。新增效果默认显示为 `Play`（出牌阶段）；如果某个效果更适合其他初始时机，可在构造函数中调用 `base(CardEffectTiming.Xxx)` 设置。
 每张卡牌生效时都会获得自己的 `BattleContext`。出牌结算中，同一张卡的出牌开始、出牌、出牌结束阶段共享同一个上下文；放牌阶段上下文会保留到撤回、换槽、清槽或弃牌时取消。上下文可用来记录临时信息、注册临时事件，生效结束后会自动清理并注销事件。放牌阶段效果如果会修改可变战斗状态，需要同时重写 `Cancel(BattleContext ctx)` 做反向取消。
+如果要实现“被激发时生效”的组合效果，优先在卡牌上添加 `TriggeredCardEffect` 并把实际效果内嵌到「被激发时效果」列表中；再用其他卡牌的 `TriggerCardEffect` 在出牌阶段通过目标选择器激发它。内嵌效果会在激发时执行，不再按自身普通时机过滤。
 
 ```csharp
 using System;

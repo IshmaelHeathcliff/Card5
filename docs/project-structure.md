@@ -15,6 +15,7 @@ Assets/Scripts/
 ├── Data/                        # 数据配置
 │   ├── CardData.cs              # 卡牌 ScriptableObject
 │   ├── CardEffect.cs            # 内联效果基类
+│   ├── CardTargetSelector.cs    # 通用卡牌目标选择器
 │   ├── DeckPresetData.cs        # 牌组预设配置
 │   ├── EnemyData.cs             # 敌人配置
 │   ├── MonsterListData.cs       # 怪物列表与单怪物出牌轮数限制
@@ -23,7 +24,9 @@ Assets/Scripts/
 │   ├── GameGlobalConfigData.cs  # 全局游戏配置
 │   └── Effects/                 # 具体效果实现
 │       ├── DamageCardEffect.cs    # 伤害效果
-│       └── BoostSlotCardEffect.cs # 槽位增伤效果
+│       ├── BoostSlotCardEffect.cs # 槽位增伤效果
+│       ├── TriggeredCardEffect.cs # 被激发效果
+│       └── TriggerCardEffect.cs   # 激发效果
 ├── Editor/                      # Unity 编辑器扩展
 │   ├── ConfigCenterWindow.cs    # Odin 配置中心
 │   └── BattleRewardSetupUtility.cs # 默认奖励配置/UI 生成工具
@@ -109,10 +112,13 @@ Assets/Scripts/
 
 | 类 | 菜单路径 | 说明 |
 |----|---------|------|
-| `CardData` | Card5/Card | 卡牌配置：整数 ID、名称、费用、图片、类型、内联效果列表 |
+| `CardData` | Card5/Card | 卡牌配置：整数 ID、名称、费用、图片、类型、标签、内联效果列表 |
 | `CardEffect`（抽象） | — | 内联效果基类，按放牌、出牌开始、出牌、出牌结束时机执行；通过 `CardData` 内部多态配置 |
+| `CardTargetSelector` | — | 通用目标选择器，统一处理范围、位置、类型、标签和数量 |
 | `DamageCardEffect` | — | 对敌人造成伤害 |
-| `BoostSlotCardEffect` | — | 提高指定槽位本轮伤害 |
+| `BoostSlotCardEffect` | — | 通过目标选择器提高目标卡牌本轮伤害 |
+| `TriggeredCardEffect` | — | 在出牌开始阶段注册被激发时执行的内嵌效果，不持有激发条件 |
+| `TriggerCardEffect` | — | 在出牌阶段通过目标选择器激发已注册的被激发效果 |
 | `DeckPresetData` | Card5/Deck Preset | 牌组预设，包含卡牌及数量列表 |
 | `EnemyData` | Card5/Enemy | 敌人配置：名称、最大 HP、描述、头像 |
 | `MonsterListData` | Card5/Monster List | 怪物列表配置：按顺序配置每只怪物与最大出牌轮数；一轮最多结算 5 张槽位卡 |

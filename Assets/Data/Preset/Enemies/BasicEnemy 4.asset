@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: BasicEnemy 4
   m_EditorClassIdentifier: Assembly-CSharp::Card5.EnemyData
   _enemyName: Enemy 4
-  _maxHp: 50
+  _maxHp: 300
   _description: 
   _portrait: {fileID: 0}

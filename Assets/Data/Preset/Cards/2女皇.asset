@@ -61,12 +61,36 @@ MonoBehaviour:
     - Name: _description
       Entry: 6
       Data: 
-    - Name: _targetScope
+    - Name: _targetSelector
+      Entry: 7
+      Data: 3|Card5.CardTargetSelector, Assembly-CSharp
+    - Name: _range
       Entry: 3
       Data: 1
-    - Name: _targetSlots
+    - Name: _slots
       Entry: 3
       Data: 31
+    - Name: _useTypeFilter
+      Entry: 5
+      Data: false
+    - Name: _requiredType
+      Entry: 3
+      Data: 0
+    - Name: _useTagFilter
+      Entry: 5
+      Data: false
+    - Name: _requiredTag
+      Entry: 6
+      Data: 
+    - Name: _quantityMode
+      Entry: 3
+      Data: 0
+    - Name: _randomCount
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: _boostMode
       Entry: 3
       Data: 0
@@ -108,4 +132,5 @@ MonoBehaviour:
   _description: "\u9020\u62103\u70B9\u4F24\u5BB3\uFF0C\u524D\u7F6E\u4F4D\u6BCF\u6709\u4E00\u5F20\u724C\uFF0C\u4F24\u5BB3+2"
   _energyCost: 2
   _cardType: 0
+  _cardTags: []
   _artwork: {fileID: 3752572798022221216, guid: 453a65207dd1dc243919bfc0bf4d6ff9, type: 3}

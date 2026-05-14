@@ -58,6 +58,9 @@ namespace Card5
         [VerticalGroup("基础信息首行/文本列")]
         [BoxGroup("基础信息首行/文本列/基础信息文本"), SerializeField, LabelText("能量消耗"), MinValue(0)] int _energyCost;
         [BoxGroup("基础信息配置"), FormerlySerializedAs("_tags"), SerializeField, LabelText("卡牌类型"), EnumToggleButtons] CardType _cardType = CardType.Common;
+        [BoxGroup("基础信息配置"), SerializeField, LabelText("卡牌标签")]
+        [ListDrawerSettings(ShowFoldout = true, DefaultExpandedState = false, DraggableItems = true)]
+        List<string> _cardTags = new List<string>();
         [HorizontalGroup("基础信息首行", 0.32f)]
         [VerticalGroup("基础信息首行/视觉列")]
         [BoxGroup("基础信息首行/视觉列/基础信息视觉"), SerializeField, LabelText("卡面图片"), PreviewField(180, ObjectFieldAlignment.Center)] Sprite _artwork;
@@ -72,6 +75,7 @@ namespace Card5
         public CardType Type => NormalizeCardType(_cardType);
         [BoxGroup("基础信息说明"), ShowInInspector, ReadOnly, LabelText("类型说明")]
         public string TypeDescription => GetTypeDescription();
+        public IReadOnlyList<string> Tags => _cardTags;
         public Sprite Artwork => _artwork;
         public IReadOnlyList<CardEffect> Effects => _inlineEffects;
 
@@ -81,6 +85,21 @@ namespace Card5
         public bool IsType(CardType type)
         {
             return Type == NormalizeCardType(type);
+        }
+
+        public bool HasTag(string tag)
+        {
+            if (string.IsNullOrWhiteSpace(tag)) return false;
+
+            string normalizedTag = tag.Trim();
+            foreach (string cardTag in _cardTags)
+            {
+                if (string.IsNullOrWhiteSpace(cardTag)) continue;
+                if (string.Equals(cardTag.Trim(), normalizedTag, StringComparison.Ordinal))
+                    return true;
+            }
+
+            return false;
         }
 
         public string GetTypeDescription()
@@ -116,6 +135,24 @@ namespace Card5
         void OnValidate()
         {
             _cardType = NormalizeCardType(_cardType);
+            RemoveEmptyTags();
+        }
+
+        void RemoveEmptyTags()
+        {
+            if (_cardTags == null)
+            {
+                _cardTags = new List<string>();
+                return;
+            }
+
+            for (int i = _cardTags.Count - 1; i >= 0; i--)
+            {
+                if (string.IsNullOrWhiteSpace(_cardTags[i]))
+                    _cardTags.RemoveAt(i);
+                else
+                    _cardTags[i] = _cardTags[i].Trim();
+            }
         }
 
         static CardType NormalizeCardType(CardType cardType)

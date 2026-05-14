@@ -27,7 +27,49 @@ MonoBehaviour:
         mscorlib
     - Name: 
       Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 1|Card5.TriggerCardEffect, Assembly-CSharp
+    - Name: _timing
+      Entry: 3
       Data: 0
+    - Name: _description
+      Entry: 6
+      Data: 
+    - Name: _targetSelector
+      Entry: 7
+      Data: 2|Card5.CardTargetSelector, Assembly-CSharp
+    - Name: _range
+      Entry: 3
+      Data: 0
+    - Name: _slots
+      Entry: 3
+      Data: 31
+    - Name: _useTypeFilter
+      Entry: 5
+      Data: false
+    - Name: _requiredType
+      Entry: 3
+      Data: 0
+    - Name: _useTagFilter
+      Entry: 5
+      Data: false
+    - Name: _requiredTag
+      Entry: 6
+      Data: 
+    - Name: _quantityMode
+      Entry: 3
+      Data: 1
+    - Name: _randomCount
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: 
       Entry: 13
       Data: 
@@ -36,7 +78,8 @@ MonoBehaviour:
       Data: 
   _cardId: 10
   _cardName: "\u9690\u58EB"
-  _description: "\u6682\u65E0"
+  _description: "\u3010\u6FC0\u53D1\u3011\u4E00\u5F20\u968F\u673A\u5361\u724C"
   _energyCost: 1
   _cardType: 2
+  _cardTags: []
   _artwork: {fileID: -2221846081180755905, guid: e0c1c59859b23584e8185a3129058be3, type: 3}

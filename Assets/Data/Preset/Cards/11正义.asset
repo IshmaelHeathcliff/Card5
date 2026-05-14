@@ -60,7 +60,8 @@ MonoBehaviour:
       Data: 
   _cardId: 12
   _cardName: "\u6B63\u4E49"
-  _description: "\u6682\u65E0"
+  _description: "\u9020\u62103\u70B9\u4F24\u5BB3"
   _energyCost: 2
   _cardType: 2
+  _cardTags: []
   _artwork: {fileID: 542727329550607977, guid: 8b3277b5f66afab479d6bffe3e3e20ca, type: 3}
